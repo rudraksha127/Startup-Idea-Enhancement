@@ -1,0 +1,38 @@
+services:
+  agencyos-web:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile
+    container_name: agencyos-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/agencyos
+      - JWT_SECRET=change-this-to-a-very-secure-32-byte-hex-secret
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    depends_on:
+      - mongo
+    networks:
+      - agencyos-network
+
+  mongo:
+    image: mongo:7.0
+    container_name: agencyos-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - agencyos-network
+
+networks:
+  agencyos-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
+

@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #F7F6F2;
+  --paper-2: #EFECE6;
+  --card: #FFFFFF;
+  --ink: #171918;
+  --muted: #68717D;
+  --faint: #8C9390;
+  --green: #171918;
+  --green-2: #232B29;
+  --green-accent: #25835B;
+  --blue-accent: #3568E8;
+  --sidebar-bg: #151B1A;
+  --sidebar-line: #232B29;
+  --line: #E7E7E2;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 20, 19, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 20, 19, 0.35);
+}
+
+/* Status Badges matching AgencyOS prototype */
+.badge-new {
+  background: #eef2f6;
+  color: #3b506c;
+  border: 1px solid #d8e2ec;
+}
+.badge-contacted {
+  background: #fbf5e6;
+  color: #8f650b;
+  border: 1px solid #f0e1be;
+}
+.badge-interested {
+  background: #eef9f2;
+  color: #176e42;
+  border: 1px solid #ccecd8;
+}
+.badge-replied {
+  background: #eef4ff;
+  color: #1e4bbd;
+  border: 1px solid #cbdcfc;
+}
+.badge-converted {
+  background: #f4ecff;
+  color: #6324a6;
+  border: 1px solid #dfc6fc;
+}
+.badge-archived {
+  background: #f1f2f1;
+  color: #6d7570;
+  border: 1px solid #dbdedb;
+}
+
+/* Dot indicators */
+.dot-green {
+  background-color: #0da66c;
+  box-shadow: 0 0 0 3px rgba(13, 166, 108, 0.12);
+}
+.dot-amber {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+.dot-blue {
+  background-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+

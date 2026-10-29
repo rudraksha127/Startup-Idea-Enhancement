@@ -124,3 +124,41 @@ Instantly halt or resume all automated workflows.
     "activeWorkflowsTerminated": true
   }
   ```
+
+
+---
+
+## 3. Next.js App Router Application API Contracts (Implemented)
+
+The following 15 Route Handlers are implemented and verified in `src/app/api/`:
+
+### 3.1 Authentication
+- `POST /api/auth/login`: Accepts `{ email, password }`, verifies bcrypt hash, sets HTTP-only `agencyos_session` JWT cookie.
+- `POST /api/auth/register`: Accepts `{ name, email, password, orgName }`, creates organization & user, sets cookie.
+- `GET /api/auth/me`: Reads session cookie, returns sanitized current user & organization context.
+- `POST /api/auth/logout`: Clears session cookie.
+
+### 3.2 Dashboard & Metrics
+- `GET /api/dashboard/metrics`: Returns aggregated KPIs (`totalLeads`, `contactedLeads`, `convertedClients`, `pipelineRevenue`, `leadsGrowth` 6-month array, `leadsBySource` array, `agentSummary`).
+- `GET /api/dashboard/activity`: Returns recent activity events with icons, timestamps, and status badges.
+
+### 3.3 Leads Pipeline
+- `GET /api/leads`: Paginated, filtered, and sorted lead query. Query parameters: `page`, `limit`, `status`, `category`, `search`, `sortBy`, `sortOrder`. Returns `{ leads, pagination, counts }`.
+- `POST /api/leads`: Validates body against `createLeadSchema` (Zod), stores new lead with default scores.
+- `GET /api/leads/[leadId]`: Retrieves complete intelligence dossier by MongoDB ObjectId or lead slug.
+- `PATCH /api/leads/[leadId]`: Partial update with `updateLeadSchema` validation (e.g. status transition, notes, scores).
+- `DELETE /api/leads/[leadId]`: Soft-archives or removes lead.
+- `GET /api/leads/export`: Streams or downloads CSV file using PapaParse. Supports optional `?ids=` or filter params.
+- `POST /api/leads/import`: Ingests CSV file payload, parses rows, validates required fields, inserts leads.
+- `GET /api/leads/[leadId]/notes`: Lists chronological activity notes for a lead.
+- `POST /api/leads/[leadId]/notes`: Creates a new activity note (`note`, `call`, `email`, `meeting`, `audit`).
+- `POST /api/leads/[leadId]/outreach`: Dispatches email/WhatsApp message using pluggable provider interface (mock provider by default).
+
+### 3.4 Projects & Autonomous Fleet
+- `GET /api/projects`: Lists delivery projects with task checklists and budget trackers.
+- `POST /api/projects`: Generates dev-ready project brief and pipeline card.
+- `GET /api/agents`: Returns status and daily metrics for the 4 autonomous agents.
+- `PATCH /api/agents`: Toggles agent running state or updates daily quota.
+
+### 3.5 System Health
+- `GET /api/health`: Returns `{ status: 'ok', timestamp, database: 'connected' }`.

@@ -274,3 +274,35 @@ CREATE POLICY "Operator full access" ON amc_subscriptions
 CREATE POLICY "Operator full access" ON audit_logs 
     FOR ALL TO authenticated USING (true) WITH CHECK (true);
 ```
+
+
+---
+
+## 7. MongoDB & Mongoose Schema Specification (Full-Stack SaaS Migration)
+
+Per the SaaS Migration specification, the operational application implements MongoDB via Mongoose with multi-tenancy (`organizationId`), indexing, and typed schemas:
+
+### 7.1 Mongoose Collections & Models
+
+1. **`organizations` (`src/models/Organization.ts`)**
+   - Fields: `name` (String), `slug` (String, unique index), `plan` ('free' | 'starter' | 'pro' | 'enterprise'), `credits` (Number), `settings` (Object), `createdAt`, `updatedAt`.
+2. **`users` (`src/models/User.ts`)**
+   - Fields: `name` (String), `email` (String, unique index), `passwordHash` (String), `role` ('admin' | 'operator' | 'viewer'), `organizationId` (ObjectId ref Organization), `avatarInitials` (String).
+3. **`leads` (`src/models/Lead.ts`)**
+   - Multi-tenant model indexed by `organizationId`, `status`, `category`, `createdAt`, and compound text index on `businessName`, `category`, `address`.
+   - Rich intelligence fields:
+     - `performanceScores`: `website`, `seo`, `performance`, `mobile`, `accessibility`, `security` (0-100 integers).
+     - `painPoints`: `string[]` (concrete issues identified during analysis).
+     - `competitors`: `Array<{ name: string; rating: number; price: string; note: string }>`
+     - `actionPlan`: `Array<{ phase: string; title: string; description: string; timeEstimate: string }>`
+     - `websiteAudit`: Core Web Vitals (`lcp`, `cls`, `fid`, `inp`, `fcp`, `ttfb`, `sslValid`, `mobileFriendly`, `hasForms`, `hasWhatsappCta`).
+     - `aiInsights`: `summary`, `angle`, `recommendedOffer`, `elevatorPitch`, `riskFactors`.
+4. **`leadnotes` (`src/models/LeadNote.ts`)**
+   - Audit trail and operator notes linked to `leadId` and `organizationId`.
+   - Fields: `leadId`, `organizationId`, `author`, `authorRole`, `content`, `type` ('note' | 'call' | 'email' | 'meeting' | 'audit').
+5. **`projects` (`src/models/Project.ts`)**
+   - Delivery projects with `title`, `clientName`, `leadId`, `organizationId`, `status` ('Briefing' | 'In Progress' | 'Review' | 'Delivered' | 'On Hold'), `budget`, `deadline`, `tasks` checklist with completed status.
+6. **`outreachmessages` (`src/models/OutreachMessage.ts`)**
+   - Outbound campaign tracking with `leadId`, `organizationId`, `toEmail`, `channel` ('Email' | 'WhatsApp'), `subject`, `body`, `status` ('Draft' | 'Scheduled' | 'Sent' | 'Delivered' | 'Replied' | 'Bounced'), `sentAt`.
+7. **`agentconfigs` (`src/models/AgentConfig.ts`)**
+   - Autonomous agent fleet configuration (`name`, `role`, `status` 'Running' | 'Idle' | 'Paused', `dailyTarget`, `processedToday`, `accuracyRate`, `lastRunAt`).
