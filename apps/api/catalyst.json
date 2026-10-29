@@ -1,0 +1,17 @@
+{
+  "appsail": [
+    {
+      "name": "agencyos-api",
+      "source": ".",
+      "build_path": "dist",
+      "command": "node dist/server.js",
+      "runtime": "nodejs20",
+      "memory": 512,
+      "env_variables": {
+        "PORT": "4000",
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
+

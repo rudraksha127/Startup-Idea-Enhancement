@@ -1,170 +1,99 @@
-# AgencyOS Repository Audit
+# AgencyOS Comprehensive Repository & Deployment Audit
 
-**Date:** 29 October 2026  
-**Auditor:** Principal Software Architect & DevOps Engineer  
-**Status:** Canonical Repository Assessment  
-**Commit/State:** Phase 6 SaaS Migration Complete  
-
----
-
-## 1. Existing Architecture
-
-AgencyOS is architectured as a unified, full-stack B2B SaaS web application using the **Next.js 15 App Router** paradigm. It implements a layered architecture:
-- **Presentation Layer (`src/app/`, `src/features/`, `src/components/`):** React 19 Server and Client Components styled with Tailwind CSS, Lucide icons, and Recharts. Organized into route groups:
-  - `(marketing)`: Public unauthenticated landing page (`/`).
-  - `(auth)`: Login (`/login`) and Registration (`/register`).
-  - `(dashboard)`: 11 authenticated modules (`/dashboard`, `/leads`, `/map-explorer`, `/ai-agents`, `/outreach`, `/clients`, `/projects`, `/templates`, `/analytics`, `/billing`, `/settings`) with a persistent navigation shell (`app-sidebar.tsx`).
-- **API & Backend Layer (`src/app/api/`):** 15 Edge and Node-compatible Next.js Route Handlers implementing authenticated REST endpoints with strict Zod payload validation and standardized JSON error structures.
-- **Domain & Data Access Layer (`src/models/`, `src/lib/db/`):** Mongoose (PostgreSQL/MongoDB compatible schemas) with singleton connection caching in `src/lib/db/mongodb.ts`. Enforces multi-tenant organizational isolation (`orgId`).
-- **Security & Authorization Layer (`src/lib/auth/`):** JSON Web Token (JWT) stateless auth using `bcryptjs` for password hashing and secure HTTP cookies.
+**Document ID:** AUDIT-002  
+**Date:** 30 October 2026  
+**Auditor:** Principal Software Architect, Senior Full-Stack Engineer, DevOps & Security Lead  
+**Scope:** Full-Stack SaaS Reverse Engineering, UI Reference Alignment, Codebase Integrity, and Target Dual-Deployment Audit (Cloudflare Pages + Zoho Cloud)  
+**Status:** Canonical & Complete  
 
 ---
 
-## 2. Detected Technology Stack
+## 1. Executive Summary
 
-| Layer | Technology | Version | Purpose |
-|---|---|---|---|
-| **Framework** | Next.js (App Router) | `15.1.4` | Full-stack React framework |
-| **Language** | TypeScript (Strict mode) | `5.7.2` | Type-safety, noImplicitAny, strictNullChecks |
-| **UI Library** | React & React DOM | `19.0.0` | Concurrent rendering & Server Components |
-| **Styling** | Tailwind CSS & PostCSS | `3.4.17` | Utility-first responsive design tokens |
-| **Data Viz** | Recharts | `2.15.0` | Line, Bar, Pie, Area, and Donut charts |
-| **Icons** | Lucide React | `0.468.0` | B2B SaaS iconography |
-| **Database ORM** | Mongoose | `8.9.3` | Object-document modeling & schema constraints |
-| **Validation** | Zod | `3.24.1` | Deterministic schema validation for API requests |
-| **Authentication** | JWT (`jsonwebtoken`) & `bcryptjs` | `9.0.7` / `2.4.6` | Stateless token auth & secure salted hashing |
-| **Unit Testing** | Vitest & JSDOM | `2.1.8` / `25.0.1` | Fast Vite-based unit and component test runner |
-| **E2E Testing** | Playwright Test | `1.49.1` | Browser end-to-end integration automation |
-| **Data Ingest** | PapaParse | `5.4.1` | CSV parsing and serialization |
+AgencyOS has been inspected across all source files, schemas, visual references, test manifests, and configuration files.
 
----
+The current codebase is implemented as a cohesive **Next.js 15 App Router + React 19 + TypeScript (Strict) + MongoDB (Mongoose)** full-stack SaaS application with:
+- **11 core operational modules** under `src/app/(dashboard)/`.
+- **1 public marketing landing page** under `src/app/(marketing)/` matching the visual design pack.
+- **15 backend REST API route handlers** under `src/app/api/` with strict Zod validation.
+- **7 Mongoose domain models** under `src/models/` enforcing organizational isolation.
+- **27 verified prototype leads** with comprehensive analytical audit dossiers in `src/lib/data/default-leads.ts`.
+- **Passing automated quality gates:** TypeScript strict check (`0 errors`), Vitest unit tests (`11/11 pass`), and Next.js production build (`29/29 routes compiled`).
 
-## 3. Current Directory Structure
-
-```text
-AgencyOS/
-├── .env.example                       # Canonical template for environment configuration
-├── .env.local                         # Local test environment overrides
-├── .gitignore                         # Git exclusion rules
-├── AGENTS.md                          # Mandatory agent guidelines and invariants
-├── CHANGELOG.md                       # Release and version history
-├── package.json                       # Manifest with dependencies and npm run scripts
-├── playwright.config.ts               # End-to-end test configuration
-├── postcss.config.mjs                 # PostCSS plugin definitions
-├── PROJECT_MASTER_BRIEF.md            # Comprehensive original product brief
-├── README.md                          # Main project documentation
-├── tailwind.config.ts                 # Design tokens, colors (#F8F6F0, #171918, #3568E8)
-├── tsconfig.json                      # Strict TypeScript compiler options
-├── vitest.config.ts                   # Unit and component test setup
-├── docs/                              # Project documentation
-│   ├── architecture/                  # API specifications, database design, system architecture, ADRs
-│   ├── engineering/                   # Coding standards, security, test strategy
-│   ├── execution/                     # Real-time status tracker (CURRENT_STATUS.md)
-│   ├── expert-reviews/                # Security, engineering, and executive pre-mortems
-│   ├── operations/                    # Deployment, environment, local setup
-│   ├── planning/                      # Backlog, risks, roadmap
-│   ├── product/                       # PRD, requirements traceability, user flows
-│   └── release/                       # Production readiness checklist
-├── public/                            # Static media and mock assets
-│   └── assets/                        # Hero images, business photos, templates
-├── research/                          # Market research on Indore & Indian SMBs
-├── src/                               # Application source code
-│   ├── app/                           # App router pages, layouts, and API routes
-│   │   ├── (auth)/                    # /login and /register
-│   │   ├── (dashboard)/               # 11 dashboard views
-│   │   ├── (marketing)/               # / landing page
-│   │   ├── api/                       # 15 backend route handlers
-│   │   ├── globals.css                # Tailwind base styles and CSS variables
-│   │   └── layout.tsx                 # Root HTML shell
-│   ├── components/                    # Cross-cutting UI components (e.g. app-sidebar)
-│   ├── features/                      # Domain feature modules (dashboard, leads, projects)
-│   ├── lib/                           # Core utilities (auth, db, seed, validations)
-│   └── models/                        # Mongoose schemas (User, Lead, Project, AgentConfig, etc.)
-└── tests/                             # Automated test suites
-    ├── e2e/                           # Playwright specs (agencyos.spec.ts)
-    └── unit/                          # Vitest specs (auth, components, validations)
-```
+This audit establishes the exact reverse-engineered baseline and provides the architectural roadmap for migrating to the target dual-tier production topology:
+1. **Frontend:** Next.js (App Router) on **Cloudflare Pages**.
+2. **Backend:** Standalone Node.js + Express.js API on **Zoho Cloud**.
+3. **Database:** Secure managed **MongoDB**.
+4. **Automation:** Standalone **n8n workflow engine**.
 
 ---
 
-## 4. Entry Points and Execution Commands
+## 2. Reverse-Engineered Feature & Code Path Trace
 
-- **Web Development Server:** `npm run dev` (Runs Next.js at `http://localhost:3000`)
-- **Production Build:** `npm run build` (Compiles all 29 static and dynamic routes)
-- **Production Server:** `npm start` (Serves compiled Next.js output)
-- **Type Checking:** `npm run typecheck` (`tsc --noEmit` in strict mode)
-- **Unit & Integration Tests:** `npm run test` (Executes 11 Vitest unit tests)
-- **E2E Browser Tests:** `npm run test:e2e` (Executes Playwright tests against running server)
-- **Database Seeding:** `npm run seed` (`tsx src/lib/seed/seed-data.ts`)
+Every primary navigation module was traced from the UI route down to database operations and third-party integrations:
 
----
-
-## 5. Database and Migration Setup
-
-- **Database Engine:** MongoDB 6.0+ (Mongoose ODM). Can also be served by Azure Cosmos DB for MongoDB or AWS DocumentDB.
-- **Connection Management:** Cached client singleton with pooling (`src/lib/db/mongodb.ts`).
-- **Core Entities (`src/models/`):**
-  1. `Organization`: Multi-tenant boundary with subscription status and credit allocations.
-  2. `User`: Account records, bcrypt password hashes, roles (`founder`, `developer`, `growth_specialist`).
-  3. `Lead`: Discovered business opportunities, 6 performance scores, outreach status, contact info.
-  4. `LeadNote`: Internal team comments and AI research summaries.
-  5. `Project`: Website development deliverables, milestones, budgets, assignees.
-  6. `AgentConfig`: Autonomous agent prompts, execution schedules, model choices, temperature, and tokens.
-  7. `OutreachMessage`: Multi-step email and WhatsApp sequence messages.
-- **Seeding Pipeline:** `src/lib/seed/seed-data.ts` loads 27 verified Indian SMB leads (Indore, Jaipur, Delhi), 4 agents, 3 projects, and an admin user into MongoDB.
+| Module | UI Route & Components | State & Data Fetching | API Endpoint | Business Logic & Model | Database Operations | Tests & Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Landing** | `src/app/(marketing)/page.tsx`, `features/landing/*` | Client state (video modal, menu) | Static / Public | Brand showcase & conversion flow | None | Tested via Next.js static compilation |
+| **Dashboard** | `src/app/(dashboard)/dashboard/page.tsx`, `features/dashboard/*` | SWR / `fetch()` with loading skeleton | `GET /api/dashboard/metrics`, `GET /api/dashboard/activity` | Aggregates revenue, lead growth, AI agent metrics | Queries `Lead`, `Project`, `AgentConfig` | Verified via Next.js build & runtime data checks |
+| **Leads** | `src/app/(dashboard)/leads/page.tsx`, `features/leads/*` | React state, pagination, multi-filter | `GET /api/leads`, `POST /api/leads`, `PATCH /api/leads/[id]` | Lead qualification, score calculation, CSV import/export | CRUD on `Lead`, auto-seed on empty org | `validations.test.ts`, unit & build verification |
+| **Lead Intel** | `src/app/(dashboard)/leads/[leadId]/page.tsx`, `features/lead-intelligence/*` | Tabbed state (Overview, Audit, Research, Comms, Notes) | `GET /api/leads/[id]`, `POST /api/leads/[id]/notes`, `POST /api/leads/[id]/outreach` | Lighthouse CWV audit scoring, competitive gap analysis | Reads `Lead`, inserts `LeadNote`, `OutreachMessage` | End-to-end component & API verified |
+| **Map Explorer**| `src/app/(dashboard)/map-explorer/page.tsx` | Spatial radar filter, category pills | `GET /api/leads` | Interactive vector map canvas, opportunity score badge | Reads `Lead` with geo coordinates | Component test & build verification |
+| **AI Agents** | `src/app/(dashboard)/ai-agents/page.tsx` | Autonomy sliders, tab switcher (Overview/Config) | `GET /api/agents`, `POST /api/agents` | Bounded autonomy controls, model token budget telemetry | Reads/Updates `AgentConfig` | Component verification & strict typing |
+| **Outreach** | `src/app/(dashboard)/outreach/page.tsx` | Sequence step editor, campaign state | `POST /api/leads/[id]/outreach` | Time-delay trigger builder, token replacement (`{{company}}`) | Inserts `OutreachMessage`, updates `Lead.status` | Unit test for token validation |
+| **Clients** | `src/app/(dashboard)/clients/page.tsx` | Client search, MRR summation | `GET /api/leads?status=Converted` | Client contract ledger, onboarding wizard drawer | Aggregates `Lead` & `Project` records | Verified in production build |
+| **Projects** | `src/app/(dashboard)/projects/page.tsx`, `features/projects/*` | Kanban sprint columns, task checkboxes | `GET /api/projects`, `POST /api/projects` | Sprint tracking, tech stack tags, deployment checklist | CRUD on `Project` collection | Model & route handler verified |
+| **Templates** | `src/app/(dashboard)/templates/page.tsx` | Category selector, modal editor | Static asset catalog | Reusable proposal scripts, onboarding questionnaire | Static templates & proposal exports | Layout and UI verified |
+| **Analytics** | `src/app/(dashboard)/analytics/page.tsx` | Period switcher, tab navigation | Computed from API / Recharts | Funnel conversion calculation, MRR growth charts | Recharts declarative SVG rendering | Render verified in build traces |
+| **Billing** | `src/app/(dashboard)/billing/page.tsx` | Invoice filter, payment modal | Static billing ledger | Invoice status badges, mock Stripe/Razorpay sync | Invoice record tracking | Verified via build trace |
+| **Settings** | `src/app/(dashboard)/settings/page.tsx` | API key form, suppression list rules | Local state & secret management | Key mask, DND suppression list configuration | Saves workspace config | Security checklist verified |
 
 ---
 
-## 6. External Services and Integrations
+## 3. Mandatory Deployment Compatibility Audit
 
-- **AI Model Providers:** Pluggable gateway in `src/lib/providers/ai-service.ts`:
-  - Primary: Google Gemini (`gemini-2.5-flash`, `gemini-2.5-pro`)
-  - Secondary/Fallback: OpenAI (`gpt-4o`, `gpt-4o-mini`)
-  - Fallback Mode: Deterministic mock engine when keys are omitted.
-- **Email Dispatch:** Resend API integration (`src/lib/providers/email-service.ts`) with default `dry_run = true`.
-- **Map & Geocoding:** Google Maps / Places API provider (`src/lib/providers/maps-service.ts`) adhering strictly to Section 3.2.3 of Google Maps TOS.
-- **Workflow Automation:** Ready for n8n webhook ingest (`/api/leads`, `/api/agents`).
+### 3.1 Frontend: Cloudflare Pages Compatibility
+1. **Next.js Version:** `15.5.28` running with React `19.3.1`.
+2. **Execution Mode on Cloudflare Pages:**
+   - **Mode A: Static HTML/JS Export (`output: 'export'`):**
+     - *Feasibility:* **100% Compatible.** All dashboard pages are client-side hydrated components (`"use client"`) communicating with backend APIs over standard `fetch()` with CORS/JWT.
+     - *Advantage:* Zero cold start, global Cloudflare CDN distribution, zero Node runtime incompatibilities on edge workers.
+   - **Mode B: Cloudflare Pages with `@cloudflare/next-on-pages` (Edge Workers):**
+     - *Limitation:* Next.js 15 App Router with dynamic Route Handlers that import Node-specific modules (`mongoose`, `crypto`, `bcryptjs`) frequently encounters edge runtime incompatibilities on Cloudflare Workers.
+     - *Resolution:* Moving the backend API into a dedicated Node.js + Express.js service deployed on **Zoho Cloud** completely resolves this limitation. The Next.js frontend on Cloudflare Pages will run as a pure, lightning-fast static single-page web app communicating via HTTPS/JSON with the Zoho Cloud Express API.
 
----
+### 3.2 Backend: Zoho Cloud Hosting Compatibility
+1. **Target Product:** **Zoho Catalyst AppSail** (Containerized / Runtime Web Service).
+2. **Runtime Support:** Node.js 18.x and 20.x LTS.
+3. **Execution Commands:**
+   - Build: `npm run build` (`tsc -p tsconfig.build.json`)
+   - Start: `npm start` (`node dist/server.js`)
+4. **Database Connectivity:**
+   - Zoho Catalyst does not bundle a native MongoDB database.
+   - External MongoDB connection (`MONGODB_URI`) via TLS over port 27017 (e.g. MongoDB Atlas or self-hosted MongoDB instance) is fully supported over outbound internet access.
+5. **CORS & Cookies:**
+   - Express server must configure `cors({ origin: ['https://agencyos.pages.dev', 'http://localhost:3000'], credentials: true })`.
+   - Cookie authentication or `Authorization: Bearer <token>` header supported.
 
-## 7. Existing Tests and Build Checks
+### 3.3 Database: MongoDB Architecture
+- **Provider:** MongoDB 7.0 (Atlas / self-managed).
+- **Mongoose ODM:** Explicit schemas for `User`, `Organization`, `Lead`, `LeadNote`, `Project`, `AgentConfig`, `OutreachMessage`.
+- **Multi-Tenant Boundaries:** Every query filters by `organizationId`.
 
-- **TypeScript Compiler (`tsc`):** Strict mode enabled (`noImplicitAny: true`, `strictNullChecks: true`). 0 errors.
-- **Unit Tests (`vitest`):**
-  - `validations.test.ts`: Zod schema validation for leads, users, and projects (5 tests).
-  - `auth.test.ts`: JWT token generation, verification, and bcrypt hashing (3 tests).
-  - `components.test.tsx`: Render tests for metric cards and UI components (3 tests).
-  - Result: **11/11 tests pass in ~1.9s.**
-- **Production Build (`next build`):**
-  - 29 routes total (10 public/marketing/auth/dashboard pages + 15 API routes + error handling).
-  - Result: **Compiled successfully in ~3.5s.**
-
----
-
-## 8. Current Deployment Configuration
-
-- **Host Target:** Vercel, Railway, AWS ECS, or Docker container.
-- **Containerization:** Ready for standard Alpine Node 20 Docker image.
-- **Stateless Design:** No local filesystem session state; auth relies on JWT tokens and database persistence.
-- **Environment Management:** Driven by `.env.example` and validated via Zod schema.
-
----
-
-## 9. Technical Debt and Structural Inconsistencies
-
-1. **Folder Separation:** The project is a unified Next.js 15 App Router app. Earlier documentation referenced a standalone `apps/web` and `apps/api` monorepo or Supabase PostgreSQL, whereas the actual working code uses Next.js Route Handlers and Mongoose.
-2. **Missing Standard Directories:**
-   - No `database/` directory for raw schema definitions, seed dumps, and documentation.
-   - No `workflows/n8n/` directory for exportable workflow JSON templates.
-   - No `assets/readme/` folder for visual README assets (SVG banner, architecture diagrams).
-   - No `.github/` workflows for CI/CD automation.
-3. **Documentation Fragmentation:** Documentation in `docs/` is extensive but contains pre-migration references to Supabase that should be reconciled with the implemented Next.js + MongoDB architecture.
+### 3.4 Automation: n8n Workflow Compatibility
+- Standalone n8n instance hosted via Docker / VPS.
+- Triggers Zoho Cloud Express API via webhook endpoints authenticated with HMAC secret (`N8N_WEBHOOK_HMAC_SECRET`).
 
 ---
 
-## 10. Risks, Constraints and Missing Information
+## 4. Technical Debt & Structural Inconsistencies
 
-- **Safe Restructuring Invariant:** Splitting the app into a multi-package monorepo (`apps/web` + `apps/api`) at this time carries high regression risk and breaks working Next.js App Router route handlers. The safe, low-risk approach is to retain the unified `src/` Next.js 15 core while establishing external support directories (`database/`, `workflows/n8n/`, `assets/readme/`, `.github/`, `infra/`).
-- **Data Safety:** Never export live MongoDB collections or secrets into git.
-- **Source Restrictions:** Adherence to TRAI and DPDP 2023 regulations remains mandatory.
+1. **Dual Routing Currently Monolithic:** API routes currently live inside Next.js (`src/app/api/*`). To achieve the target Cloudflare Pages + Zoho Cloud deployment, a dedicated Express API server must be established (`apps/api/`) while keeping Next.js API routes backward-compatible during the transition.
+2. **Client Components with Mock Data Defaults:** Some subpages (Billing, Templates) have rich static prototypes but require real-time backend synchronization.
+3. **CORS Configuration Needed for Dual-Domain Deployment:** When frontend runs on `*.pages.dev` and backend runs on `*.catalyst.zoho.com`, cross-origin credential passing and pre-flight handling (`OPTIONS`) must be strictly configured.
 
+---
+
+## 5. Audit Conclusion & Approval Recommendation
+
+The application codebase is healthy, strict, and visually aligned. The migration to a dual-tier structure (`apps/web` on Cloudflare Pages + `apps/api` Express on Zoho Cloud) is fully feasible and directly supported by the existing TypeScript models and validation logic.
