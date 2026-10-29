@@ -29,6 +29,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 const REVENUE_OVER_TIME = [
   { month: "Jan", billed: 420000, paid: 350000, outstanding: 70000 },
@@ -278,7 +279,7 @@ export default function BillingPage() {
               <LineChart data={REVENUE_OVER_TIME} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
                 <XAxis dataKey="month" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                 <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} tickFormatter={(v) => `₹${v / 100000}L`} />
-                <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                 <Line type="monotone" dataKey="billed" stroke="#3B82F6" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="paid" stroke="#10B981" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="outstanding" stroke="#F59E0B" strokeWidth={2} dot={false} />

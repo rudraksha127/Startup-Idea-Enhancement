@@ -43,6 +43,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 interface CampaignItem {
   id: string;
@@ -504,7 +505,7 @@ export default function OutreachPage() {
                     <LineChart data={PERFORMANCE_DATA} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                       <XAxis dataKey="day" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                       <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} />
-                      <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                      <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                       <Line type="monotone" dataKey="sent" stroke="#3568E8" strokeWidth={2} dot={false} />
                       <Line type="monotone" dataKey="opened" stroke="#10B981" strokeWidth={2} dot={false} />
                       <Line type="monotone" dataKey="replied" stroke="#F59E0B" strokeWidth={2} dot={false} />

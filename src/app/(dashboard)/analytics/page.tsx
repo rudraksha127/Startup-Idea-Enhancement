@@ -45,6 +45,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 // --- DATASETS MATCHING 14_Analytics_Overview.png ---
 const OVERVIEW_LEAD_GEN_TREND = [
@@ -362,7 +363,7 @@ export default function AnalyticsPage() {
                   <LineChart data={OVERVIEW_LEAD_GEN_TREND} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                     <XAxis dataKey="day" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                     <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                    <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                     <Line type="monotone" dataKey="mapLeads" stroke="#3568E8" strokeWidth={2.5} dot={false} />
                     <Line type="monotone" dataKey="websiteLeads" stroke="#10B981" strokeWidth={2.5} dot={false} />
                     <Line type="monotone" dataKey="manualLeads" stroke="#8B5CF6" strokeWidth={2.5} dot={false} />
@@ -396,7 +397,7 @@ export default function AnalyticsPage() {
                   <BarChart data={OVERVIEW_OUTREACH_PERF} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                     <XAxis dataKey="day" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                     <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                    <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                     <Bar dataKey="emails" fill="#3568E8" radius={[2, 2, 0, 0]} />
                     <Bar dataKey="replies" fill="#10B981" radius={[2, 2, 0, 0]} />
                     <Bar dataKey="meetings" fill="#8B5CF6" radius={[2, 2, 0, 0]} />
@@ -707,7 +708,7 @@ export default function AnalyticsPage() {
                   <BarChart data={FUNNEL_SOURCE_RATES}>
                     <XAxis dataKey="source" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                     <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} tickFormatter={(v) => `${v}%`} />
-                    <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                    <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                     <Bar dataKey="rate" fill="#10B981" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -822,7 +823,7 @@ export default function AnalyticsPage() {
                   <BarChart data={SOURCES_BAR_DATA}>
                     <XAxis dataKey="source" stroke="#A0A6A3" fontSize={9} tickLine={false} />
                     <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                    <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                     <Bar dataKey="count" fill="#3568E8" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -925,7 +926,7 @@ export default function AnalyticsPage() {
                 <AreaChart data={CAMPAIGNS_AREA_DATA}>
                   <XAxis dataKey="month" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                   <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                  <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                   <Area type="monotone" dataKey="sent" stroke="#3568E8" fill="#3568E8" fillOpacity={0.1} />
                   <Area type="monotone" dataKey="replies" stroke="#10B981" fill="#10B981" fillOpacity={0.15} />
                 </AreaChart>
@@ -1013,7 +1014,7 @@ export default function AnalyticsPage() {
                 <AreaChart data={REVENUE_OVER_TIME}>
                   <XAxis dataKey="month" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                   <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} tickFormatter={(v) => `₹${v}L`} />
-                  <Tooltip contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }} />
+                  <Tooltip contentStyle={WHITE_TOOLTIP_STYLE.contentStyle} itemStyle={WHITE_TOOLTIP_STYLE.itemStyle} labelStyle={WHITE_TOOLTIP_STYLE.labelStyle} />
                   <Area type="monotone" dataKey="total" stroke="#3568E8" fill="#3568E8" fillOpacity={0.12} />
                   <Area type="monotone" dataKey="mrr" stroke="#10B981" fill="#10B981" fillOpacity={0.2} />
                 </AreaChart>

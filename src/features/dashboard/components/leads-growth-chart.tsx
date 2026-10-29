@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 interface GrowthData {
   month: string;
@@ -69,13 +70,17 @@ export function LeadsGrowthChart({ data }: LeadsGrowthChartProps) {
             <XAxis dataKey="month" stroke="#A0A6A3" fontSize={11} tickLine={false} />
             <YAxis stroke="#A0A6A3" fontSize={11} tickLine={false} />
             <Tooltip
-              contentStyle={{
-                backgroundColor: "#171918",
-                borderColor: "#232B29",
-                borderRadius: "10px",
-                color: "#fff",
-                fontSize: "11px",
-                padding: "8px 12px",
+              contentStyle={WHITE_TOOLTIP_STYLE.contentStyle}
+              itemStyle={WHITE_TOOLTIP_STYLE.itemStyle}
+              labelStyle={WHITE_TOOLTIP_STYLE.labelStyle}
+              formatter={(val: number, name: string) => {
+                const labelMap: Record<string, string> = {
+                  leadsFound: "Leads Found",
+                  contacted: "Contacted",
+                  replies: "Replies",
+                  clients: "Clients",
+                };
+                return [val.toLocaleString(), labelMap[name] || name];
               }}
             />
             <Line type="monotone" dataKey="leadsFound" stroke="#3568E8" strokeWidth={2.5} dot={{ r: 3 }} />

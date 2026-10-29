@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, ChevronDown } from "lucide-react";
+import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 interface MonthlyRevenue {
   month: string;
@@ -59,13 +60,9 @@ export function RevenueOverview({
             <XAxis dataKey="month" stroke="#A0A6A3" fontSize={10} tickLine={false} />
             <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
             <Tooltip
-              contentStyle={{
-                backgroundColor: "#171918",
-                borderColor: "#232B29",
-                borderRadius: "8px",
-                color: "#fff",
-                fontSize: "11px",
-              }}
+              contentStyle={WHITE_TOOLTIP_STYLE.contentStyle}
+              itemStyle={WHITE_TOOLTIP_STYLE.itemStyle}
+              labelStyle={WHITE_TOOLTIP_STYLE.labelStyle}
               formatter={(val: number) => [`₹${val.toLocaleString()}`, "Revenue"]}
             />
             <Bar dataKey="amount" fill="#93C5FD" radius={[4, 4, 0, 0]} activeBar={{ fill: "#3568E8" }} />

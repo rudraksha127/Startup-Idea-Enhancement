@@ -38,6 +38,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 interface Agent {
   _id: string;
@@ -483,7 +484,9 @@ export default function AIAgentsPage() {
                       <XAxis dataKey="day" stroke="#A0A6A3" fontSize={10} tickLine={false} />
                       <YAxis stroke="#A0A6A3" fontSize={10} tickLine={false} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: "#171918", borderRadius: "8px", color: "#fff", fontSize: "11px" }}
+                        contentStyle={WHITE_TOOLTIP_STYLE.contentStyle}
+                        itemStyle={WHITE_TOOLTIP_STYLE.itemStyle}
+                        labelStyle={WHITE_TOOLTIP_STYLE.labelStyle}
                       />
                       <Bar dataKey="tasks" fill="#3B82F6" radius={[2, 2, 0, 0]} />
                       <Bar dataKey="leads" fill="#10B981" radius={[2, 2, 0, 0]} />
