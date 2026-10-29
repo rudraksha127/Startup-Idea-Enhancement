@@ -54,6 +54,14 @@ body {
 }
 
 /* Status Badges matching AgencyOS prototype */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .badge-new {
   background: #eef2f6;
   color: #3b506c;

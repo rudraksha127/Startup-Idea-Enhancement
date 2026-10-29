@@ -57,13 +57,13 @@ export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSideb
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#151B1A] border-r border-[#232B29] flex flex-col justify-between text-white transition-transform duration-200 lg:static lg:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-40 w-64 h-screen max-h-screen bg-[#151B1A] border-r border-[#232B29] flex flex-col justify-between text-white transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 shrink-0 overflow-hidden ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         {/* Brand */}
-        <div className="h-16 px-5 flex items-center justify-between border-b border-[#232B29]/60">
+        <div className="h-16 px-5 flex items-center justify-between border-b border-[#232B29]/60 shrink-0">
           <Link href="/" className="inline-flex items-center gap-2.5 text-lg font-bold tracking-tight text-white hover:opacity-90">
             <span className="w-8 h-8 rounded-full bg-white text-[#151B1A] flex items-center justify-center font-bold text-sm shadow-inner">
               A
@@ -80,7 +80,7 @@ export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSideb
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto no-scrollbar">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -117,7 +117,7 @@ export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSideb
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-3 border-t border-[#232B29]/60 space-y-3">
+      <div className="p-3 border-t border-[#232B29]/60 space-y-2.5 shrink-0">
         {/* Upgrade Plan Box */}
         <div className="p-3.5 rounded-xl bg-[#1D2523] border border-[#2B3532] text-xs">
           <div className="flex items-center gap-1.5 font-bold text-amber-400 text-xs mb-1">
@@ -173,4 +173,3 @@ export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSideb
     </aside>
   );
 }
-
