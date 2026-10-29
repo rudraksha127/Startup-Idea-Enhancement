@@ -174,3 +174,4 @@ AgencyOS is an autonomous AI-driven agency operating platform engineered under a
 3. **Password Security:** Salted BCrypt rounds = 12; cleartext credentials never stored or logged.
 4. **CORS:** Restricted to `http://localhost:3000` and `https://*.pages.dev`.
 5. **Rate Limiting:** Express API tier throttled to prevent credential stuffing and denial of service.
+

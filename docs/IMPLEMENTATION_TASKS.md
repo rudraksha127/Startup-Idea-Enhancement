@@ -101,3 +101,4 @@
 3. Both Light and Dark themes render without contrast regressions or layout shifts.
 4. All chart tooltips appear with white backgrounds, dark text, and legible numbers.
 5. All 27 initial leads render in the table with working status filter tabs.
+

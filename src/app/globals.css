@@ -154,3 +154,111 @@ body {
   border: 1px solid #2e3834;
 }
 
+/* ==========================================================================
+   Comprehensive Dark Mode System
+   Covers Dashboard, All Subpages, Tables, Cards, Modals, Drawers & Forms
+   ========================================================================== */
+
+.dark body {
+  background-color: #0b0f0e !important;
+  color: #f7f9f8 !important;
+}
+
+/* Card surfaces */
+.dark .bg-white:not(aside .bg-white):not([data-keep-light="true"]) {
+  background-color: #151d1a !important;
+}
+
+/* Header & background tones */
+.dark .bg-\[\#F7F6F2\],
+.dark .bg-\[\#f7f6f2\],
+.dark .bg-\[\#FAF9F6\],
+.dark .bg-\[\#faf9f6\],
+.dark .bg-\[\#fafaf8\],
+.dark .bg-\[\#FAF8F5\],
+.dark .bg-gray-50:not([data-keep-light="true"]) {
+  background-color: #111715 !important;
+}
+
+.dark .bg-gray-100:not([data-keep-light="true"]):not(aside .bg-gray-100) {
+  background-color: #1a2420 !important;
+}
+
+/* Typography */
+.dark .text-\[\#171918\]:not(aside .text-\[\#171918\]),
+.dark .text-\[\#101413\],
+.dark .text-gray-900:not(aside .text-gray-900) {
+  color: #f7f9f8 !important;
+}
+
+.dark .text-\[\#68717D\],
+.dark .text-\[\#68717d\],
+.dark .text-\[\#555956\],
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #9aa29e !important;
+}
+
+.dark .text-\[\#353b38\],
+.dark .text-gray-700,
+.dark .text-gray-800 {
+  color: #d1d5db !important;
+}
+
+/* Borders */
+.dark .border-\[\#E7E7E2\],
+.dark .border-\[\#e7e7e2\],
+.dark .border-\[\#161f1b\]\/10,
+.dark .border-\[\#161f1b\]\/15,
+.dark .border-gray-200,
+.dark .border-gray-100,
+.dark .border-gray-300 {
+  border-color: #22302b !important;
+}
+
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #22302b !important;
+}
+
+/* Form Inputs, Selects & Buttons */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: #121816 !important;
+  border-color: #2b3833 !important;
+  color: #f7f9f8 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #68717d !important;
+}
+
+.dark button.bg-white:not(aside button.bg-white),
+.dark a.bg-white:not(aside a.bg-white) {
+  background-color: #151d1a !important;
+  color: #f7f9f8 !important;
+  border-color: #22302b !important;
+}
+
+.dark button.bg-white:hover:not(aside button.bg-white:hover),
+.dark a.bg-white:hover:not(aside a.bg-white:hover) {
+  background-color: #1c2723 !important;
+}
+
+/* Table Hover States */
+.dark tr:hover td {
+  background-color: rgba(29, 37, 35, 0.5) !important;
+}
+
+/* Preserve active navigation and specific white pills in sidebar */
+aside .bg-white {
+  background-color: #ffffff !important;
+}
+aside .bg-white.text-\[\#171918\],
+aside .bg-white .text-\[\#171918\] {
+  color: #171918 !important;
+}
+

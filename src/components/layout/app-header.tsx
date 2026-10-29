@@ -95,8 +95,8 @@ export function AppHeader({ onToggleMobileNav, onOpenAddLead }: AppHeaderProps) 
           )}
         </div>
 
-        {/* Theme Toggle (Light / Dark / System Default) */}
-        <ThemeToggle />
+        {/* Dedicated Header Theme Switcher (Light | Dark | System Default) */}
+        <ThemeToggle variant="header" />
 
         {/* Notifications */}
         <div className="relative">
