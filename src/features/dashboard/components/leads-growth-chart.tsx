@@ -37,17 +37,17 @@ export function LeadsGrowthChart({ data }: LeadsGrowthChartProps) {
   const chartData = data && Array.isArray(data) && data[0]?.leadsFound ? data : DEFAULT_GROWTH_DATA;
 
   return (
-    <div className="p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs">
+    <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <div>
-          <h3 className="text-sm font-bold text-[#171918]">
+          <h3 className="text-sm font-bold text-[#171918] dark:text-white">
             Leads &amp; Clients Growth
             <span className="sr-only">Leads Growth</span>
           </h3>
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#68717D]">
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#68717D] dark:text-[#9AA29E]">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#3568E8]" /> Leads Found
           </span>

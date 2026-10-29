@@ -28,27 +28,27 @@ export function RecentLeadsCard() {
   const getBadgeStyle = (status: RecentLeadItem["status"]) => {
     switch (status) {
       case "New":
-        return "bg-blue-50 text-blue-700 border border-blue-200";
+        return "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800";
       case "Contacted":
-        return "bg-sky-50 text-sky-700 border border-sky-200";
+        return "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800";
       case "Replied":
-        return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+        return "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800";
       case "Interested":
-        return "bg-amber-50 text-amber-700 border border-amber-200";
+        return "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800";
       case "Converted":
-        return "bg-green-50 text-green-700 border border-green-200";
+        return "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800";
       default:
-        return "bg-gray-50 text-gray-700 border border-gray-200";
+        return "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800";
     }
   };
 
   return (
-    <div className="p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs">
+    <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold text-[#171918]">Recent Leads</h3>
+        <h3 className="text-sm font-bold text-[#171918] dark:text-white">Recent Leads</h3>
         <Link
           href="/leads"
-          className="text-xs font-semibold text-gray-500 hover:text-[#171918] inline-flex items-center gap-1"
+          className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-[#171918] dark:hover:text-white inline-flex items-center gap-1"
         >
           View All <ArrowRight size={12} />
         </Link>
@@ -57,7 +57,7 @@ export function RecentLeadsCard() {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-gray-100 text-[#68717D] text-[11px]">
+            <tr className="border-b border-gray-100 dark:border-[#22302B] text-[#68717D] dark:text-[#9AA29E] text-[11px]">
               <th className="pb-2 font-medium">Business ⌄</th>
               <th className="pb-2 font-medium">Category</th>
               <th className="pb-2 font-medium">Location ⌄</th>
@@ -66,24 +66,24 @@ export function RecentLeadsCard() {
               <th className="pb-2 font-medium text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-[#22302B]">
             {RECENT_LEADS.map((lead) => (
-              <tr key={lead.id} className="hover:bg-gray-50/60 transition-colors">
+              <tr key={lead.id} className="hover:bg-gray-50/60 dark:hover:bg-[#1D2523]/60 transition-colors">
                 <td className="py-2.5 pr-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-md overflow-hidden bg-gray-100 relative shrink-0">
+                    <div className="w-7 h-7 rounded-md overflow-hidden bg-gray-100 dark:bg-[#1D2523] relative shrink-0">
                       <Image src={lead.img} alt={lead.name} fill className="object-cover" />
                     </div>
                     <Link
                       href={`/leads/${lead.id}`}
-                      className="font-semibold text-[#171918] hover:text-[#3568E8] truncate max-w-[120px]"
+                      className="font-semibold text-[#171918] dark:text-white hover:text-[#3568E8] dark:hover:text-emerald-400 truncate max-w-[120px]"
                     >
                       {lead.name}
                     </Link>
                   </div>
                 </td>
-                <td className="py-2.5 pr-2 text-gray-500 text-[11px]">{lead.category}</td>
-                <td className="py-2.5 pr-2 text-gray-500 text-[11px] whitespace-nowrap">{lead.location}</td>
+                <td className="py-2.5 pr-2 text-gray-500 dark:text-gray-400 text-[11px]">{lead.category}</td>
+                <td className="py-2.5 pr-2 text-gray-500 dark:text-gray-400 text-[11px] whitespace-nowrap">{lead.location}</td>
                 <td className="py-2.5 pr-2 text-amber-500 font-bold text-[11px] whitespace-nowrap">
                   ★ {lead.rating}
                 </td>
@@ -93,7 +93,7 @@ export function RecentLeadsCard() {
                   </span>
                 </td>
                 <td className="py-2.5 text-right">
-                  <button className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-black">
+                  <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#1D2523] text-gray-400 hover:text-black dark:hover:text-white">
                     <MoreHorizontal size={13} />
                   </button>
                 </td>

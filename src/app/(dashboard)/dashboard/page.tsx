@@ -33,11 +33,11 @@ export default function DashboardPage() {
     <div className="space-y-5">
       {/* Page Title & Subtitle matching Reference */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
           Dashboard
           <span className="sr-only">Operations Dashboard</span>
         </h1>
-        <p className="text-xs text-[#68717D] mt-0.5">
+        <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
           Here&apos;s what&apos;s happening with your autonomous agency.
         </p>
       </div>

@@ -26,12 +26,12 @@ const DEFAULT_AGENTS = [
 
 export function AIAgentsCard({ agents }: AIAgentsCardProps) {
   return (
-    <div className="p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs">
+    <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
       <div className="flex items-center justify-between mb-3.5">
-        <h3 className="text-sm font-bold text-[#171918]">Active AI Agents</h3>
+        <h3 className="text-sm font-bold text-[#171918] dark:text-white">Active AI Agents</h3>
         <Link
           href="/ai-agents"
-          className="text-xs font-semibold text-gray-500 hover:text-[#171918] inline-flex items-center gap-1"
+          className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-[#171918] dark:hover:text-white inline-flex items-center gap-1"
         >
           Manage Agents <ArrowRight size={12} />
         </Link>
@@ -43,17 +43,17 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
           return (
             <div
               key={agent.name}
-              className="p-3 rounded-lg bg-[#FAF9F6] border border-gray-100 flex flex-col justify-between space-y-2 hover:border-gray-200 transition-colors"
+              className="p-3 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex flex-col justify-between space-y-2 hover:border-gray-200 dark:hover:border-[#2B3532] transition-colors"
             >
               <div className="flex items-center gap-2">
                 <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs shrink-0 ${agent.color}`}>
                   <Icon size={13} />
                 </span>
-                <span className="font-bold text-[11px] text-[#171918] truncate">{agent.name}</span>
+                <span className="font-bold text-[11px] text-[#171918] dark:text-white truncate">{agent.name}</span>
               </div>
-              <p className="text-[10px] text-gray-500 truncate">{agent.role}</p>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{agent.role}</p>
               <div>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
                 </span>
               </div>

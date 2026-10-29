@@ -43,16 +43,16 @@ export function RecentActivity({ activities }: { activities?: ActivityItem[] }) 
   };
 
   return (
-    <div className="p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs">
+    <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <h3 className="text-sm font-bold text-[#171918]">Live Activities</h3>
+          <h3 className="text-sm font-bold text-[#171918] dark:text-white">Live Activities</h3>
           <span className="sr-only">Recent Activity</span>
         </div>
         <Link
           href="/outreach"
-          className="text-xs font-semibold text-gray-500 hover:text-[#171918] inline-flex items-center gap-1"
+          className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-[#171918] dark:hover:text-white inline-flex items-center gap-1"
         >
           View All <ArrowRight size={12} />
         </Link>
@@ -61,15 +61,15 @@ export function RecentActivity({ activities }: { activities?: ActivityItem[] }) 
       <div className="space-y-3.5">
         {items.map((item) => (
           <div key={item.id} className="flex items-start gap-3 text-xs">
-            <span className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 mt-0.5">
+            <span className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-center shrink-0 mt-0.5">
               {getIcon(item.type)}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-1">
-                <span className="font-semibold text-[#171918] truncate">{item.title}</span>
-                <span className="text-[10px] text-gray-400 shrink-0">{item.time}</span>
+                <span className="font-semibold text-[#171918] dark:text-white truncate">{item.title}</span>
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 shrink-0">{item.time}</span>
               </div>
-              <p className="text-[11px] text-[#68717D] truncate mt-0.5">{item.detail}</p>
+              <p className="text-[11px] text-[#68717D] dark:text-[#9AA29E] truncate mt-0.5">{item.detail}</p>
             </div>
           </div>
         ))}

@@ -20,6 +20,7 @@ import {
   LogOut,
   ExternalLink,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface AppSidebarProps {
   leadCount?: number;
@@ -153,6 +154,10 @@ export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSideb
 
           {profileMenuOpen && (
             <div className="absolute bottom-full left-0 mb-1 w-full rounded-xl bg-[#1D2523] border border-[#2B3532] shadow-xl py-1 text-xs">
+              <div className="px-3 py-2 border-b border-[#2B3532]/60">
+                <div className="text-[10px] text-gray-400 font-semibold mb-1.5 uppercase tracking-wider">Appearance</div>
+                <ThemeToggle variant="segmented" className="w-full justify-between" />
+              </div>
               <Link
                 href="/settings"
                 onClick={() => setProfileMenuOpen(false)}

@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -13,7 +14,7 @@ const config: Config = {
         paper: {
           DEFAULT: "var(--paper, #f8f6f0)",
           2: "var(--paper-2, #f3f1eb)",
-          card: "#ffffff",
+          card: "var(--card, #ffffff)",
         },
         ink: {
           DEFAULT: "var(--ink, #101413)",

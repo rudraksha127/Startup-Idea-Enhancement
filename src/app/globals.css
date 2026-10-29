@@ -21,6 +21,21 @@
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
+.dark {
+  --paper: #0B0F0E;
+  --paper-2: #121716;
+  --card: #151D1A;
+  --ink: #F7F9F8;
+  --muted: #9AA29E;
+  --faint: #68717D;
+  --green: #F7F9F8;
+  --green-2: #1A2421;
+  --sidebar-bg: #0D1312;
+  --sidebar-line: #1F2C27;
+  --line: #22302B;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -105,5 +120,37 @@ body {
 .dot-blue {
   background-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Dark mode badge variants */
+.dark .badge-new {
+  background: #172433;
+  color: #93c5fd;
+  border: 1px solid #1e3a5f;
+}
+.dark .badge-contacted {
+  background: #2d2311;
+  color: #fde047;
+  border: 1px solid #4d3b19;
+}
+.dark .badge-interested {
+  background: #102d1d;
+  color: #6ee7b7;
+  border: 1px solid #1a4d33;
+}
+.dark .badge-replied {
+  background: #132342;
+  color: #93c5fd;
+  border: 1px solid #1e3a8a;
+}
+.dark .badge-converted {
+  background: #2b1842;
+  color: #d8b4fe;
+  border: 1px solid #4a2574;
+}
+.dark .badge-archived {
+  background: #1c2220;
+  color: #9ca3af;
+  border: 1px solid #2e3834;
 }
 

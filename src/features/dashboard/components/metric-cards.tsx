@@ -20,8 +20,8 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       value: metrics?.totalLeads !== undefined ? metrics.totalLeads.toLocaleString() : "2,847",
       trend: metrics?.leadsTrend?.replace("+", "") || "12%",
       icon: Users,
-      color: "text-blue-600",
-      bg: "bg-blue-50/80 border border-blue-100",
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50",
       sparkColor: "#3568E8",
     },
     {
@@ -29,8 +29,8 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       value: metrics?.qualifiedLeads !== undefined ? metrics.qualifiedLeads.toLocaleString() : "892",
       trend: metrics?.qualifiedTrend?.replace("+", "") || "16%",
       icon: PhoneCall,
-      color: "text-sky-600",
-      bg: "bg-sky-50/80 border border-sky-100",
+      color: "text-sky-600 dark:text-sky-400",
+      bg: "bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50",
       sparkColor: "#38BDF8",
     },
     {
@@ -38,8 +38,8 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       value: metrics?.activeOutreaches !== undefined ? metrics.activeOutreaches.toLocaleString() : "142",
       trend: metrics?.outreachTrend?.replace("+", "") || "34%",
       icon: MessageCircle,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50/80 border border-emerald-100",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50",
       sparkColor: "#10B981",
     },
     {
@@ -47,8 +47,8 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       value: metrics?.convertedClients !== undefined ? metrics.convertedClients.toLocaleString() : "38",
       trend: metrics?.convertedTrend?.replace("+", "") || "18%",
       icon: Briefcase,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50/80 border border-indigo-100",
+      color: "text-indigo-600 dark:text-indigo-400",
+      bg: "bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50",
       sparkColor: "#6366F1",
     },
   ];
@@ -60,7 +60,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
         return (
           <div
             key={card.title}
-            className="p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between"
+            className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between"
           >
             <div className="flex items-center gap-3.5">
               <span className={`w-11 h-11 rounded-xl ${card.bg} ${card.color} flex items-center justify-center shrink-0`}>
@@ -68,15 +68,15 @@ export function MetricCards({ metrics }: MetricCardsProps) {
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold tracking-tight text-[#171918]">
+                  <span className="text-2xl font-bold tracking-tight text-[#171918] dark:text-white">
                     {card.value}
                   </span>
-                  <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full border border-emerald-200">
+                  <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-800">
                     <TrendingUp size={10} className="mr-0.5" />
                     ↑ {card.trend}
                   </span>
                 </div>
-                <div className="text-xs text-[#68717D] font-medium mt-0.5">
+                <div className="text-xs text-[#68717D] dark:text-[#9AA29E] font-medium mt-0.5">
                   <span>{card.title}</span>
                 </div>
               </div>

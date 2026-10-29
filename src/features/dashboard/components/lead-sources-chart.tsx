@@ -30,10 +30,10 @@ export function LeadSourcesChart({ sources }: LeadSourcesChartProps) {
   const totalLeads = chartData.reduce((acc, curr) => acc + curr.count, 0);
 
   return (
-    <div className="p-4 sm:p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs flex flex-col justify-between min-h-[220px]">
+    <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs flex flex-col justify-between min-h-[220px]">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-bold text-[#171918]">Lead Sources</h3>
-        <span className="text-[11px] font-semibold text-[#68717D]">
+        <h3 className="text-sm font-bold text-[#171918] dark:text-white">Lead Sources</h3>
+        <span className="text-[11px] font-semibold text-[#68717D] dark:text-[#9AA29E]">
           {totalLeads.toLocaleString()} Total
         </span>
       </div>
@@ -105,22 +105,22 @@ export function LeadSourcesChart({ sources }: LeadSourcesChartProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none text-center px-1">
             {activeItem ? (
               <>
-                <span className="text-[9px] uppercase tracking-wider font-bold text-gray-500 truncate max-w-[70px]">
+                <span className="text-[9px] uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400 truncate max-w-[70px]">
                   {activeItem.name}
                 </span>
-                <span className="text-sm font-extrabold text-[#171918] leading-tight mt-0.5">
+                <span className="text-sm font-extrabold text-[#171918] dark:text-white leading-tight mt-0.5">
                   {activeItem.percentage}%
                 </span>
-                <span className="text-[10px] text-gray-400 font-medium leading-none">
+                <span className="text-[10px] text-gray-400 dark:text-gray-400 font-medium leading-none">
                   {activeItem.count}
                 </span>
               </>
             ) : (
               <>
-                <span className="text-[9px] uppercase tracking-wider font-bold text-[#68717D]">
+                <span className="text-[9px] uppercase tracking-wider font-bold text-[#68717D] dark:text-[#9AA29E]">
                   TOTAL
                 </span>
-                <span className="text-base font-extrabold text-[#171918] leading-tight mt-0.5">
+                <span className="text-base font-extrabold text-[#171918] dark:text-white leading-tight mt-0.5">
                   {totalLeads.toLocaleString()}
                 </span>
               </>
@@ -138,17 +138,19 @@ export function LeadSourcesChart({ sources }: LeadSourcesChartProps) {
                 onMouseEnter={() => setActiveItem(s)}
                 onMouseLeave={() => setActiveItem(null)}
                 className={`flex items-center justify-between text-[11px] gap-2 py-0.5 px-1.5 rounded cursor-pointer transition-colors ${
-                  isHovered ? "bg-gray-100 font-medium" : "hover:bg-gray-50"
+                  isHovered
+                    ? "bg-gray-100 dark:bg-[#1D2523] font-medium"
+                    : "hover:bg-gray-50 dark:hover:bg-[#1D2523]/60"
                 }`}
               >
-                <span className="flex items-center gap-2 truncate text-[#353b38] min-w-0">
+                <span className="flex items-center gap-2 truncate text-[#353b38] dark:text-[#E2E8F0] min-w-0">
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: s.color }}
                   />
                   <span className="truncate">{s.name}</span>
                 </span>
-                <span className="font-bold text-[#171918] shrink-0 ml-1">
+                <span className="font-bold text-[#171918] dark:text-white shrink-0 ml-1">
                   {s.percentage}%
                 </span>
               </div>

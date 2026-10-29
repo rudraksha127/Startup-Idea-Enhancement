@@ -22,6 +22,7 @@ import {
   FileText,
   Save,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type SettingsTab =
   | "workspace"
@@ -306,6 +307,16 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-6">
+            <div className="bg-white border border-[#E7E7E2] rounded-xl p-5 shadow-xs space-y-3">
+              <h3 className="text-xs font-bold text-[#171918]">Interface Appearance</h3>
+              <p className="text-xs text-[#68717D]">
+                Choose how AgencyOS looks to you. Select between Light, Dark, or automatically match your System settings.
+              </p>
+              <div className="pt-1">
+                <ThemeToggle variant="segmented" className="w-full justify-between" />
+              </div>
+            </div>
+
             <div className="bg-white border border-[#E7E7E2] rounded-xl p-5 shadow-xs space-y-3">
               <h3 className="text-xs font-bold text-[#171918]">Subscription Status</h3>
               <div className="p-3 bg-[#F7F6F2] rounded-lg border border-[#E7E7E2] space-y-2">
