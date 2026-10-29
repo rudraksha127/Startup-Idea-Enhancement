@@ -7,6 +7,7 @@ import { AddLeadModal } from "@/features/leads/components/add-lead-modal";
 import { ImportCSVModal } from "@/features/leads/components/import-csv-modal";
 import { LeadFiltersSidebar } from "@/features/leads/components/lead-filters-sidebar";
 import { LeadDetailAuditPanel } from "@/features/leads/components/lead-detail-audit-panel";
+import { DEFAULT_LEADS } from "@/lib/data/default-leads";
 import {
   Plus,
   Upload,
@@ -27,11 +28,19 @@ import {
 
 export default function LeadsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [leads, setLeads] = useState<any[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [total, setTotal] = useState(2847);
+  const [leads, setLeads] = useState<any[]>(() => DEFAULT_LEADS.slice(0, 10));
+  const [counts, setCounts] = useState<Record<string, number>>({
+    All: 2847,
+    New: 120,
+    Contacted: 892,
+    Replied: 142,
+    Interested: 68,
+    Converted: 38,
+    Archived: 96,
+  });
+  const [total, setTotal] = useState(DEFAULT_LEADS.length);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Filters
   const [status, setStatus] = useState("All");
@@ -73,15 +82,53 @@ export default function LeadsPage() {
       if (search) params.set("search", search);
 
       const res = await fetch(`/api/leads?${params.toString()}`);
-      const data = await res.json();
-
       if (res.ok) {
-        setLeads(data.leads || []);
-        setCounts(data.counts || {});
-        if (data.pagination?.total) setTotal(data.pagination.total);
+        const data = await res.json();
+        if (data.leads && data.leads.length > 0) {
+          setLeads(data.leads);
+          setCounts(data.counts || {});
+          setTotal(data.total ?? data.pagination?.total ?? data.leads.length);
+        } else if (status === "All" && category === "All" && !search) {
+          // If DB is fresh, display default leads
+          setLeads(DEFAULT_LEADS.slice((page - 1) * 10, page * 10));
+          setTotal(DEFAULT_LEADS.length);
+        } else {
+          setLeads([]);
+          if (typeof data.total === "number") setTotal(data.total);
+        }
+      } else {
+        // Fallback filter
+        let filtered = [...DEFAULT_LEADS];
+        if (status !== "All") filtered = filtered.filter((l) => l.status === status);
+        if (category !== "All") filtered = filtered.filter((l) => l.category === category);
+        if (search) {
+          const q = search.toLowerCase();
+          filtered = filtered.filter(
+            (l) =>
+              l.businessName.toLowerCase().includes(q) ||
+              l.category.toLowerCase().includes(q) ||
+              (l.location && l.location.toLowerCase().includes(q))
+          );
+        }
+        setLeads(filtered.slice((page - 1) * 10, page * 10));
+        setTotal(filtered.length);
       }
     } catch (err) {
       console.error("Failed to fetch leads:", err);
+      let filtered = [...DEFAULT_LEADS];
+      if (status !== "All") filtered = filtered.filter((l) => l.status === status);
+      if (category !== "All") filtered = filtered.filter((l) => l.category === category);
+      if (search) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(
+          (l) =>
+            l.businessName.toLowerCase().includes(q) ||
+            l.category.toLowerCase().includes(q) ||
+            (l.location && l.location.toLowerCase().includes(q))
+        );
+      }
+      setLeads(filtered.slice((page - 1) * 10, page * 10));
+      setTotal(filtered.length);
     } finally {
       setLoading(false);
     }
@@ -99,10 +146,10 @@ export default function LeadsPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedIds.length === leads.length) {
+    if (selectedIds.length === leads.length && leads.length > 0) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(leads.map((l) => l._id));
+      setSelectedIds(leads.map((l) => l._id || l.slug));
     }
   };
 
@@ -115,17 +162,30 @@ export default function LeadsPage() {
       });
       if (res.ok) {
         fetchLeads();
-        if (inspectedLead && (inspectedLead._id === leadId || inspectedLead.slug === leadId)) {
-          setInspectedLead({ ...inspectedLead, status: newStatus });
-        }
+      } else {
+        // Optimistic local update
+        setLeads((prev) =>
+          prev.map((l) =>
+            (l._id === leadId || l.slug === leadId) ? { ...l, status: newStatus } : l
+          )
+        );
+      }
+      if (inspectedLead && (inspectedLead._id === leadId || inspectedLead.slug === leadId)) {
+        setInspectedLead({ ...inspectedLead, status: newStatus });
       }
     } catch (err) {
       console.error("Failed to update status:", err);
+      setLeads((prev) =>
+        prev.map((l) =>
+          (l._id === leadId || l.slug === leadId) ? { ...l, status: newStatus } : l
+        )
+      );
     }
   };
 
   const STATUS_TABS = [
     { label: "All Leads", key: "All", count: counts.All ?? 2847 },
+    { label: "New", key: "New", count: counts.New ?? 120 },
     { label: "Contacted", key: "Contacted", count: counts.Contacted ?? 892 },
     { label: "Replied", key: "Replied", count: counts.Replied ?? 142 },
     { label: "Interested", key: "Interested", count: counts.Interested ?? 68 },
@@ -254,7 +314,10 @@ export default function LeadsPage() {
           return (
             <button
               key={tab.key}
-              onClick={() => setStatus(tab.key)}
+              onClick={() => {
+                setStatus(tab.key);
+                setPage(1);
+              }}
               className={`pb-2.5 px-3 transition-colors border-b-2 whitespace-nowrap flex items-center gap-1.5 ${
                 isActive
                   ? "border-[#25835B] text-[#171918] font-bold"
@@ -275,7 +338,10 @@ export default function LeadsPage() {
           <input
             type="search"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by business name, category, location..."
             className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[#E7E7E2] bg-white focus:outline-none focus:ring-1 focus:ring-[#171918]"
           />
@@ -325,7 +391,10 @@ export default function LeadsPage() {
 
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1);
+            }}
             className="h-8 px-2.5 rounded-lg border border-[#E7E7E2] bg-white text-xs font-semibold text-gray-700 focus:outline-none shadow-2xs"
           >
             <option value="createdAt">Sort: Most Recent</option>
@@ -363,116 +432,142 @@ export default function LeadsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {leads.map((lead) => {
-                  const isInspected = inspectedLead?._id === lead._id || inspectedLead?.slug === lead.slug;
-                  return (
-                    <tr
-                      key={lead._id}
-                      onClick={() => setInspectedLead(lead)}
-                      className={`cursor-pointer transition-colors ${
-                        isInspected
-                          ? "bg-blue-50/40"
-                          : "hover:bg-[#FAF9F6]/80"
-                      }`}
-                    >
-                      <td className="py-3 px-3.5" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(lead._id)}
-                          onChange={() => handleToggleRow(lead._id)}
-                          className="rounded border-gray-300 text-[#171918] focus:ring-0"
-                        />
-                      </td>
-
-                      {/* Business name + logo */}
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 relative shrink-0 border border-gray-200">
-                            <Image
-                              src={lead.imageUrl || "/assets/urban-kitchen.jpg"}
-                              alt={lead.businessName}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div>
-                            <div className="font-bold text-[#171918] hover:text-[#3568E8] transition-colors truncate max-w-[150px]">
-                              {lead.businessName}
-                            </div>
-                            <div className="text-[10px] text-gray-400 flex items-center gap-1">
-                              <span className="truncate max-w-[130px]">{lead.website ? lead.website.replace("https://", "") : "example.in"}</span>
-                              <ExternalLink size={9} />
-                            </div>
-                          </div>
+                {leads.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                          <Search size={18} />
                         </div>
-                      </td>
-
-                      {/* Category */}
-                      <td className="py-3 px-3 text-gray-600 text-[11px] whitespace-nowrap">
-                        {lead.category}
-                      </td>
-
-                      {/* Location */}
-                      <td className="py-3 px-3 text-gray-600 text-[11px] whitespace-nowrap">
-                        {lead.location || "New Delhi"}
-                      </td>
-
-                      {/* Rating */}
-                      <td className="py-3 px-3 text-amber-500 font-bold text-[11px] whitespace-nowrap">
-                        ★ {lead.rating}
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-                        <select
-                          value={lead.status}
-                          onChange={(e) => handleStatusChange(lead._id, e.target.value)}
-                          className="text-[11px] font-bold px-2 py-0.5 rounded-md border border-gray-200 bg-white text-gray-800 focus:outline-none"
+                        <p className="font-semibold text-gray-700">No leads found</p>
+                        <p className="text-[11px] text-gray-400">Try adjusting your filters or search keywords</p>
+                        <button
+                          onClick={() => {
+                            setStatus("All");
+                            setCategory("All");
+                            setSearch("");
+                            setPage(1);
+                          }}
+                          className="mt-2 text-xs font-semibold text-[#3568E8] hover:underline"
                         >
-                          <option value="New">New</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Interested">Interested</option>
-                          <option value="Replied">Replied</option>
-                          <option value="Converted">Converted</option>
-                          <option value="Archived">Archived</option>
-                        </select>
-                      </td>
+                          Reset all filters
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  leads.map((lead) => {
+                    const leadKey = lead._id || lead.slug;
+                    const isInspected = inspectedLead && (inspectedLead._id === leadKey || inspectedLead.slug === leadKey);
+                    return (
+                      <tr
+                        key={leadKey}
+                        onClick={() => setInspectedLead(lead)}
+                        className={`cursor-pointer transition-colors ${
+                          isInspected
+                            ? "bg-blue-50/40"
+                            : "hover:bg-[#FAF9F6]/80"
+                        }`}
+                      >
+                        <td className="py-3 px-3.5" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(leadKey)}
+                            onChange={() => handleToggleRow(leadKey)}
+                            className="rounded border-gray-300 text-[#171918] focus:ring-0"
+                          />
+                        </td>
 
-                      {/* Source */}
-                      <td className="py-3 px-3 text-gray-600 text-[11px] whitespace-nowrap">
-                        {lead.source}
-                      </td>
+                        {/* Business name + logo */}
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 relative shrink-0 border border-gray-200">
+                              <Image
+                                src={lead.imageUrl || "/assets/urban-kitchen.jpg"}
+                                alt={lead.businessName}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div>
+                              <div className="font-bold text-[#171918] hover:text-[#3568E8] transition-colors truncate max-w-[150px]">
+                                {lead.businessName}
+                              </div>
+                              <div className="text-[10px] text-gray-400 flex items-center gap-1">
+                                <span className="truncate max-w-[130px]">{lead.website ? lead.website.replace("https://", "") : "example.in"}</span>
+                                <ExternalLink size={9} />
+                              </div>
+                            </div>
+                          </div>
+                        </td>
 
-                      {/* Last Activity */}
-                      <td className="py-3 px-3 text-gray-400 text-[11px] whitespace-nowrap">
-                        {lead.lastContactedAt || "12 Mar 2024"}
-                      </td>
+                        {/* Category */}
+                        <td className="py-3 px-3 text-gray-600 text-[11px] whitespace-nowrap">
+                          {lead.category}
+                        </td>
 
-                      {/* Actions */}
-                      <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Link
-                            href={`/leads/${lead.slug || lead._id}`}
-                            className="p-1 rounded text-gray-400 hover:text-black hover:bg-gray-100"
-                            title="Open Dossier"
+                        {/* Location */}
+                        <td className="py-3 px-3 text-gray-600 text-[11px] whitespace-nowrap">
+                          {lead.location || "New Delhi"}
+                        </td>
+
+                        {/* Rating */}
+                        <td className="py-3 px-3 text-amber-500 font-bold text-[11px] whitespace-nowrap">
+                          ★ {lead.rating}
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                          <select
+                            value={lead.status}
+                            onChange={(e) => handleStatusChange(leadKey, e.target.value)}
+                            className="text-[11px] font-bold px-2 py-0.5 rounded-md border border-gray-200 bg-white text-gray-800 focus:outline-none"
                           >
-                            <ExternalLink size={13} />
-                          </Link>
-                          <button className="p-1 rounded text-gray-400 hover:text-black hover:bg-gray-100">
-                            <MoreHorizontal size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            <option value="New">New</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Interested">Interested</option>
+                            <option value="Replied">Replied</option>
+                            <option value="Converted">Converted</option>
+                            <option value="Archived">Archived</option>
+                          </select>
+                        </td>
+
+                        {/* Source */}
+                        <td className="py-3 px-3 text-gray-600 text-[11px] whitespace-nowrap">
+                          {lead.source}
+                        </td>
+
+                        {/* Last Activity */}
+                        <td className="py-3 px-3 text-gray-400 text-[11px] whitespace-nowrap">
+                          {lead.lastContactedAt || "12 Mar 2024"}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Link
+                              href={`/leads/${lead.slug || lead._id}`}
+                              className="p-1 rounded text-gray-400 hover:text-black hover:bg-gray-100"
+                              title="Open Dossier"
+                            >
+                              <ExternalLink size={13} />
+                            </Link>
+                            <button className="p-1 rounded text-gray-400 hover:text-black hover:bg-gray-100">
+                              <MoreHorizontal size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Table Footer / Pagination */}
           <div className="p-3.5 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-[#68717D]">
-            <span>Showing 1 – 10 of {total.toLocaleString()} leads</span>
+            <span>Showing {leads.length > 0 ? (page - 1) * 10 + 1 : 0} – {Math.min(page * 10, total)} of {total.toLocaleString()} leads</span>
 
             <div className="flex items-center gap-1">
               <button
@@ -495,7 +590,7 @@ export default function LeadsPage() {
                   {num}
                 </button>
               ))}
-              <span className="px-1 text-gray-400">...</span>
+              {Math.ceil(total / 10) > 5 && <span className="px-1 text-gray-400">...</span>}
               <button
                 onClick={() => setPage((p) => Math.min(Math.ceil(total / 10), p + 1))}
                 disabled={page >= Math.ceil(total / 10)}
@@ -517,13 +612,20 @@ export default function LeadsPage() {
         ) : showFilters ? (
           <LeadFiltersSidebar
             category={category}
-            onCategoryChange={setCategory}
+            onCategoryChange={(c) => {
+              setCategory(c);
+              setPage(1);
+            }}
             status={status}
-            onStatusChange={setStatus}
+            onStatusChange={(s) => {
+              setStatus(s);
+              setPage(1);
+            }}
             onReset={() => {
               setCategory("All");
               setStatus("All");
               setSearch("");
+              setPage(1);
             }}
           />
         ) : null}
