@@ -153,14 +153,14 @@ export function LandingHero({ onOpenDemo }: LandingHeroProps) {
               </div>
             </div>
 
-            {/* Handwritten scribble annotation */}
-            <div className="hidden sm:block absolute -bottom-8 -left-8 bg-transparent text-[#151B1A] font-handwriting text-2xl rotate-[-6deg] select-none pointer-events-none">
-              <span>Turn Opportunities</span>
+            {/* Handwritten scribble annotation - positioned on background to the left of image */}
+            <div className="hidden lg:block absolute -bottom-6 -left-48 xl:-left-52 bg-transparent text-[#151B1A] font-handwriting text-2xl rotate-[-5deg] select-none pointer-events-none z-10">
+              <span className="whitespace-nowrap">Turn Opportunities</span>
               <br />
-              <span className="pl-4">into Real Clients</span>
-              <svg className="w-16 h-10 mt-1 ml-6 text-[#151B1A]" viewBox="0 0 80 48" fill="none">
-                <path d="M4 2C12 23 30 26 62 34" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                <path d="m51 25 13 10-16 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              <span className="pl-3 whitespace-nowrap">into Real Clients</span>
+              <svg className="w-20 h-10 mt-0.5 ml-auto text-[#151B1A]" viewBox="0 0 80 48" fill="none">
+                <path d="M4 4C20 28 42 30 70 32" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="m58 23 13 9-15 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
           </div>
