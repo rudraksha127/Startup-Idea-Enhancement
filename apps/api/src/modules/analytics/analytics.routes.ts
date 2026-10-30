@@ -6,3 +6,4 @@ export const analyticsRouter = Router();
 
 analyticsRouter.get("/", asyncHandler(AnalyticsController.getOverview));
 analyticsRouter.get("/overview", asyncHandler(AnalyticsController.getOverview));
+

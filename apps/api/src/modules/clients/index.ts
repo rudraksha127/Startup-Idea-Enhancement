@@ -9,3 +9,4 @@ export const clientsModule: AppModule = {
 
 export { ClientsService } from "./clients.service.js";
 export { ClientsController } from "./clients.controller.js";
+

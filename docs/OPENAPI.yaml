@@ -1,0 +1,735 @@
+# AgencyOS OpenAPI Specification
+# Version: 1.0.0
+# Last Updated: 2026-10-30
+
+openapi: 3.1.0
+
+info:
+  title: AgencyOS REST API
+  version: 1.0.0
+  description: |
+    AgencyOS is an AI-powered agency operating system. This specification covers all
+    `/api/v1/*` endpoints served by the Node.js + Express backend.
+
+    **Base URL:** `https://api.agencyos.io/api/v1` (production)
+
+    **Authentication:** All protected endpoints require a JWT Bearer token.
+    Obtain a token via `POST /auth/login` or `POST /auth/register`.
+
+    **Rate Limits:**
+    - General: 100 req/min per IP
+    - Auth endpoints: 10 req/15min per IP
+    - Agent runs: 20 req/min per IP
+
+  contact:
+    name: AgencyOS Engineering
+    url: https://github.com/rudraksha127/Startup-Idea-Enhancement
+
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Local development
+  - url: https://api.agencyos.io/api/v1
+    description: Production
+
+tags:
+  - name: Health
+    description: System health and readiness probes
+  - name: Auth
+    description: Authentication — register, login, logout, profile
+  - name: Leads
+    description: Lead management and qualification
+  - name: Clients
+    description: Client relationship management
+  - name: Projects
+    description: Project lifecycle management
+  - name: Campaigns
+    description: Outreach campaigns and messages
+  - name: Agents
+    description: AI agent configuration and execution
+  - name: Dashboard
+    description: Dashboard metrics and activity feed
+  - name: Analytics
+    description: Business analytics and reporting
+  - name: Settings
+    description: Organization settings and compliance configuration
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          description: Response payload (type depends on endpoint)
+        requestId:
+          type: string
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Validation failed"
+        message:
+          type: string
+          example: "email is required"
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+            page:
+              type: integer
+            limit:
+              type: integer
+            pages:
+              type: integer
+
+    Lead:
+      type: object
+      properties:
+        _id:
+          type: string
+        businessName:
+          type: string
+        contactName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        website:
+          type: string
+        category:
+          type: string
+          enum: [Restaurant, Retail, Healthcare, Professional, Education, Entertainment, Other]
+        city:
+          type: string
+        state:
+          type: string
+        status:
+          type: string
+          enum: [New, Contacted, Qualified, Proposal, Won, Lost, Suppressed]
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        organizationId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Client:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        company:
+          type: string
+        status:
+          type: string
+          enum: [Active, Inactive, Prospect, Churned]
+        mrr:
+          type: number
+        organizationId:
+          type: string
+
+    Project:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        clientId:
+          type: string
+        status:
+          type: string
+          enum: [Discovery, In Progress, Review, Complete, On Hold, Cancelled]
+        budget:
+          type: number
+        organizationId:
+          type: string
+
+    Campaign:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        channel:
+          type: string
+          enum: [Email, WhatsApp, SMS, LinkedIn]
+        status:
+          type: string
+          enum: [Draft, Active, Paused, Complete]
+        dryRun:
+          type: boolean
+          default: true
+          description: |
+            COMPLIANCE: dryRun=true is the system default. Outbound messages are
+            never sent unless this is explicitly set to false by an authorized user.
+
+    AgentConfig:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        enabled:
+          type: boolean
+        autonomyLevel:
+          type: string
+          enum: [Supervised, Semi-Autonomous, Autonomous]
+        lastRunAt:
+          type: string
+          format: date-time
+        organizationId:
+          type: string
+
+paths:
+  # ─────────────── HEALTH ───────────────
+  /health:
+    get:
+      tags: [Health]
+      summary: Health probe
+      description: Returns service health status including DB connectivity.
+      responses:
+        '200':
+          description: Service healthy
+        '503':
+          description: Service degraded (DB not connected)
+
+  # ─────────────── AUTH ───────────────
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user and organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, organizationName]
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                organizationName:
+                  type: string
+                  minLength: 2
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+        '409':
+          description: Account already exists
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+        '401':
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current session
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+        '401':
+          description: Not authenticated
+
+  # ─────────────── LEADS ───────────────
+  /leads:
+    get:
+      tags: [Leads]
+      summary: List leads with filtering and pagination
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated leads list
+    post:
+      tags: [Leads]
+      summary: Create a new lead
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lead'
+      responses:
+        '201':
+          description: Lead created
+        '400':
+          description: Validation error
+
+  /leads/{id}:
+    get:
+      tags: [Leads]
+      summary: Get lead by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lead detail
+        '404':
+          description: Lead not found
+    patch:
+      tags: [Leads]
+      summary: Update lead
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lead updated
+    delete:
+      tags: [Leads]
+      summary: Delete lead
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lead deleted
+
+  # ─────────────── CLIENTS ───────────────
+  /clients:
+    get:
+      tags: [Clients]
+      summary: List clients
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Clients list
+    post:
+      tags: [Clients]
+      summary: Create client
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Client created
+
+  /clients/{id}:
+    get:
+      tags: [Clients]
+      summary: Get client by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Client detail
+    patch:
+      tags: [Clients]
+      summary: Update client
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Client updated
+    delete:
+      tags: [Clients]
+      summary: Delete client
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Client deleted
+
+  # ─────────────── PROJECTS ───────────────
+  /projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Projects list
+    post:
+      tags: [Projects]
+      summary: Create project
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Project created
+
+  /projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Get project by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project detail
+    patch:
+      tags: [Projects]
+      summary: Update project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project updated
+    delete:
+      tags: [Projects]
+      summary: Delete project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project deleted
+
+  # ─────────────── CAMPAIGNS ───────────────
+  /campaigns:
+    get:
+      tags: [Campaigns]
+      summary: List campaigns
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Campaigns list
+    post:
+      tags: [Campaigns]
+      summary: Create campaign
+      security:
+        - BearerAuth: []
+      description: |
+        **COMPLIANCE NOTE:** All campaigns default to `dryRun: true`.
+        Outbound messages are never sent unless `dryRun` is explicitly set to `false`
+        by an authorized Founder/Admin role. This satisfies DPDP Act 2023 and TRAI TCCCPR requirements.
+      responses:
+        '201':
+          description: Campaign created
+
+  /campaigns/{id}:
+    get:
+      tags: [Campaigns]
+      summary: Get campaign by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Campaign detail
+    patch:
+      tags: [Campaigns]
+      summary: Update campaign
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Campaign updated
+
+  /campaigns/{id}/messages:
+    get:
+      tags: [Campaigns]
+      summary: List messages for a campaign
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Messages list
+    post:
+      tags: [Campaigns]
+      summary: Create outreach message
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Message created (queued for dry-run review)
+
+  # ─────────────── AGENTS ───────────────
+  /agents:
+    get:
+      tags: [Agents]
+      summary: List AI agent configurations
+      responses:
+        '200':
+          description: Agent configs list
+
+  /agents/{id}:
+    get:
+      tags: [Agents]
+      summary: Get agent config by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent config detail
+    patch:
+      tags: [Agents]
+      summary: Update agent configuration
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent updated
+
+  /agents/{id}/run:
+    post:
+      tags: [Agents]
+      summary: Trigger agent run
+      security:
+        - BearerAuth: []
+      description: |
+        Triggers an AI agent run. Subject to:
+        - Auth: Founder/Admin role required
+        - Rate limit: 20 runs/min per IP
+        - Autonomy level check: Supervised agents require manual confirmation
+        - All actions are logged to the audit trail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent run triggered
+        '403':
+          description: Insufficient permissions
+        '429':
+          description: Rate limit exceeded
+
+  # ─────────────── DASHBOARD ───────────────
+  /dashboard/metrics:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard KPI metrics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Metrics (leads, clients, revenue, agents)
+
+  /dashboard/activity:
+    get:
+      tags: [Dashboard]
+      summary: Get recent activity feed
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Activity feed items
+
+  # ─────────────── ANALYTICS ───────────────
+  /analytics:
+    get:
+      tags: [Analytics]
+      summary: Get analytics overview
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Analytics overview with charts data
+
+  # ─────────────── SETTINGS ───────────────
+  /settings:
+    get:
+      tags: [Settings]
+      summary: Get organization settings
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Settings including compliance flags
+    patch:
+      tags: [Settings]
+      summary: Update organization settings
+      security:
+        - BearerAuth: []
+      description: |
+        **COMPLIANCE NOTE:** `outreach.dryRun` defaults to `true`.
+        Setting it to `false` is an audited privileged operation requiring Founder role.
+      responses:
+        '200':
+          description: Settings updated

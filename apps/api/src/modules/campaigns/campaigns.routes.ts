@@ -12,3 +12,4 @@ campaignsRouter.post("/messages", requireAuth, asyncHandler(CampaignsController.
 campaignsRouter.get("/:id", asyncHandler(CampaignsController.getCampaignById));
 campaignsRouter.patch("/:id", requireAuth, asyncHandler(CampaignsController.updateCampaign));
 campaignsRouter.delete("/:id", requireAuth, asyncHandler(CampaignsController.deleteCampaign));
+

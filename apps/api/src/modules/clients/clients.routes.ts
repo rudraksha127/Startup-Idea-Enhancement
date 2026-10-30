@@ -9,3 +9,4 @@ clientsRouter.get("/", asyncHandler(ClientsController.getClients));
 clientsRouter.post("/", requireAuth, asyncHandler(ClientsController.createClient));
 clientsRouter.get("/:id", asyncHandler(ClientsController.getClientById));
 clientsRouter.patch("/:id", requireAuth, asyncHandler(ClientsController.updateClient));
+

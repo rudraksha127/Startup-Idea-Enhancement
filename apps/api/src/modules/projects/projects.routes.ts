@@ -9,3 +9,4 @@ projectsRouter.get("/", asyncHandler(ProjectsController.getProjects));
 projectsRouter.post("/", requireAuth, asyncHandler(ProjectsController.createProject));
 projectsRouter.get("/:id", asyncHandler(ProjectsController.getProjectById));
 projectsRouter.patch("/:id", requireAuth, asyncHandler(ProjectsController.updateProject));
+

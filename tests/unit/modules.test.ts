@@ -58,3 +58,4 @@ describe("Backend Modular Architecture & Registry", () => {
     expect(res.body.data).toBeDefined();
   });
 });
+

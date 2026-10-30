@@ -9,3 +9,4 @@ export const analyticsModule: AppModule = {
 
 export { AnalyticsService } from "./analytics.service.js";
 export { AnalyticsController } from "./analytics.controller.js";
+

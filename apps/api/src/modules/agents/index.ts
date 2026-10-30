@@ -9,3 +9,4 @@ export const agentsModule: AppModule = {
 
 export { AgentsService } from "./agents.service.js";
 export { AgentsController } from "./agents.controller.js";
+

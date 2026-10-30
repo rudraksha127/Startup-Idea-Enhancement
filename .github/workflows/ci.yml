@@ -1,4 +1,4 @@
-name: AgencyOS CI
+name: AgencyOS CI/CD
 
 on:
   push:
@@ -6,38 +6,212 @@ on:
   pull_request:
     branches: [ main, staging ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20.x'
+  NEXT_TELEMETRY_DISABLED: 1
+
 jobs:
-  verify:
-    name: Lint, Typecheck, Test & Build
+  # ──────────────────────────────────────────────
+  # 1. TYPECHECK — Frontend + Backend
+  # ──────────────────────────────────────────────
+  typecheck:
+    name: TypeScript Typecheck
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [ 20.x ]
-
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Strict Typecheck
+      - name: Typecheck Frontend (Next.js)
         run: npm run typecheck
 
-      - name: Run Vitest Unit Tests
-        run: npm run test
+      - name: Typecheck Backend (Express API)
+        run: npm run typecheck:api
 
-      - name: Production Next.js Build
+  # ──────────────────────────────────────────────
+  # 2. TEST — Vitest unit + integration tests
+  # ──────────────────────────────────────────────
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Vitest Test Suite
+        run: npm run test
+        env:
+          JWT_SECRET: ci-test-secret-key-32-chars-minimum
+          MONGODB_URI: mongodb://localhost:27017/agencyos_ci_test
+          NODE_ENV: test
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+
+  # ──────────────────────────────────────────────
+  # 3. BUILD — Next.js production build
+  # ──────────────────────────────────────────────
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js App
         run: npm run build
         env:
-          NEXT_TELEMETRY_DISABLED: 1
-          MONGODB_URI: "mongodb://localhost:27017/test"
-          JWT_SECRET: "ci-test-secret-key-must-be-32-chars-long"
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000' }}
+          MONGODB_URI: mongodb://localhost:27017/agencyos_build
+          JWT_SECRET: ci-build-secret-key-32-chars-minimum
 
+      - name: Build Express API
+        run: npm run build:api
+
+      - name: Upload Next.js Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: .next/
+          retention-days: 3
+
+  # ──────────────────────────────────────────────
+  # 4. SECURITY — Dependency audit
+  # ──────────────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    # Run in parallel with tests (doesn't need typecheck to pass)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Dependency Security Audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Check for Known Secrets in Source
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          # Check for common secret patterns (not .env files)
+          if grep -r --include="*.ts" --include="*.tsx" --include="*.js" \
+            -E "(password|secret|api_key|apikey|private_key)\s*=\s*['\"][^'\"]{8,}" \
+            --exclude-dir=node_modules \
+            --exclude-dir=.next \
+            --exclude-dir=dist \
+            src/ apps/ 2>/dev/null | grep -v "test\|spec\|mock\|example\|placeholder\|process\.env"; then
+            echo "⚠ Potential hardcoded secrets found above"
+            exit 1
+          else
+            echo "✓ No hardcoded secrets detected"
+          fi
+        continue-on-error: true
+
+      - name: Verify No .env Files Committed
+        run: |
+          if git ls-files | grep -E "^\.env$|^\.env\.[^e]"; then
+            echo "❌ .env files are committed to the repository!"
+            exit 1
+          else
+            echo "✓ No .env files committed"
+          fi
+
+  # ──────────────────────────────────────────────
+  # 5. LINT — ESLint for frontend
+  # ──────────────────────────────────────────────
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+  # ──────────────────────────────────────────────
+  # 6. SUMMARY — Report final gate status
+  # ──────────────────────────────────────────────
+  summary:
+    name: CI Gate Summary
+    runs-on: ubuntu-latest
+    needs: [typecheck, test, build, security, lint]
+    if: always()
+    steps:
+      - name: Report Status
+        run: |
+          echo "## AgencyOS CI Gate Results"
+          echo "| Gate | Status |"
+          echo "|------|--------|"
+          echo "| TypeCheck | ${{ needs.typecheck.result }} |"
+          echo "| Tests | ${{ needs.test.result }} |"
+          echo "| Build | ${{ needs.build.result }} |"
+          echo "| Security | ${{ needs.security.result }} |"
+          echo "| Lint | ${{ needs.lint.result }} |"
+
+          if [[ "${{ needs.typecheck.result }}" == "failure" || "${{ needs.test.result }}" == "failure" || "${{ needs.build.result }}" == "failure" ]]; then
+            echo ""
+            echo "❌ BLOCKING GATE FAILED — merge blocked"
+            exit 1
+          else
+            echo ""
+            echo "✅ All blocking gates passed"
+          fi

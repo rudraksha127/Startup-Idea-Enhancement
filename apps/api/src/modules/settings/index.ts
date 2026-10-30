@@ -9,3 +9,4 @@ export const settingsModule: AppModule = {
 
 export { SettingsService } from "./settings.service.js";
 export { SettingsController } from "./settings.controller.js";
+

@@ -7,3 +7,4 @@ export const settingsRouter = Router();
 
 settingsRouter.get("/", asyncHandler(SettingsController.getSettings));
 settingsRouter.patch("/", requireAuth, asyncHandler(SettingsController.updateSettings));
+

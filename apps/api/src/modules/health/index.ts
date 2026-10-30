@@ -6,3 +6,4 @@ export const healthModule: AppModule = {
   routePrefix: "/health",
   router: healthRouter,
 };
+

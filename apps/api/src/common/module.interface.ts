@@ -23,3 +23,4 @@ export interface AppModule {
    */
   init?: () => Promise<void> | void;
 }
+
