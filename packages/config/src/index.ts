@@ -18,5 +18,9 @@ export const APP_CONFIG = {
     defaultOutreachWriter: "gemini-2.5-flash",
     defaultAuditor: "gemini-2.5-pro",
   },
+  safety: {
+    defaultDryRun: true,
+    allowGoogleMapsScraping: false,
+  },
 } as const;
 
