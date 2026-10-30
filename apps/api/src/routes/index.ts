@@ -3,6 +3,7 @@ import * as authCtrl from "../controllers/auth.controller.js";
 import * as leadsCtrl from "../controllers/leads.controller.js";
 import * as dashCtrl from "../controllers/dashboard.controller.js";
 import * as agentsCtrl from "../controllers/agents.controller.js";
+import * as clientsCtrl from "../controllers/clients.controller.js";
 import { requireAuth } from "../middleware/auth.js";
 
 export const apiRouter = Router();
@@ -21,6 +22,10 @@ apiRouter.get("/leads", leadsCtrl.getLeads);
 apiRouter.post("/leads", leadsCtrl.createLead);
 apiRouter.get("/leads/:leadId", leadsCtrl.getLeadById);
 apiRouter.patch("/leads/:leadId", leadsCtrl.updateLeadStatus);
+
+// --- Clients Routes ---
+apiRouter.get("/clients", clientsCtrl.getClients);
+apiRouter.post("/clients", requireAuth, clientsCtrl.createClient);
 
 // --- Dashboard Routes ---
 apiRouter.get("/dashboard/metrics", dashCtrl.getDashboardMetrics);

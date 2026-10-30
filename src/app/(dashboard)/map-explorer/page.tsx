@@ -52,6 +52,11 @@ const BUSINESS_RESULTS: BusinessResult[] = [
   { id: "5", name: "Café Central", rating: 4.5, reviews: 632, category: "Cafe", distance: "2.1 km", address: "Palasia, Indore", phone: "+91 98261 44556", website: "https://cafecentral.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 7.8, hours: "Open • Closes 9:00 PM", priceRange: "₹ (Budget)", source: "Google Maps" },
   { id: "6", name: "The Food Factory", rating: 4.2, reviews: 421, category: "Restaurant", distance: "2.3 km", address: "Karol Bagh, New Delhi", phone: "+91 98100 88990", website: "https://thefoodfactory.example", img: "/assets/urban-kitchen.jpg", opportunityScore: 8.4, hours: "Open • Closes 11:00 PM", priceRange: "₹₹ (Moderate)", source: "Google Maps" },
   { id: "7", name: "Hotel Grand Plaza", rating: 4.4, reviews: 512, category: "Hotel", distance: "2.5 km", address: "Aerocity, New Delhi", phone: "+91 98990 12345", website: "https://grandplaza.example", img: "/assets/templates/hotel.jpg", opportunityScore: 9.1, hours: "Open 24 Hours", priceRange: "₹₹₹₹ (Luxury)", source: "Google Maps" },
+  { id: "8", name: "Luxe Glow Salon & Spa", rating: 4.7, reviews: 340, category: "Salon", distance: "1.1 km", address: "Saket Nagar, Indore", phone: "+91 98260 45678", website: "", img: "/assets/templates/salon.jpg", opportunityScore: 9.3, hours: "Open • Closes 8:30 PM", priceRange: "₹₹ (Moderate)", source: "Local Registry" },
+  { id: "9", name: "Iron & Pulse Fitness Club", rating: 4.8, reviews: 450, category: "Gym", distance: "1.9 km", address: "AB Road, Indore", phone: "+91 98260 99887", website: "", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.9, hours: "Open • Closes 10:00 PM", priceRange: "₹₹ (Moderate)", source: "Local Registry" },
+  { id: "10", name: "City Care Specialty Clinic", rating: 4.6, reviews: 620, category: "Clinic", distance: "2.8 km", address: "Old Palasia, Indore", phone: "+91 98260 77889", website: "https://citycare.example", img: "/assets/templates/clinic.jpg", opportunityScore: 8.6, hours: "Open • Closes 8:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Registry" },
+  { id: "11", name: "Urban Elegance Boutique", rating: 4.3, reviews: 180, category: "Retail", distance: "3.2 km", address: "Treasure Island Mall, Indore", phone: "+91 98260 33445", website: "", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.4, hours: "Open • Closes 9:30 PM", priceRange: "₹₹ (Moderate)", source: "Local Registry" },
+  { id: "12", name: "Apex Coding Academy", rating: 4.9, reviews: 510, category: "Education", distance: "0.6 km", address: "Vijay Nagar, Indore", phone: "+91 98260 22331", website: "https://apexcoding.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 9.0, hours: "Open • Closes 7:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Registry" },
 ];
 
 const CATEGORY_PILLS = [
@@ -70,17 +75,67 @@ const CATEGORY_PILLS = [
 
 export default function MapExplorerPage() {
   const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult>(BUSINESS_RESULTS[0]);
-  const [searchQuery, setSearchQuery] = useState("Restaurant");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Indore, Madhya Pradesh");
   const [activeCategoryPill, setActiveCategoryPill] = useState("Restaurant");
   const [mapMode, setMapMode] = useState<"map" | "satellite">("map");
   const [previewTab, setPreviewTab] = useState("Overview");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [addingLead, setAddingLead] = useState(false);
+  const [savedLeadMap, setSavedLeadMap] = useState<Record<string, boolean>>({});
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  const handleAddLead = async (biz: BusinessResult) => {
+    if (savedLeadMap[biz.id] || addingLead) return;
+    setAddingLead(true);
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: biz.name,
+          category: biz.category,
+          address: biz.address,
+          city: selectedCity.split(",")[0].trim(),
+          phone: biz.phone,
+          website: biz.website,
+          rating: biz.rating,
+          reviewCount: biz.reviews,
+          opportunityScore: biz.opportunityScore,
+          source: "Map Explorer",
+          status: "New",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
+        showToast(`✓ Added "${biz.name}" to Leads database!`);
+      } else {
+        showToast(`Error: ${data.error || "Failed to add lead"}`);
+      }
+    } catch {
+      showToast("Network error saving lead to database");
+    } finally {
+      setAddingLead(false);
+    }
+  };
+
+  const filteredBusinesses = BUSINESS_RESULTS.filter((biz) => {
+    const matchesCat =
+      activeCategoryPill === "All" ||
+      activeCategoryPill === "More" ||
+      biz.category.toLowerCase() === activeCategoryPill.toLowerCase();
+    const matchesSearch =
+      !searchQuery ||
+      biz.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      biz.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      biz.address.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
 
   return (
     <div className="space-y-4">
@@ -197,14 +252,14 @@ export default function MapExplorerPage() {
         {/* Left Column: Businesses Found List */}
         <div className="xl:col-span-3 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-3 shadow-xs">
           <div className="flex items-center justify-between pb-2 border-b border-gray-100 text-xs">
-            <span className="font-bold text-[#171918]">Businesses Found (2,847)</span>
+            <span className="font-bold text-[#171918]">Businesses Found ({filteredBusinesses.length})</span>
             <span className="text-gray-400 text-[11px] cursor-pointer hover:text-black">
               Sort: Relevance ⌄
             </span>
           </div>
 
           <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
-            {BUSINESS_RESULTS.map((biz) => {
+            {(filteredBusinesses.length > 0 ? filteredBusinesses : BUSINESS_RESULTS).map((biz) => {
               const isSelected = selectedBusiness.id === biz.id;
               return (
                 <div
@@ -406,25 +461,44 @@ export default function MapExplorerPage() {
           {/* Action buttons */}
           <div className="flex items-center gap-2 text-xs">
             <button
-              onClick={() => showToast(`✓ Added ${selectedBusiness.name} to Leads database`)}
-              className="flex-1 h-8 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white font-bold inline-flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+              onClick={() => handleAddLead(selectedBusiness)}
+              disabled={addingLead || savedLeadMap[selectedBusiness.id]}
+              className={`flex-1 h-8 rounded-lg font-bold inline-flex items-center justify-center gap-1.5 shadow-xs transition-colors ${
+                savedLeadMap[selectedBusiness.id]
+                  ? "bg-emerald-600 text-white cursor-default"
+                  : "bg-[#171918] hover:bg-[#232B29] text-white"
+              }`}
             >
-              <Plus size={13} /> Add to Leads
+              {addingLead ? (
+                <span>Adding...</span>
+              ) : savedLeadMap[selectedBusiness.id] ? (
+                <>
+                  <CheckCircle2 size={13} />
+                  <span>Added to Leads</span>
+                </>
+              ) : (
+                <>
+                  <Plus size={13} />
+                  <span>Add to Leads</span>
+                </>
+              )}
             </button>
-            <button
-              onClick={() => showToast(`✉ Generated cold email sequence for ${selectedBusiness.name}`)}
+            <Link
+              href={`/outreach?lead=${encodeURIComponent(selectedBusiness.name)}`}
               className="h-8 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold inline-flex items-center gap-1 shadow-2xs"
             >
               <Mail size={12} /> Send Email
-            </button>
-            <button
-              onClick={() => showToast(`💬 Initiated WhatsApp pitch for ${selectedBusiness.phone}`)}
+            </Link>
+            <a
+              href={`https://wa.me/${selectedBusiness.phone.replace(/[^0-9]/g, "")}?text=Hi%20${encodeURIComponent(selectedBusiness.name)}%20team,%20noticed%20your%20presence`}
+              target="_blank"
+              rel="noreferrer"
               className="h-8 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-emerald-700 font-semibold inline-flex items-center gap-1 shadow-2xs"
             >
               <MessageCircle size={12} /> WhatsApp
-            </button>
+            </a>
             <button
-              onClick={() => showToast(`Options for ${selectedBusiness.name}: Export vCard, Add Note, Assign Tag`)}
+              onClick={() => showToast(`Lead info: ${selectedBusiness.name} • ${selectedBusiness.phone}`)}
               className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-black shadow-2xs"
             >
               <MoreHorizontal size={13} />

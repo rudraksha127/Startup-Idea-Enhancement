@@ -5,6 +5,8 @@ import { Lead } from "../../models/Lead";
 import { LeadNote } from "../../models/LeadNote";
 import { Project } from "../../models/Project";
 import { AgentConfig } from "../../models/AgentConfig";
+import { Client } from "../../models/Client";
+import { Campaign } from "../../models/Campaign";
 import { hashPassword } from "../auth/jwt";
 import { DEFAULT_LEADS } from "../data/default-leads";
 
@@ -144,7 +146,89 @@ export async function seedDatabase() {
     ]);
   }
 
-  console.log("Database seeded successfully with all 28 leads, projects, agents, and default user!");
+  // 7. Seed Clients
+  const clientCount = await Client.countDocuments({ organizationId: org._id });
+  if (clientCount === 0) {
+    await Client.create([
+      {
+        organizationId: org._id,
+        businessName: "Hotel Grand Plaza",
+        contactPerson: "Mr. Rajesh Malhotra",
+        email: "gm@grandplazadelhi.com",
+        phone: "+91 98990 12345",
+        address: "Aerocity, New Delhi",
+        status: "Active",
+        monthlyRetainer: 35000,
+        plan: "Full Stack Growth + Cloud Hosting",
+        website: "https://grandplaza.example",
+        activeProjectsCount: 1,
+        totalPaid: 120000,
+      },
+      {
+        organizationId: org._id,
+        businessName: "City Care Clinic",
+        contactPerson: "Dr. Arvind Saxena",
+        email: "care@citycareindore.com",
+        phone: "+91 98260 77889",
+        address: "Old Palasia, Indore",
+        status: "Retainer",
+        monthlyRetainer: 20000,
+        plan: "Patient Portal & WhatsApp Reminders",
+        website: "https://citycare.example",
+        activeProjectsCount: 0,
+        totalPaid: 65000,
+      },
+      {
+        organizationId: org._id,
+        businessName: "The Urban Kitchen",
+        contactPerson: "Chef Vikram Adiga",
+        email: "vikram@urbankitchen.in",
+        phone: "+91 98765 43210",
+        address: "Connaught Place, New Delhi",
+        status: "Onboarding",
+        monthlyRetainer: 28000,
+        plan: "Performance Funnel + Maintenance",
+        website: "https://theurbankitchen.in",
+        activeProjectsCount: 1,
+        totalPaid: 45000,
+      },
+    ]);
+  }
+
+  // 8. Seed Campaigns
+  const campaignCount = await Campaign.countDocuments({ organizationId: org._id });
+  if (campaignCount === 0) {
+    await Campaign.create([
+      {
+        organizationId: org._id,
+        name: "Indore Premier Restaurants Funnel Q2",
+        channel: "Email",
+        status: "Active",
+        leadsTargeted: 48,
+        sentCount: 36,
+        openedCount: 24,
+        repliedCount: 8,
+        convertedCount: 2,
+        templateSubject: "Modern table reservation system for {{businessName}}",
+        dryRunMode: true,
+      },
+      {
+        organizationId: org._id,
+        name: "Delhi NCR Diagnostic Clinics Mobile Audit",
+        channel: "WhatsApp",
+        status: "Active",
+        leadsTargeted: 60,
+        sentCount: 42,
+        openedCount: 31,
+        repliedCount: 11,
+        convertedCount: 3,
+        templateSubject: "Quick mobile accessibility audit for {{businessName}}",
+        dryRunMode: true,
+      },
+    ]);
+  }
+
+  console.log("Database seeded successfully with all leads, clients, campaigns, projects, agents, and default user!");
 }
 
 // Allow standalone execution

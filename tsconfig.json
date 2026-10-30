@@ -19,7 +19,15 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@agencyos/contracts": ["./packages/contracts/src/index.ts"],
+      "@agencyos/contracts/*": ["./packages/contracts/src/*"],
+      "@agencyos/validation": ["./packages/validation/src/index.ts"],
+      "@agencyos/validation/*": ["./packages/validation/src/*"],
+      "@agencyos/config": ["./packages/config/src/index.ts"],
+      "@agencyos/config/*": ["./packages/config/src/*"],
+      "@agencyos/utils": ["./packages/utils/src/index.ts"],
+      "@agencyos/utils/*": ["./packages/utils/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
