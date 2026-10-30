@@ -37,3 +37,4 @@ export const securityHeaders = helmet({
   frameguard: { action: "deny" },
   xssFilter: true,
 });
+

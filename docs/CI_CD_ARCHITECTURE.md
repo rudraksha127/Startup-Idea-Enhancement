@@ -113,3 +113,4 @@ Configure these in `Settings → Branches → Branch protection rules` for `main
 | `e2e.yml` | MEDIUM | Playwright E2E on staging after deploy |
 | `dependency-update.yml` | LOW | Weekly Dependabot PRs |
 | `codeql.yml` | MEDIUM | CodeQL static security analysis |
+

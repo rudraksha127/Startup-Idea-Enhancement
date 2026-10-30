@@ -111,3 +111,4 @@ AgencyOS uses a provider-independent adapter layer. The following providers are 
 | Unknown/unvetted | ❌ Blocked | Any provider not in this list |
 
 **Data sent to AI providers:** Anonymized business data only. No PII (names, emails, phone numbers) sent to AI providers without explicit opt-in and data processing agreement.
+

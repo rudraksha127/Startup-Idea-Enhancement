@@ -12,6 +12,10 @@ import { agentsModule } from "./agents/index.js";
 import { dashboardModule } from "./dashboard/index.js";
 import { analyticsModule } from "./analytics/index.js";
 import { settingsModule } from "./settings/index.js";
+import { mapsModule } from "./maps/index.js";
+import { templatesModule } from "./templates/index.js";
+import { billingModule } from "./billing/index.js";
+import { integrationsModule } from "./integrations/index.js";
 
 /**
  * Central Module Registry
@@ -34,6 +38,10 @@ export const activeModules: AppModule[] = [
   dashboardModule,
   analyticsModule,
   settingsModule,
+  mapsModule,
+  templatesModule,
+  billingModule,
+  integrationsModule,
 ];
 
 /**

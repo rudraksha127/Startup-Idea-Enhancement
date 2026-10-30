@@ -1,52 +1,77 @@
+import mongoose from "mongoose";
 import { AgentConfig } from "../../models/AgentConfig.js";
-
-const DEFAULT_AGENTS = [
-  { name: "Discovery Agent", role: "Local business research", status: "Active", dailyTarget: 50, processedToday: 42, confidenceThreshold: 85 },
-  { name: "Audit Agent", role: "Website scoring & CWV", status: "Active", dailyTarget: 30, processedToday: 28, confidenceThreshold: 90 },
-  { name: "Copywriter Agent", role: "Proposal generation", status: "Active", dailyTarget: 25, processedToday: 18, confidenceThreshold: 88 },
-  { name: "Triage Agent", role: "Inbox reply classification", status: "Idle", dailyTarget: 20, processedToday: 6, confidenceThreshold: 80 },
-];
+import { AgentOrchestrator, ExecutionResult } from "./agent-orchestrator.js";
 
 export class AgentsService {
   static async getAgents(orgId: string) {
-    let agents = await AgentConfig.find({ organizationId: orgId });
-    if (agents.length === 0) {
-      await AgentConfig.insertMany(
-        DEFAULT_AGENTS.map((a) => ({ ...a, organizationId: orgId }))
-      );
-      agents = await AgentConfig.find({ organizationId: orgId });
-    }
-    return agents;
+    return await AgentOrchestrator.syncOrganizationAgents(orgId);
   }
 
   static async getAgentById(id: string, orgId: string) {
-    return AgentConfig.findOne({ _id: id, organizationId: orgId });
+    const canonical = AgentOrchestrator.getAgentDefinition(id);
+    if (canonical) {
+      return {
+        _id: canonical.id,
+        agentId: canonical.id,
+        name: canonical.name,
+        category: canonical.category,
+        role: canonical.role,
+        status: "Active",
+        autonomyLevel: canonical.autonomyLevel,
+        requiresApproval: canonical.requiresApproval,
+        model: canonical.defaultModel,
+        version: canonical.version,
+        tools: canonical.tools,
+        description: canonical.description,
+      };
+    }
+
+    if (mongoose.connection.readyState === 1) {
+      return await AgentConfig.findOne({ _id: id, organizationId: orgId }).lean();
+    }
+    return null;
   }
 
   static async updateAgent(id: string, data: Record<string, any>, orgId: string) {
-    return AgentConfig.findOneAndUpdate(
-      { _id: id, organizationId: orgId },
-      data,
-      { new: true }
-    );
+    if (mongoose.connection.readyState === 1) {
+      return await AgentConfig.findOneAndUpdate(
+        { _id: id, organizationId: orgId },
+        data,
+        { new: true }
+      );
+    }
+    return { _id: id, ...data };
   }
 
-  static async runAgent(id: string, orgId: string) {
-    const agent = await AgentConfig.findOne({ _id: id, organizationId: orgId });
-    if (!agent) return null;
+  static async runAgent(
+    id: string,
+    orgId: string,
+    userId?: string,
+    inputPayload?: Record<string, unknown>
+  ): Promise<ExecutionResult> {
+    let resolvedAgentId = id;
+    if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(id)) {
+      const config = await AgentConfig.findById(id);
+      if (config) {
+        const all = AgentOrchestrator.getRegisteredAgents();
+        const match = all.find((a) => a.name.toLowerCase() === config.name.toLowerCase());
+        if (match) resolvedAgentId = match.id;
+      }
+    }
 
-    agent.processedToday += 1;
-    agent.status = "Active";
-    await agent.save();
+    return await AgentOrchestrator.dispatchRun({
+      agentId: resolvedAgentId,
+      organizationId: orgId,
+      userId,
+      inputPayload,
+    });
+  }
 
-    return {
-      success: true,
-      agentId: agent._id.toString(),
-      name: agent.name,
-      processedToday: agent.processedToday,
-      status: agent.status,
-      lastRunAt: new Date().toISOString(),
-    };
+  static async approveRun(runId: string, approverId: string) {
+    return await AgentOrchestrator.approveRun(runId, approverId);
+  }
+
+  static async getRunHistory(orgId: string, agentId?: string) {
+    return await AgentOrchestrator.getRunHistory(orgId, agentId);
   }
 }
-

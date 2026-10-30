@@ -90,3 +90,4 @@ cyclonedx-npm --output-format json --output-file sbom.json
 | Malicious PR dependency changes | CI `npm audit` check | ✅ DONE |
 | Outdated dependencies with CVEs | `npm audit` in CI | ✅ DONE |
 | Secrets in dependencies | No secret scanning on deps | ⚠️ TODO |
+

@@ -162,3 +162,4 @@ db.collection.dropIndex("index_name")
 ```
 
 Never use `db.collection.drop()` on existing collections in production without authorization.
+

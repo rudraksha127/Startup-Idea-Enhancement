@@ -95,3 +95,4 @@ Free tier is generous for an early-stage project:
 | Quarterly | Evaluate if current tier is still appropriate |
 | On new AI feature | Estimate per-request and monthly cost before shipping |
 | On major traffic spike | Evaluate auto-scaling costs before enabling |
+

@@ -160,3 +160,4 @@ Last verified: 2026-10-30, commit `3607a71` + security middleware addition
 ```
 
 **Recommended Next Action:** Deploy to staging → run smoke tests → tick off Section 4 blockers → promote to production.
+
