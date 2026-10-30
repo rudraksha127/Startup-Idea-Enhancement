@@ -17,6 +17,8 @@ import {
   Layers,
   ArrowRight,
   TrendingDown,
+  X,
+  Loader2,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -97,6 +99,61 @@ const SERVICE_REVENUE = [
 
 export default function BillingPage() {
   const [timeframe, setTimeframe] = useState("Monthly");
+  const [invoicesList, setInvoicesList] = useState(RECENT_INVOICES);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // New Invoice Form
+  const [newClient, setNewClient] = useState("Spice Villa Restaurant");
+  const [newProject, setNewProject] = useState("Website Development & SEO");
+  const [newAmount, setNewAmount] = useState(65000);
+  const [newDueDate, setNewDueDate] = useState("30 Apr 2026");
+  const [newStatus, setNewStatus] = useState("Pending");
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleCreateInvoice = (e: React.FormEvent) => {
+    e.preventDefault();
+    const invNumber = `INV-${new Date().getFullYear()}-${String(invoicesList.length + 29).padStart(3, "0")}`;
+    const newInv = {
+      id: invNumber,
+      client: newClient,
+      project: newProject,
+      amount: `₹${Number(newAmount).toLocaleString("en-IN")}`,
+      status: newStatus,
+      issueDate: "Today",
+      dueDate: newDueDate,
+    };
+    setInvoicesList([newInv, ...invoicesList]);
+    setIsModalOpen(false);
+    showToast(`Invoice ${invNumber} generated for ${newClient}!`);
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Invoice ID", "Client", "Project", "Amount", "Status", "Issue Date", "Due Date"];
+    const rows = invoicesList.map((inv) => [
+      `"${inv.id}"`,
+      `"${inv.client}"`,
+      `"${inv.project}"`,
+      `"${inv.amount}"`,
+      `"${inv.status}"`,
+      `"${inv.issueDate}"`,
+      `"${inv.dueDate}"`,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `AgencyOS_Invoices_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Invoices exported to CSV successfully.");
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -131,10 +188,17 @@ export default function BillingPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs">
-              Generate Invoice
+            <button
+              onClick={handleExportCSV}
+              className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1"
+            >
+              <Download size={12} className="text-gray-400" />
+              <span>Export Invoices</span>
             </button>
-            <button className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+            >
               <Plus size={14} />
               <span>Create Invoice</span>
             </button>
@@ -377,7 +441,7 @@ export default function BillingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[11px]">
-                {RECENT_INVOICES.map((inv, idx) => (
+                {invoicesList.map((inv, idx) => (
                   <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-2.5 px-3 text-gray-400 font-mono text-[10px]">{idx + 1}</td>
                     <td className="py-2.5 px-2.5">
@@ -536,6 +600,117 @@ export default function BillingPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#171918] text-white text-xs font-semibold shadow-xl border border-gray-700 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Create Invoice Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <CreditCard size={14} />
+                </span>
+                <h3 className="font-bold text-base text-[#171918]">Generate New Invoice</h3>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateInvoice} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Client Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Spice Villa Restaurant"
+                  value={newClient}
+                  onChange={(e) => setNewClient(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Service / Project *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Website Development &amp; SEO Retainer"
+                  value={newProject}
+                  onChange={(e) => setNewProject(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Invoice Amount (₹) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={1000}
+                    value={newAmount}
+                    onChange={(e) => setNewAmount(Number(e.target.value))}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Status</label>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Due Date</label>
+                <input
+                  type="text"
+                  placeholder="30 Apr 2026"
+                  value={newDueDate}
+                  onChange={(e) => setNewDueDate(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+                >
+                  <Plus size={13} />
+                  <span>Issue Invoice</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

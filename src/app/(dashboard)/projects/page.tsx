@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   FolderGit2,
@@ -342,11 +342,112 @@ const PROJECTS_DATA: ProjectItem[] = [
 ];
 
 export default function ProjectsPage() {
+  const [projectsList, setProjectsList] = useState<ProjectItem[]>(PROJECTS_DATA);
   const [selectedProject, setSelectedProject] = useState<ProjectItem>(PROJECTS_DATA[0]);
   const [activeTab, setActiveTab] = useState("All Projects (18)");
   const [detailTab, setDetailTab] = useState("Overview");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch real projects from DB
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await fetch("/api/projects");
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.projects) && json.projects.length > 0) {
+            const mapped: ProjectItem[] = json.projects.map((p: any) => ({
+              id: p._id || p.id,
+              name: p.title,
+              subtitle: p.scope ? p.scope.slice(0, 30) + "..." : "Custom Client Scope",
+              client: p.clientName,
+              clientAvatar: (p.clientName || "C").charAt(0).toUpperCase(),
+              clientAvatarBg: "bg-emerald-100 text-emerald-700",
+              type: "Full-Stack Dev",
+              typeBadgeBg: "bg-blue-50 text-blue-700",
+              progress: p.status === "Delivered" ? 100 : p.status === "Review" ? 85 : p.status === "In Progress" ? 50 : 25,
+              team: [
+                { name: "Dev Lead", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" },
+              ],
+              deadline: p.deadline || "30 days",
+              status: p.status === "Delivered" ? "Completed" : "Active",
+              budget: p.budget || 45000,
+              amountPaid: Math.round((p.budget || 45000) * 0.5),
+              amountDue: Math.round((p.budget || 45000) * 0.5),
+              startDate: p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
+              domain: `${(p.clientName || "project").toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
+              description: p.scope || "Client custom delivery scope.",
+              tags: p.features || ["nextjs", "web"],
+              milestones: (p.tasks || []).map((t: any) => ({
+                title: t.title,
+                status: t.completed ? "Completed" : "In Progress",
+                date: "Pending",
+              })),
+            }));
+
+            setProjectsList((prev) => {
+              const prevIds = new Set(mapped.map((m) => m.id));
+              const combined = [...mapped, ...prev.filter((p) => !prevIds.has(p.id))];
+              if (mapped.length > 0) setSelectedProject(mapped[0]);
+              return combined;
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load projects from DB:", err);
+      }
+    }
+    loadProjects();
+  }, []);
+
+  const handleProjectCreated = (newProject: any) => {
+    if (!newProject) return;
+    const item: ProjectItem = {
+      id: newProject._id || String(Date.now()),
+      name: newProject.title,
+      subtitle: newProject.scope ? newProject.scope.slice(0, 30) + "..." : "Custom Scope",
+      client: newProject.clientName,
+      clientAvatar: (newProject.clientName || "C").charAt(0).toUpperCase(),
+      clientAvatarBg: "bg-blue-100 text-blue-700",
+      type: "Website",
+      typeBadgeBg: "bg-blue-50 text-blue-700",
+      progress: 10,
+      team: [{ name: "Alex", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" }],
+      deadline: newProject.deadline || "30 days",
+      status: "Active",
+      budget: newProject.budget || 45000,
+      amountPaid: 0,
+      amountDue: newProject.budget || 45000,
+      startDate: "Today",
+      domain: `${(newProject.clientName || "client").toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
+      description: newProject.scope || "Project initiated.",
+      tags: newProject.features || ["responsive", "web"],
+      milestones: [
+        { title: "Brief Created", status: "Completed", date: "Today" },
+        { title: "Development", status: "In Progress", date: "Upcoming" },
+      ],
+    };
+    setProjectsList((prev) => [item, ...prev]);
+    setSelectedProject(item);
+  };
+
+  const filteredProjects = projectsList.filter((p) => {
+    if (activeTab.startsWith("Active") && p.status !== "Active") return false;
+    if (activeTab.startsWith("Completed") && p.status !== "Completed") return false;
+    if (activeTab.startsWith("On Hold") && p.status !== "On Hold") return false;
+    if (activeTab.startsWith("Cancelled") && p.status !== "Cancelled") return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.client.toLowerCase().includes(q) ||
+        p.domain.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   const getStatusDot = (status: ProjectItem["status"]) => {
     switch (status) {
@@ -560,7 +661,7 @@ export default function ProjectsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[11px]">
-                {PROJECTS_DATA.map((p) => {
+                {filteredProjects.map((p) => {
                   const isSelected = selectedProject.id === p.id;
                   return (
                     <tr
@@ -882,6 +983,7 @@ export default function ProjectsPage() {
         isOpen={dialogOpen}
         onClose={() => setDialogOpen(false)}
         lead={null}
+        onCreated={handleProjectCreated}
       />
     </div>
   );

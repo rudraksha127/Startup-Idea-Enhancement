@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Settings,
   Building,
@@ -40,7 +40,7 @@ export default function SettingsPage() {
   const [orgName, setOrgName] = useState("AgencyOS Headquarters");
   const [slug, setSlug] = useState("agencyos-hq");
   const [timezone, setTimezone] = useState("Asia/Kolkata (IST +05:30)");
-  const [currency, setCurrency] = useState("USD ($)");
+  const [currency, setCurrency] = useState("INR (₹)");
   const [founderName, setFounderName] = useState("Rudraksh");
   const [founderEmail, setFounderEmail] = useState("founder@agencyos.ai");
 
@@ -84,9 +84,64 @@ export default function SettingsPage() {
     },
   ]);
 
-  const handleSave = (section: string) => {
-    setSavedMessage(`${section} saved successfully.`);
-    setTimeout(() => setSavedMessage(null), 3000);
+  // Load live settings from MongoDB
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            if (json.data.organizationName) setOrgName(json.data.organizationName);
+            if (json.data.slug) setSlug(json.data.slug);
+            if (json.data.founderName) setFounderName(json.data.founderName);
+            if (json.data.founderEmail) setFounderEmail(json.data.founderEmail);
+            if (json.data.currency) setCurrency(json.data.currency);
+            if (json.data.timezone) setTimezone(json.data.timezone);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const handleSave = async (section: string) => {
+    try {
+      const payload: any = {
+        organizationName: orgName,
+        timezone,
+        currency,
+        notificationEmail: founderEmail,
+      };
+      if (geminiKey && !geminiKey.includes("•••")) {
+        payload.geminiApiKey = geminiKey;
+      }
+      if (openaiKey && !openaiKey.includes("•••")) {
+        payload.openAiApiKey = openaiKey;
+      }
+      if (resendKey && !resendKey.includes("•••")) {
+        payload.resendApiKey = resendKey;
+      }
+
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setSavedMessage(`${section} saved successfully to database.`);
+      } else {
+        const json = await res.json();
+        setSavedMessage(json.error || `Failed to save ${section}.`);
+      }
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      setSavedMessage(`Network error saving ${section}.`);
+    }
+    setTimeout(() => setSavedMessage(null), 3500);
   };
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -34,6 +34,8 @@ import {
   Reply,
   ReplyAll,
   Forward,
+  X,
+  Loader2,
 } from "lucide-react";
 import {
   LineChart,
@@ -85,9 +87,181 @@ export default function OutreachPage() {
   const [viewMode, setViewMode] = useState<"campaigns" | "sequence" | "inbox">("campaigns");
   const [activeFilterTab, setActiveFilterTab] = useState("All Campaigns (12)");
   const [activeTemplateTab, setActiveTemplateTab] = useState("Initial Email");
+  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>(CAMPAIGNS);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isTestingSequence, setIsTestingSequence] = useState(false);
+
+  // New Campaign Form State
+  const [newCampaignName, setNewCampaignName] = useState("");
+  const [newCampaignService, setNewCampaignService] = useState("Website Development");
+  const [newCampaignChannel, setNewCampaignChannel] = useState<"Email" | "WhatsApp" | "Multi-channel">("Email");
+  const [newCampaignAudience, setNewCampaignAudience] = useState("Local Restaurants");
+  const [newCampaignSubject, setNewCampaignSubject] = useState("Quick idea to improve your website");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Inbox state
   const [selectedInboxIndex, setSelectedInboxIndex] = useState(0);
+
+  // Fetch real campaigns from backend
+  useEffect(() => {
+    async function loadCampaigns() {
+      try {
+        const res = await fetch("/api/outreach/campaigns");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            // Map DB campaigns to CampaignItem format
+            const mapped: CampaignItem[] = json.data.map((c: any) => ({
+              id: c._id || c.id,
+              name: c.name,
+              service: c.templateSubject ? `Subject: ${c.templateSubject.slice(0, 20)}...` : "Outreach Campaign",
+              type: c.channel === "Email" ? "Cold Email" : c.channel === "WhatsApp" ? "WhatsApp" : "Multi-channel",
+              typeBadgeBg: c.channel === "WhatsApp" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700",
+              audience: c.targetNiche || "Target Audience",
+              sent: c.sentCount || 0,
+              opens: c.openedCount ? `${Math.round((c.openedCount / (c.sentCount || 1)) * 100)}%` : "0%",
+              replies: c.repliedCount ? `${Math.round((c.repliedCount / (c.sentCount || 1)) * 100)}%` : "0%",
+              meetings: c.leadsTargeted ? Math.round(c.leadsTargeted * 0.1) : 0,
+              status: c.status || "Active",
+              createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
+            }));
+            // Merge DB campaigns with default campaigns
+            setCampaignsList((prev) => {
+              const prevIds = new Set(mapped.map((m) => m.id));
+              return [...mapped, ...prev.filter((p) => !prevIds.has(p.id))];
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load campaigns:", err);
+      }
+    }
+    loadCampaigns();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleToggleCampaignStatus = async (c: CampaignItem) => {
+    const nextStatus: CampaignItem["status"] = c.status === "Active" ? "Paused" : "Active";
+    setCampaignsList((prev) =>
+      prev.map((item) => (item.id === c.id ? { ...item, status: nextStatus } : item))
+    );
+
+    // Call API if campaign has a mongo ID (length 24)
+    if (c.id.length === 24) {
+      try {
+        await fetch(`/api/outreach/campaigns/${c.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus }),
+        });
+      } catch (e) {
+        console.error("Failed to persist campaign status:", e);
+      }
+    }
+    showToast(`Campaign "${c.name}" status changed to ${nextStatus}.`);
+  };
+
+  const handleCreateCampaign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCampaignName.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/outreach/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newCampaignName,
+          channel: newCampaignChannel,
+          templateSubject: newCampaignSubject,
+          dryRunMode: true,
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const created = json.data;
+        const newCamp: CampaignItem = {
+          id: created?._id || String(Date.now()),
+          name: newCampaignName,
+          service: newCampaignService,
+          type: newCampaignChannel === "Email" ? "Cold Email" : newCampaignChannel === "WhatsApp" ? "WhatsApp" : "Multi-channel",
+          typeBadgeBg: newCampaignChannel === "WhatsApp" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700",
+          audience: newCampaignAudience,
+          sent: 0,
+          opens: "0%",
+          replies: "0%",
+          meetings: 0,
+          status: "Active",
+          createdAt: "Just now",
+        };
+        setCampaignsList((prev) => [newCamp, ...prev]);
+        setIsNewModalOpen(false);
+        setNewCampaignName("");
+        showToast(`Campaign "${newCampaignName}" created successfully!`);
+      } else {
+        showToast("Error creating campaign. Please try again.");
+      }
+    } catch (err) {
+      console.error("Create campaign error:", err);
+      showToast("Network error creating campaign.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleTestSequence = async () => {
+    setIsTestingSequence(true);
+    try {
+      const res = await fetch("/api/outreach/send-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toEmail: "founder@agencyos.ai",
+          subject: "Test Sequence Execution [Dry-Run Safe Mode]",
+          content: "Hello! This is an autonomous test sequence dispatch simulated in safe dry-run mode.",
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        showToast(json.message || "Test sequence executed safely in dry-run mode!");
+      } else {
+        showToast("Test sequence failed to simulate.");
+      }
+    } catch (err) {
+      console.error("Test sequence error:", err);
+      showToast("Network error executing test sequence.");
+    } finally {
+      setIsTestingSequence(false);
+    }
+  };
+
+  // Filtered campaigns
+  const filteredCampaigns = campaignsList.filter((c) => {
+    // Filter tab
+    if (activeFilterTab.startsWith("Active") && c.status !== "Active") return false;
+    if (activeFilterTab.startsWith("Paused") && c.status !== "Paused") return false;
+    if (activeFilterTab.startsWith("Drafts") && c.status !== "Draft") return false;
+    if (activeFilterTab.startsWith("Completed") && c.status !== "Completed") return false;
+
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.service.toLowerCase().includes(q) ||
+        c.audience.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   const getStatusBadge = (status: CampaignItem["status"]) => {
     switch (status) {
@@ -171,7 +345,10 @@ export default function OutreachPage() {
               >
                 View Inbox
               </button>
-              <button className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors">
+              <button
+                onClick={() => setIsNewModalOpen(true)}
+                className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+              >
                 <Plus size={14} />
                 <span>New Campaign</span>
               </button>
@@ -319,6 +496,8 @@ export default function OutreachPage() {
                       <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search campaigns..."
                         className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none"
                       />
@@ -356,7 +535,7 @@ export default function OutreachPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-[11px]">
-                      {CAMPAIGNS.map((c) => (
+                      {filteredCampaigns.map((c) => (
                         <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
                           <td className="py-2.5 px-3"><input type="checkbox" className="rounded border-gray-300" /></td>
                           <td className="py-2.5 px-2.5">
@@ -374,13 +553,21 @@ export default function OutreachPage() {
                           <td className="py-2.5 px-2 text-gray-600">{c.replies}</td>
                           <td className="py-2.5 px-2 font-bold text-emerald-700">{c.meetings}</td>
                           <td className="py-2.5 px-2">
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${getStatusBadge(c.status)}`}>
+                            <button
+                              onClick={() => handleToggleCampaignStatus(c)}
+                              title="Click to toggle status"
+                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors hover:opacity-80 ${getStatusBadge(c.status)}`}
+                            >
                               <span className="w-1.5 h-1.5 rounded-full bg-current" /> {c.status}
-                            </span>
+                            </button>
                           </td>
                           <td className="py-2.5 px-2 text-gray-400">{c.createdAt}</td>
                           <td className="py-2.5 px-2 text-right">
-                            <button className="p-1 rounded text-gray-400 hover:text-black">
+                            <button
+                              onClick={() => handleToggleCampaignStatus(c)}
+                              className="p-1 rounded text-gray-400 hover:text-black"
+                              title={c.status === "Active" ? "Pause Campaign" : "Activate Campaign"}
+                            >
                               <MoreHorizontal size={13} />
                             </button>
                           </td>
@@ -408,7 +595,7 @@ export default function OutreachPage() {
                   <h3 className="text-sm font-bold text-[#171918]">Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div
-                      onClick={() => setViewMode("campaigns")}
+                      onClick={() => setIsNewModalOpen(true)}
                       className="p-3 rounded-xl bg-[#FAF9F6] border border-gray-100 hover:border-gray-200 cursor-pointer space-y-1"
                     >
                       <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-1">
@@ -599,8 +786,13 @@ export default function OutreachPage() {
               <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs">
                 Save as Template
               </button>
-              <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs">
-                Test Sequence
+              <button
+                onClick={handleTestSequence}
+                disabled={isTestingSequence}
+                className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1.5 transition-colors disabled:opacity-60"
+              >
+                {isTestingSequence ? <Loader2 size={12} className="animate-spin text-blue-600" /> : <Play size={12} className="text-emerald-600" />}
+                <span>{isTestingSequence ? "Dispatching..." : "Test Sequence"}</span>
               </button>
               <button className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors">
                 <Play size={14} />
@@ -1053,6 +1245,122 @@ export default function OutreachPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#171918] text-white text-xs font-semibold shadow-xl border border-gray-700 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* New Campaign Modal Dialog */}
+      {isNewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Send size={14} />
+                </span>
+                <h3 className="font-bold text-base text-[#171918]">Create New Campaign</h3>
+              </div>
+              <button
+                onClick={() => setIsNewModalOpen(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCampaign} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Campaign Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Indore Dental Clinics Q2"
+                  value={newCampaignName}
+                  onChange={(e) => setNewCampaignName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none focus:ring-1 focus:ring-black text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Channel *</label>
+                  <select
+                    value={newCampaignChannel}
+                    onChange={(e) => setNewCampaignChannel(e.target.value as any)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  >
+                    <option value="Email">Email</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="Multi-channel">Multi-channel</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Offering Service</label>
+                  <input
+                    type="text"
+                    value={newCampaignService}
+                    onChange={(e) => setNewCampaignService(e.target.value)}
+                    placeholder="Website Development"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Target Audience Niche</label>
+                <input
+                  type="text"
+                  value={newCampaignAudience}
+                  onChange={(e) => setNewCampaignAudience(e.target.value)}
+                  placeholder="e.g. Restaurants &amp; Cafes in MP"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Email / Message Subject *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCampaignSubject}
+                  onChange={(e) => setNewCampaignSubject(e.target.value)}
+                  placeholder="e.g. Quick idea to improve your local online presence"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200 text-emerald-800 text-[11px] flex items-start gap-1.5">
+                <CheckCircle2 size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                <span>Default safety rule: Campaigns are initialized with <b>Dry-Run Mode enabled</b>. Real sending requires explicit operator clearance.</span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsNewModalOpen(false)}
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors disabled:opacity-60 shadow-xs"
+                >
+                  {isSubmitting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                  <span>{isSubmitting ? "Creating..." : "Launch Campaign"}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -8,9 +8,11 @@ interface ProjectBriefDialogProps {
   onClose: () => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lead: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onCreated?: (project: any) => void;
 }
 
-export function ProjectBriefDialog({ isOpen, onClose, lead }: ProjectBriefDialogProps) {
+export function ProjectBriefDialog({ isOpen, onClose, lead, onCreated }: ProjectBriefDialogProps) {
   const [title, setTitle] = useState(
     lead ? `${lead.businessName} — Complete Website Redesign` : "Client Website Redesign"
   );
@@ -49,6 +51,8 @@ export function ProjectBriefDialog({ isOpen, onClose, lead }: ProjectBriefDialog
       });
 
       if (res.ok) {
+        const json = await res.json();
+        onCreated?.(json.project);
         setSuccess(true);
         setTimeout(() => {
           setSuccess(false);

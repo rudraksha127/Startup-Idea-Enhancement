@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -26,6 +26,8 @@ import {
   ArrowRight,
   Receipt,
   MessageSquare,
+  X,
+  Loader2,
 } from "lucide-react";
 
 interface ClientRecord {
@@ -61,10 +63,178 @@ const CLIENT_RECORDS: ClientRecord[] = [
 ];
 
 export default function ClientsPage() {
+  const [clientsList, setClientsList] = useState<ClientRecord[]>(CLIENT_RECORDS);
   const [selectedClient, setSelectedClient] = useState<ClientRecord>(CLIENT_RECORDS[0]);
   const [activeTab, setActiveTab] = useState("All Clients (48)");
   const [detailTab, setDetailTab] = useState("Overview");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // New Client Form State
+  const [newBusinessName, setNewBusinessName] = useState("");
+  const [newContactPerson, setNewContactPerson] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newAddress, setNewAddress] = useState("Indore, MP");
+  const [newType, setNewType] = useState("Restaurant");
+  const [newRetainer, setNewRetainer] = useState(45000);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Fetch real clients from backend
+  useEffect(() => {
+    async function loadClients() {
+      try {
+        const res = await fetch("/api/clients");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            const mapped: ClientRecord[] = json.data.map((c: any) => ({
+              id: c._id || c.id,
+              name: c.businessName,
+              domain: c.website ? c.website.replace(/^https?:\/\//, "") : `${c.businessName.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
+              type: "Local Business",
+              location: c.address || "Indore, MP",
+              projectsCount: 1,
+              totalValue: `₹${(c.monthlyRetainer || 35000).toLocaleString("en-IN")}`,
+              status: c.status === "Onboarding" ? "Onboarding" : c.status === "Past" ? "Completed" : "Active",
+              lastActivity: "Recently added",
+              iconBg: "bg-blue-50 text-blue-600",
+              phone: c.phone || "+91 98000 00000",
+              email: c.email || "contact@client.in",
+              contactPerson: c.contactPerson || "Manager",
+              rating: 4.5,
+              reviews: 120,
+              clientSince: c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
+              description: `${c.businessName} partner account under plan: ${c.plan || "Performance Funnel"}.`,
+              tags: ["active-client", "verified"],
+            }));
+
+            setClientsList((prev) => {
+              const prevIds = new Set(mapped.map((m) => m.id));
+              const combined = [...mapped, ...prev.filter((p) => !prevIds.has(p.id))];
+              if (mapped.length > 0) setSelectedClient(mapped[0]);
+              return combined;
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load clients:", err);
+      }
+    }
+    loadClients();
+  }, []);
+
+  const handleCreateClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBusinessName.trim() || !newEmail.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: newBusinessName,
+          contactPerson: newContactPerson || "Owner",
+          email: newEmail,
+          phone: newPhone || "9876543210",
+          address: newAddress,
+          monthlyRetainer: Number(newRetainer) || 35000,
+          plan: "Performance Funnel + Maintenance",
+          status: "Active",
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const created = json.data;
+        const newRecord: ClientRecord = {
+          id: created?._id || String(Date.now()),
+          name: newBusinessName,
+          domain: `${newBusinessName.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
+          type: newType,
+          location: newAddress,
+          projectsCount: 1,
+          totalValue: `₹${Number(newRetainer).toLocaleString("en-IN")}`,
+          status: "Active",
+          lastActivity: "Just now",
+          iconBg: "bg-emerald-50 text-emerald-600",
+          phone: newPhone || "+91 98765 43210",
+          email: newEmail,
+          contactPerson: newContactPerson || "Owner",
+          rating: 4.8,
+          reviews: 50,
+          clientSince: "Today",
+          description: `Newly onboarded ${newType} client in ${newAddress}.`,
+          tags: ["new-client", newType.toLowerCase()],
+        };
+
+        setClientsList((prev) => [newRecord, ...prev]);
+        setSelectedClient(newRecord);
+        setIsAddModalOpen(false);
+        setNewBusinessName("");
+        setNewContactPerson("");
+        setNewEmail("");
+        setNewPhone("");
+        showToast(`Client "${newBusinessName}" onboarded successfully!`);
+      } else {
+        const json = await res.json();
+        showToast(json.error || "Failed to create client.");
+      }
+    } catch (err) {
+      console.error("Error creating client:", err);
+      showToast("Network error creating client.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Name", "Contact Person", "Email", "Phone", "Location", "Status", "Total Value"];
+    const rows = filteredClients.map((c) => [
+      `"${c.name}"`,
+      `"${c.contactPerson}"`,
+      `"${c.email}"`,
+      `"${c.phone}"`,
+      `"${c.location}"`,
+      `"${c.status}"`,
+      `"${c.totalValue}"`,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `AgencyOS_Clients_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Clients exported to CSV successfully.");
+  };
+
+  // Filtered clients
+  const filteredClients = clientsList.filter((c) => {
+    if (activeTab.startsWith("Active") && c.status !== "Active") return false;
+    if (activeTab.startsWith("Onboarding") && c.status !== "Onboarding") return false;
+    if (activeTab.startsWith("Inactive") && c.status === "Active") return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.contactPerson.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.location.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   const getStatusBadge = (status: ClientRecord["status"]) => {
     switch (status) {
@@ -94,10 +264,16 @@ export default function ClientsPage() {
           <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs">
             Import Clients
           </button>
-          <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1">
-            <span>Export</span> <ChevronDown size={11} className="text-gray-400" />
+          <button
+            onClick={handleExportCSV}
+            className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1"
+          >
+            <span>Export CSV</span> <Download size={12} className="text-gray-400" />
           </button>
-          <button className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+          >
             <Plus size={14} />
             <span>Add Client</span>
           </button>
@@ -281,7 +457,7 @@ export default function ClientsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[11px]">
-                {CLIENT_RECORDS.map((c) => {
+                {filteredClients.map((c) => {
                   const isSelected = selectedClient.id === c.id;
                   return (
                     <tr
@@ -482,28 +658,188 @@ export default function ClientsPage() {
           <div className="pt-2 border-t border-gray-100 space-y-2">
             <span className="font-bold text-xs text-[#171918]">Quick Actions</span>
             <div className="grid grid-cols-3 gap-1.5 text-[10px]">
-              <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs">
+              <Link
+                href={`/outreach?lead=${encodeURIComponent(selectedClient.name)}`}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+              >
                 <Mail size={11} /> Send Email
-              </button>
-              <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs">
-                <Calendar size={11} /> Schedule Call
-              </button>
-              <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs">
+              </Link>
+              <a
+                href={`tel:${selectedClient.phone}`}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+              >
+                <Phone size={11} /> Call Client
+              </a>
+              <Link
+                href={`/projects?client=${encodeURIComponent(selectedClient.name)}`}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+              >
                 <Plus size={11} /> Create Project
-              </button>
-              <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs">
+              </Link>
+              <Link
+                href="/billing"
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+              >
                 <Receipt size={11} /> View Invoices
-              </button>
-              <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs">
+              </Link>
+              <button
+                onClick={() => showToast(`Note appended for ${selectedClient.name}`)}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+              >
                 <FileText size={11} /> Add Note
               </button>
-              <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs">
-                <Share2 size={11} /> Share Files
+              <button
+                onClick={() => showToast(`Shareable client portal link copied for ${selectedClient.name}`)}
+                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+              >
+                <Share2 size={11} /> Share Portal
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#171918] text-white text-xs font-semibold shadow-xl border border-gray-700 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Add Client Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Users size={14} />
+                </span>
+                <h3 className="font-bold text-base text-[#171918]">Add New Client</h3>
+              </div>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateClient} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Business Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Royal Bengal Restaurant"
+                  value={newBusinessName}
+                  onChange={(e) => setNewBusinessName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Contact Person *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Rajiv Roy"
+                    value={newContactPerson}
+                    onChange={(e) => setNewContactPerson(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Business Type</label>
+                  <select
+                    value={newType}
+                    onChange={(e) => setNewType(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  >
+                    <option value="Restaurant">Restaurant</option>
+                    <option value="Café">Café</option>
+                    <option value="Clinic">Clinic</option>
+                    <option value="Gym & Fitness">Gym &amp; Fitness</option>
+                    <option value="Hotel">Hotel</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="client@business.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+91 98765 43210"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Location / Address</label>
+                  <input
+                    type="text"
+                    placeholder="Indore, MP"
+                    value={newAddress}
+                    onChange={(e) => setNewAddress(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Monthly Retainer (₹)</label>
+                  <input
+                    type="number"
+                    value={newRetainer}
+                    onChange={(e) => setNewRetainer(Number(e.target.value))}
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors disabled:opacity-60 shadow-xs"
+                >
+                  {isSubmitting ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+                  <span>{isSubmitting ? "Onboarding..." : "Onboard Client"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

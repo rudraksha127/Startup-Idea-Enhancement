@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart3,
   TrendingUp,
@@ -248,6 +248,55 @@ export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState("Mar 1, 2024 - Mar 31, 2024");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [liveKpis, setLiveKpis] = useState<any>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  useEffect(() => {
+    async function loadAnalytics() {
+      try {
+        const res = await fetch("/api/analytics/overview");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            setLiveKpis(json.data.kpis);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load analytics overview:", e);
+      }
+    }
+    loadAnalytics();
+  }, []);
+
+  const handleExportReport = () => {
+    const reportData = [
+      ["Metric", "Value"],
+      ["Total Leads", liveKpis ? String(liveKpis.totalLeads) : "1,248"],
+      ["Emails Sent", liveKpis ? String(liveKpis.emailsSent) : "892"],
+      ["Replies Received", liveKpis ? String(liveKpis.repliesReceived) : "142"],
+      ["Meetings Booked", liveKpis ? String(liveKpis.meetingsBooked) : "38"],
+      ["Active Clients", liveKpis ? String(liveKpis.activeClients) : "48"],
+      ["Conversion Rate", liveKpis ? String(liveKpis.conversionRate) : "4.9%"],
+      ["", ""],
+      ["Lead Source", "Leads Count"],
+      ...SOURCES_BAR_DATA.map((s) => [s.source, String(s.count)]),
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," + reportData.map((r) => r.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `AgencyOS_Analytics_Report_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Analytics report downloaded successfully!");
+  };
 
   return (
     <div className="space-y-5">
@@ -285,7 +334,10 @@ export default function AnalyticsPage() {
             <ChevronDown size={12} className="text-[#68717D] ml-2" />
           </div>
 
-          <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-[#171918] shadow-2xs inline-flex items-center gap-1.5 transition-colors">
+          <button
+            onClick={handleExportReport}
+            className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-[#171918] shadow-2xs inline-flex items-center gap-1.5 transition-colors"
+          >
             <Download size={13} className="text-[#68717D]" />
             <span>Export Report</span>
           </button>
@@ -310,11 +362,11 @@ export default function AnalyticsPage() {
           {/* 6 Top KPI Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             {[
-              { label: "Total Leads", value: "1,248", trend: "32%" },
-              { label: "Emails Sent", value: "892", trend: "28%" },
-              { label: "Replies Received", value: "142", trend: "18%" },
-              { label: "Meetings Booked", value: "38", trend: "25%" },
-              { label: "Total Clients", value: "48", trend: "20%" },
+              { label: "Total Leads", value: liveKpis ? String(liveKpis.totalLeads) : "1,248", trend: "32%" },
+              { label: "Emails Sent", value: liveKpis ? String(liveKpis.emailsSent) : "892", trend: "28%" },
+              { label: "Replies Received", value: liveKpis ? String(liveKpis.repliesReceived) : "142", trend: "18%" },
+              { label: "Meetings Booked", value: liveKpis ? String(liveKpis.meetingsBooked) : "38", trend: "25%" },
+              { label: "Total Clients", value: liveKpis ? String(liveKpis.activeClients) : "48", trend: "20%" },
               { label: "Total Revenue", value: "₹4.8L", trend: "42%" },
             ].map((kpi) => (
               <div
@@ -1116,6 +1168,14 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#171918] text-white text-xs font-semibold shadow-xl border border-gray-700 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

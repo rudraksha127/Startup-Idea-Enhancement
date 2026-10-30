@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Layers,
   CheckCircle2,
@@ -15,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
+  X,
 } from "lucide-react";
 
 interface TemplateItem {
@@ -279,6 +281,24 @@ export default function TemplatesPage() {
   const [activeCategory, setActiveCategory] = useState("All Templates (24)");
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [customTemplateName, setCustomTemplateName] = useState("");
+  const [customCategory, setCustomCategory] = useState("Restaurant");
+
+  const filteredTemplates = TEMPLATES.filter((tmpl) => {
+    if (activeCategory !== "All Templates (24)" && !activeCategory.toLowerCase().includes(tmpl.category.toLowerCase())) {
+      return false;
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        tmpl.name.toLowerCase().includes(q) ||
+        tmpl.category.toLowerCase().includes(q) ||
+        tmpl.description.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   const handleUseTemplate = (tmpl: TemplateItem) => {
     setSelectedTemplate(tmpl);
@@ -299,7 +319,10 @@ export default function TemplatesPage() {
           </p>
         </div>
 
-        <button className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors self-start sm:self-auto">
+        <button
+          onClick={() => setIsCustomModalOpen(true)}
+          className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors self-start sm:self-auto"
+        >
           <Plus size={14} />
           <span>Create Custom Template</span>
         </button>
@@ -400,7 +423,7 @@ export default function TemplatesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left Column (8 cols): 3x3 Cards Grid */}
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {TEMPLATES.map((tmpl) => {
+          {filteredTemplates.map((tmpl) => {
             const isSelected = selectedTemplate.id === tmpl.id;
             return (
               <div
@@ -453,7 +476,8 @@ export default function TemplatesPage() {
                   >
                     Preview
                   </button>
-                  <button
+                  <Link
+                    href={`/projects?template=${encodeURIComponent(tmpl.name)}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleUseTemplate(tmpl);
@@ -462,7 +486,7 @@ export default function TemplatesPage() {
                   >
                     <span>Use Template</span>
                     <ArrowRight size={11} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             );
@@ -544,13 +568,14 @@ export default function TemplatesPage() {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-1">
-            <button
+            <Link
+              href={`/projects?template=${encodeURIComponent(selectedTemplate.name)}`}
               onClick={() => handleUseTemplate(selectedTemplate)}
               className="flex-1 py-2 rounded-lg bg-[#3568E8] hover:bg-[#2855C7] text-white font-bold text-xs shadow-xs text-center inline-flex items-center justify-center gap-1.5 transition-colors"
             >
               <span>Use This Template</span>
               <ArrowRight size={13} />
-            </button>
+            </Link>
             <button className="flex-1 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs shadow-2xs text-center inline-flex items-center justify-center gap-1">
               <span>Live Preview</span>
               <ExternalLink size={12} />
@@ -586,6 +611,85 @@ export default function TemplatesPage() {
           </div>
         </div>
       </div>
+
+      {/* Custom Template Modal */}
+      {isCustomModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Layers size={14} />
+                </span>
+                <h3 className="font-bold text-base text-[#171918]">Create Custom Template</h3>
+              </div>
+              <button
+                onClick={() => setIsCustomModalOpen(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-black hover:bg-gray-100"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setIsCustomModalOpen(false);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2500);
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Template Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Luxury Spa &amp; Wellness Suite"
+                  value={customTemplateName}
+                  onChange={(e) => setCustomTemplateName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Category *</label>
+                <select
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                >
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Café">Café</option>
+                  <option value="Clinic">Clinic</option>
+                  <option value="Gym & Fitness">Gym &amp; Fitness</option>
+                  <option value="Hotel">Hotel</option>
+                  <option value="Salon & Spa">Salon &amp; Spa</option>
+                  <option value="Education">Education</option>
+                  <option value="Automotive">Automotive</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCustomModalOpen(false)}
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+                >
+                  <Plus size={13} />
+                  <span>Save Template</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
