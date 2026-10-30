@@ -16,6 +16,8 @@ import { mapsModule } from "./maps/index.js";
 import { templatesModule } from "./templates/index.js";
 import { billingModule } from "./billing/index.js";
 import { integrationsModule } from "./integrations/index.js";
+import { n8nModule } from "./n8n/index.js";
+import { teamsModule } from "./teams/index.js";
 
 /**
  * Central Module Registry
@@ -42,6 +44,8 @@ export const activeModules: AppModule[] = [
   templatesModule,
   billingModule,
   integrationsModule,
+  n8nModule,
+  teamsModule,
 ];
 
 /**

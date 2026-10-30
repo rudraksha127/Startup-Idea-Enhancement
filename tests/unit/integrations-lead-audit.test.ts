@@ -18,9 +18,9 @@ describe("Integrations, Lead Audit & Outreach Capabilities", () => {
     { expiresIn: "1h" }
   );
 
-  it("IntegrationsService.testAllIntegrations returns status for all 6 core providers", async () => {
+  it("IntegrationsService.testAllIntegrations returns status for all 7 core providers including n8n", async () => {
     const results = await IntegrationsService.testAllIntegrations();
-    expect(results).toHaveLength(6);
+    expect(results).toHaveLength(7);
 
     const providerNames = results.map((r) => r.provider);
     expect(providerNames).toContain("MongoDB Atlas");
@@ -29,6 +29,7 @@ describe("Integrations, Lead Audit & Outreach Capabilities", () => {
     expect(providerNames).toContain("Google Maps Platform");
     expect(providerNames).toContain("Resend");
     expect(providerNames).toContain("Razorpay / Stripe");
+    expect(providerNames).toContain("n8n Automation");
 
     results.forEach((r) => {
       expect(["CONNECTED", "CREDENTIAL_REQUIRED", "FAILED", "OFFLINE"]).toContain(r.status);
@@ -37,12 +38,33 @@ describe("Integrations, Lead Audit & Outreach Capabilities", () => {
     });
   });
 
-  it("GET /api/v1/integrations returns provider status inventory", async () => {
+  it("GET /api/v1/integrations returns provider status inventory with 7 providers", async () => {
     const res = await request(app).get("/api/v1/integrations");
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.data.length).toBe(6);
+    expect(res.body.data.length).toBe(7);
+  });
+
+  it("GET /api/v1/integrations/diagnostics returns comprehensive diagnostics and webhook inventory", async () => {
+    const res = await request(app).get("/api/v1/integrations/diagnostics");
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.healthScore).toBeDefined();
+    expect(Array.isArray(res.body.data.activeWebhooks)).toBe(true);
+    expect(res.body.data.activeWebhooks.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("POST /api/v1/integrations/webhooks/test sends test webhook event", async () => {
+    const res = await request(app)
+      .post("/api/v1/integrations/webhooks/test")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ endpoint: "stripe" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.endpoint).toBe("stripe");
+    expect(res.body.data.dispatched).toBe(true);
   });
 
   it("POST /api/v1/integrations/test tests an individual provider on demand", async () => {

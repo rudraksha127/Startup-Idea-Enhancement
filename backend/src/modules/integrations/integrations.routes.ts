@@ -7,4 +7,5 @@ export const integrationsRouter = Router();
 
 integrationsRouter.get("/", asyncHandler(IntegrationsController.getIntegrations));
 integrationsRouter.post("/test", requireAuth, asyncHandler(IntegrationsController.testIntegration));
-
+integrationsRouter.get("/diagnostics", asyncHandler(IntegrationsController.getDiagnostics));
+integrationsRouter.post("/webhooks/test", requireAuth, asyncHandler(IntegrationsController.testWebhook));

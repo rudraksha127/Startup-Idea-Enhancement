@@ -39,5 +39,10 @@ export class BillingController {
     const result = await BillingService.createCheckoutSession(orgId, id);
     return res.status(200).json(result);
   };
-}
 
+  static handleWebhook = async (req: Request, res: Response) => {
+    const signature = req.headers["stripe-signature"] as string | undefined;
+    const result = await BillingService.handleWebhookEvent(req.body, signature);
+    return res.status(200).json(result);
+  };
+}
