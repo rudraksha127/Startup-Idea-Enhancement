@@ -76,3 +76,4 @@ describe("n8n Workflow Specifications & Topology Validation", () => {
     expect(dispatcher.id).toBe("wf-agent-dispatcher");
   });
 });
+

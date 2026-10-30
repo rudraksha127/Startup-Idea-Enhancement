@@ -38,3 +38,4 @@
 | **Website Templates** | Industry website templates & conversion to project workspace | `/api/v1/templates/*` | 4/4 | ✅ WORKING |
 | **Analytics & Reporting** | DB-backed conversion funnel, revenue & agent metrics | `/api/v1/analytics/*` | 3/3 | ✅ WORKING |
 | **Settings & Compliance** | System compliance status, DPDP / TRAI enforcement | `/api/v1/settings/*` | 2/2 | ✅ WORKING |
+

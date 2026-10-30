@@ -56,3 +56,4 @@ npm run typecheck:api
 # Run Next.js frontend TypeScript verification
 npm run typecheck
 ```
+

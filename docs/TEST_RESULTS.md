@@ -60,3 +60,4 @@
 - ✅ `POST /api/v1/teams/invite` validates email format and permitted roles.
 - ✅ `PATCH /api/v1/teams/members/:id` updates role.
 - ✅ `DELETE /api/v1/teams/members/:id` removes member from organization.
+

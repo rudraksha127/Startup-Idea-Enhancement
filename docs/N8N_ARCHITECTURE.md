@@ -72,3 +72,4 @@ n8n/
 - **HMAC Signatures**: Every inbound webhook to n8n and callback to AgencyOS is cryptographically verified using SHA-256 HMAC headers.
 - **Zero Raw Secrets in Git**: Workflows contain logical credential references (`openAiApi`, `googleMapsApi`) injected at runtime by the n8n credential vault.
 - **No Unrestricted Execution**: n8n runs in queue mode with isolated worker containers; filesystem and command-line execution tools are disabled.
+

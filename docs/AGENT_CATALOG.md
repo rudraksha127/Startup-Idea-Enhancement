@@ -131,3 +131,4 @@ AgencyOS features **13 specialized, workflow-oriented AI agents**. Each agent ha
 - **Approval Gate**: Not Required.
 - **Input Contract**: `{ clientDomains: string[] }`
 - **Output Contract**: `{ uptimeStatus: string, averageResponseMs: number, sslStatus: string }`
+

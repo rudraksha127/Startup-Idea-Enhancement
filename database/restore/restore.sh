@@ -13,3 +13,4 @@ echo "Restoring AgencyOS MongoDB from $BACKUP_PATH..."
 mongorestore --uri="$MONGODB_URI" --gzip "$BACKUP_PATH"
 
 echo "Restore completed successfully."
+

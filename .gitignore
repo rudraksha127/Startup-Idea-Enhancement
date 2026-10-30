@@ -11,6 +11,7 @@
 
 # Next.js build output
 /.next/
+frontend/.next/
 /out/
 /build
 /dist

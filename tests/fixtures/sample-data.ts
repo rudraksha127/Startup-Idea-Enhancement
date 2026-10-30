@@ -17,3 +17,4 @@ export const SAMPLE_INVOICE = {
   currency: "INR",
   dueDate: "2026-11-30",
 };
+

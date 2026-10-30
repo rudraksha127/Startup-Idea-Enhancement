@@ -10,3 +10,4 @@ mkdir -p "$BACKUP_DIR"
 mongodump --uri="$MONGODB_URI" --out="$BACKUP_DIR" --gzip
 
 echo "Backup completed successfully to $BACKUP_DIR"
+

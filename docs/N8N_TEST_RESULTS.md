@@ -57,3 +57,4 @@
 | `WF-DAILY-SUMMARY` | `n8n/workflows/scheduled/daily-summary.json` | Midnight cron compilation of KPI brief | ✅ PASS |
 | `WF-AGENT-RESULT-CALLBACK` | `n8n/workflows/webhooks/result-callback.json` | Ingests verified agent execution output | ✅ PASS |
 | `WF-INTEGRATION-HEALTH-CHECK` | `n8n/workflows/system/health-check.json` | 15-minute synthetic system telemetry check | ✅ PASS |
+

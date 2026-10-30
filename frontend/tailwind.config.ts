@@ -7,6 +7,10 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/features/**/*.{js,ts,jsx,tsx,mdx}",
+    "./frontend/src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./frontend/src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./frontend/src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./frontend/src/features/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {

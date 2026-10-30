@@ -46,3 +46,4 @@ AgencyOS enforces strict, deterministic permission boundaries. No state mutation
 | Revoke / Remove Member | ✅ | ❌ | ❌ | ❌ |
 | View Integration Secrets | ✅ | ❌ | ❌ | ❌ |
 | Run Integration Health Checks | ✅ | ✅ | ✅ | ✅ |
+

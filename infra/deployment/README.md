@@ -5,3 +5,4 @@ AgencyOS deploys across a split-topology infrastructure:
 2. **Backend**: Zoho-hosted Node.js / Express container runtime
 3. **Database**: MongoDB Atlas Cluster with replica sets
 4. **Automation**: Self-hosted n8n instance with PostgreSQL & Redis workers
+

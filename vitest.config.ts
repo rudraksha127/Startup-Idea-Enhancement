@@ -13,7 +13,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./frontend/src"),
       "@agencyos/contracts": path.resolve(__dirname, "./packages/contracts/src"),
       "@agencyos/validation": path.resolve(__dirname, "./packages/validation/src"),
       "@agencyos/config": path.resolve(__dirname, "./packages/config/src"),

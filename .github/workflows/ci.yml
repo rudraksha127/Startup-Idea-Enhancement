@@ -67,6 +67,9 @@ jobs:
           MONGODB_URI: mongodb://localhost:27017/agencyos_ci_test
           NODE_ENV: test
 
+      - name: Validate n8n Workflows
+        run: npm run n8n:validate
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4

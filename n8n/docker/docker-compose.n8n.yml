@@ -86,3 +86,4 @@ volumes:
   n8n_postgres_data:
   n8n_redis_data:
   n8n_main_data:
+

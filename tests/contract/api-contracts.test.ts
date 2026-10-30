@@ -60,3 +60,4 @@ describe("API & Database Zod Contracts Validation", () => {
     expect(UserSchema.safeParse(invalidUser).success).toBe(false);
   });
 });
+

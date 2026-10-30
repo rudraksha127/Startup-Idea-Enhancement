@@ -34,3 +34,4 @@ flowchart LR
 Located at `.github/workflows/ci.yml`:
 - Triggered on all pull requests and pushes to `main` and `staging`.
 - Enforces branch protection: passing CI is required before merge.
+

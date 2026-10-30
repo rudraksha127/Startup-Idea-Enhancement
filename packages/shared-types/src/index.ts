@@ -9,3 +9,4 @@ export interface TenantContext {
   userId: string;
   role: TenantRole;
 }
+

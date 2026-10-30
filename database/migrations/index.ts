@@ -72,3 +72,4 @@ export async function runMigrations() {
 
   return { applied: count, status: "SUCCESS" };
 }
+

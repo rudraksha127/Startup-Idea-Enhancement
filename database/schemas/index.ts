@@ -51,3 +51,4 @@ export const AgentExecutionSchema = z.object({
   cost: z.number().min(0).default(0),
   tokensUsed: z.number().min(0).default(0),
 });
+

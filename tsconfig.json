@@ -19,7 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./frontend/src/*"],
       "@agencyos/contracts": ["./packages/contracts/src/index.ts"],
       "@agencyos/contracts/*": ["./packages/contracts/src/*"],
       "@agencyos/validation": ["./packages/validation/src/index.ts"],

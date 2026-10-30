@@ -160,3 +160,4 @@ export async function seedDatabase() {
 
   console.log("[Seed] Database seeding completed successfully!");
 }
+

@@ -18,3 +18,4 @@ npm run build
 npx tsx n8n/scripts/deploy/deploy-workflows.ts "$ENV_TARGET"
 
 echo "[Deploy] AgencyOS deployment pipeline completed successfully."
+

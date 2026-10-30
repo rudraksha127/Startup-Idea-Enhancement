@@ -55,3 +55,4 @@ npx tsx n8n/scripts/deploy/deploy-workflows.ts staging
 docker compose -f n8n/docker/docker-compose.n8n.yml up -d
 ```
 Access the n8n dashboard at `http://localhost:5678`.
+

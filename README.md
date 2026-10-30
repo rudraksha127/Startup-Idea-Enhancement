@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/readme/agencyos-banner.svg" alt="AgencyOS Banner" width="100%">
+  <img src="docs/assets/readme/agencyos-banner.svg" alt="AgencyOS Banner" width="100%">
 </p>
 
 <p align="center">

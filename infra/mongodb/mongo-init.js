@@ -11,3 +11,4 @@ db.createUser({
 });
 
 print("AgencyOS MongoDB initialized successfully with app user.");
+
