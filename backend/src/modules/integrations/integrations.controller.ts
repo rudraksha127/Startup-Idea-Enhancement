@@ -22,13 +22,12 @@ export class IntegrationsController {
     const { targetUrl = "https://agencyos.io/api/v1/billing/webhook", payload = {}, endpoint = "stripe" } = req.body || {};
     const result = await IntegrationsService.testWebhook(targetUrl, payload);
     return res.status(200).json({
-      success: true,
+      ...result,
       data: {
         ...result,
         endpoint,
         dispatched: true,
       },
-      ...result,
     });
   };
 }

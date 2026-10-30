@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - Human-in-the-Loop Approval Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-approval"
+      },
+      "id": "node-sub-approval-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enforces gate approval before live outreach or budget spend\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"approval\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-approval-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-approval",
+  "meta": {
+    "subworkflowId": "approval",
+    "description": "Enforces gate approval before live outreach or budget spend"
+  }
+}

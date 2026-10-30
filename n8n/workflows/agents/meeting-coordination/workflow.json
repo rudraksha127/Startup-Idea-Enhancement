@@ -1,0 +1,142 @@
+{
+  "name": "AgencyOS - Meeting Coordination Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "meeting-coordination",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-meeting-coordination-trigger",
+      "name": "Webhook Inbound Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "wh-meeting-coordination"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input parameters against contract\nconst payload = $input.first().json.body || $input.first().json;\nif (!payload) {\n  throw new Error(\"Missing payload for Meeting Coordination Agent\");\n}\nreturn [{ json: { ...payload, validatedAt: new Date().toISOString(), agent: \"meeting-coordination\" } }];"
+      },
+      "id": "node-meeting-coordination-validate",
+      "name": "Validate Input Contract",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gemini-2.0-flash",
+        "prompt": "You are the Meeting Coordination Agent for AgencyOS. Execute the following task: Coordinates calendar slots and generates meeting draft confirmations. Input: {{ JSON.stringify($json) }}. Return strictly structured JSON."
+      },
+      "id": "node-meeting-coordination-ai-core",
+      "name": "AI Autonomous Execution",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/n8n/webhook/lead-audit",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agentId",
+              "value": "meeting-coordination"
+            },
+            {
+              "name": "result",
+              "value": "={{ $json }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-meeting-coordination-callback",
+      "name": "AgencyOS Backend Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input Contract": {
+      "main": [
+        [
+          {
+            "node": "AI Autonomous Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Autonomous Execution": {
+      "main": [
+        [
+          {
+            "node": "AgencyOS Backend Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "versionId": "1.0.0",
+  "id": "wf-agencyos-meeting-coordination",
+  "meta": {
+    "agentId": "meeting-coordination",
+    "agentName": "Meeting Coordination Agent",
+    "category": "Scheduling",
+    "tools": [
+      "calendar_availability_api",
+      "meeting_invite_generator"
+    ],
+    "defaultInputs": {
+      "leadId": "lead-123",
+      "requestedSlot": "2026-11-05T11:00:00Z"
+    },
+    "outputSchema": {
+      "meetingId": "string",
+      "calendarLink": "string",
+      "status": "string"
+    }
+  }
+}

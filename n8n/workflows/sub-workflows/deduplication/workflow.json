@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - Deduplication Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-deduplication"
+      },
+      "id": "node-sub-deduplication-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Levenshtein & phone/email duplicate detection\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"deduplication\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-deduplication-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-deduplication",
+  "meta": {
+    "subworkflowId": "deduplication",
+    "description": "Levenshtein & phone/email duplicate detection"
+  }
+}

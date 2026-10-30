@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - Data Validation Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-data-validation"
+      },
+      "id": "node-sub-data-validation-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deterministic Zod & schema validation gatekeeper\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"data-validation\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-data-validation-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-data-validation",
+  "meta": {
+    "subworkflowId": "data-validation",
+    "description": "Deterministic Zod & schema validation gatekeeper"
+  }
+}

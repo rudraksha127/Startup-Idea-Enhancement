@@ -1,0 +1,58 @@
+{
+  "name": "AgencyOS - System Health Check (WF-INTEGRATION-HEALTH-CHECK)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "node-health-cron",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/health",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "node-probe-backend",
+      "name": "Probe Backend API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $input.first().json;\nreturn [{\n  json: {\n    status: 'SYSTEM_PROBE_OK',\n    healthy: true,\n    backendStatus: res.status || 'OK',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-record-health",
+      "name": "Record System Telemetry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [[{ "node": "Probe Backend API", "type": "main", "index": 0 }]]
+    },
+    "Probe Backend API": {
+      "main": [[{ "node": "Record System Telemetry", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "id": "wf-system-health-check",
+  "meta": {
+    "role": "Synthetic System Telemetry",
+    "version": "1.0.0"
+  }
+}

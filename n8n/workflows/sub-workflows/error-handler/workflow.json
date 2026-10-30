@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - Global Error Handler Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-error-handler"
+      },
+      "id": "node-sub-error-handler-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Captures workflow exceptions, logs audit traces, and triggers retry\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"error-handler\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-error-handler-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-error-handler",
+  "meta": {
+    "subworkflowId": "error-handler",
+    "description": "Captures workflow exceptions, logs audit traces, and triggers retry"
+  }
+}

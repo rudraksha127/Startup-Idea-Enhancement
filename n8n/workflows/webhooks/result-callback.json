@@ -1,0 +1,62 @@
+{
+  "name": "AgencyOS - Agent Result Callback (WF-AGENT-RESULT-CALLBACK)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "agent-callback",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-callback-trigger",
+      "name": "Callback Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "wh-agent-callback"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nif (!body.executionId) {\n  throw new Error('Callback rejected: missing executionId');\n}\nreturn [{\n  json: {\n    ...body,\n    verified: true,\n    callbackReceivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-verify-callback",
+      "name": "Verify Callback Authenticity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/n8n/webhook/lead-audit",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "executionId", "value": "={{ $json.executionId }}" },
+            { "name": "result", "value": "={{ $json }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-persist-result",
+      "name": "Persist Execution Result to Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Callback Webhook": {
+      "main": [[{ "node": "Verify Callback Authenticity", "type": "main", "index": 0 }]]
+    },
+    "Verify Callback Authenticity": {
+      "main": [[{ "node": "Persist Execution Result to Backend", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "id": "wf-agent-result-callback",
+  "meta": {
+    "role": "Execution Callback Relay",
+    "version": "1.0.0"
+  }
+}

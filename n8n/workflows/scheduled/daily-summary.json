@@ -1,0 +1,58 @@
+{
+  "name": "AgencyOS - Daily Summary (WF-DAILY-SUMMARY)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 * * *"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule-cron",
+      "name": "Midnight Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/analytics",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "node-fetch-analytics",
+      "name": "Fetch AgencyOS Analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = $input.first().json;\nreturn [{\n  json: {\n    reportType: 'DAILY_EXECUTIVE_SUMMARY',\n    generatedAt: new Date().toISOString(),\n    totalLeads: metrics.totalLeads || 0,\n    convertedClients: metrics.convertedClients || 0,\n    dailyRevenue: metrics.revenue || 0,\n    agentExecutions: metrics.activeAgents || 13\n  }\n}];"
+      },
+      "id": "node-compile-report",
+      "name": "Compile Executive Brief",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Midnight Schedule Trigger": {
+      "main": [[{ "node": "Fetch AgencyOS Analytics", "type": "main", "index": 0 }]]
+    },
+    "Fetch AgencyOS Analytics": {
+      "main": [[{ "node": "Compile Executive Brief", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "id": "wf-daily-summary",
+  "meta": {
+    "role": "Scheduled Executive Briefing",
+    "version": "1.0.0"
+  }
+}

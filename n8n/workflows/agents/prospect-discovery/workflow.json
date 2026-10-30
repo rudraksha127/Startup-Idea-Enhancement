@@ -1,0 +1,144 @@
+{
+  "name": "AgencyOS - Prospect Discovery Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "prospect-discovery",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-prospect-discovery-trigger",
+      "name": "Webhook Inbound Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "wh-prospect-discovery"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input parameters against contract\nconst payload = $input.first().json.body || $input.first().json;\nif (!payload) {\n  throw new Error(\"Missing payload for Prospect Discovery Agent\");\n}\nreturn [{ json: { ...payload, validatedAt: new Date().toISOString(), agent: \"prospect-discovery\" } }];"
+      },
+      "id": "node-prospect-discovery-validate",
+      "name": "Validate Input Contract",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gemini-2.0-flash",
+        "prompt": "You are the Prospect Discovery Agent for AgencyOS. Execute the following task: Discovers local high-potential business opportunities across targeted geographies via Google Maps & permitted registries. Input: {{ JSON.stringify($json) }}. Return strictly structured JSON."
+      },
+      "id": "node-prospect-discovery-ai-core",
+      "name": "AI Autonomous Execution",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/n8n/webhook/lead-audit",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agentId",
+              "value": "prospect-discovery"
+            },
+            {
+              "name": "result",
+              "value": "={{ $json }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-prospect-discovery-callback",
+      "name": "AgencyOS Backend Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input Contract": {
+      "main": [
+        [
+          {
+            "node": "AI Autonomous Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Autonomous Execution": {
+      "main": [
+        [
+          {
+            "node": "AgencyOS Backend Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "versionId": "1.0.0",
+  "id": "wf-agencyos-prospect-discovery",
+  "meta": {
+    "agentId": "prospect-discovery",
+    "agentName": "Prospect Discovery Agent",
+    "category": "Lead Generation",
+    "tools": [
+      "google_maps_platform",
+      "deduplication_engine",
+      "agencyos_prospect_ingest"
+    ],
+    "defaultInputs": {
+      "category": "Fine Dining & Cafes",
+      "location": "Indore, MP",
+      "radiusMeters": 5000
+    },
+    "outputSchema": {
+      "candidateCount": "number",
+      "prospects": "array",
+      "duplicateCount": "number"
+    }
+  }
+}

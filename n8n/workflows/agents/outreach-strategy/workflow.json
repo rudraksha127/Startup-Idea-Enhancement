@@ -1,0 +1,143 @@
+{
+  "name": "AgencyOS - Outreach Strategy Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "outreach-strategy",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-outreach-strategy-trigger",
+      "name": "Webhook Inbound Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "wh-outreach-strategy"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input parameters against contract\nconst payload = $input.first().json.body || $input.first().json;\nif (!payload) {\n  throw new Error(\"Missing payload for Outreach Strategy Agent\");\n}\nreturn [{ json: { ...payload, validatedAt: new Date().toISOString(), agent: \"outreach-strategy\" } }];"
+      },
+      "id": "node-outreach-strategy-validate",
+      "name": "Validate Input Contract",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gemini-2.0-flash",
+        "prompt": "You are the Outreach Strategy Agent for AgencyOS. Execute the following task: Personalizes outreach sequences based on website audit signals and business profiles. Input: {{ JSON.stringify($json) }}. Return strictly structured JSON."
+      },
+      "id": "node-outreach-strategy-ai-core",
+      "name": "AI Autonomous Execution",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/n8n/webhook/lead-audit",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agentId",
+              "value": "outreach-strategy"
+            },
+            {
+              "name": "result",
+              "value": "={{ $json }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-outreach-strategy-callback",
+      "name": "AgencyOS Backend Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input Contract": {
+      "main": [
+        [
+          {
+            "node": "AI Autonomous Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Autonomous Execution": {
+      "main": [
+        [
+          {
+            "node": "AgencyOS Backend Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "versionId": "1.0.0",
+  "id": "wf-agencyos-outreach-strategy",
+  "meta": {
+    "agentId": "outreach-strategy",
+    "agentName": "Outreach Strategy Agent",
+    "category": "Outreach",
+    "tools": [
+      "outreach_template_engine",
+      "compliance_gate_check"
+    ],
+    "defaultInputs": {
+      "leadId": "lead-123",
+      "channel": "Email",
+      "tone": "Consultative"
+    },
+    "outputSchema": {
+      "subjectLine": "string",
+      "bodyContent": "string",
+      "callToAction": "string"
+    }
+  }
+}

@@ -47,6 +47,6 @@ export class TeamsController {
     const orgId = await resolveOrgId(req);
     const id = extractId(req.params.id);
     const result = await TeamsService.removeMember(id, orgId);
-    return res.status(200).json({ success: true, data: result, ...result });
+    return res.status(200).json({ ...result, data: result });
   };
 }

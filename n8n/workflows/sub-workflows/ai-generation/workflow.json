@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - AI Generation Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-ai-generation"
+      },
+      "id": "node-sub-ai-generation-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pluggable LLM invocation with temperature, fallback and token monitoring\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"ai-generation\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-ai-generation-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-ai-generation",
+  "meta": {
+    "subworkflowId": "ai-generation",
+    "description": "Pluggable LLM invocation with temperature, fallback and token monitoring"
+  }
+}

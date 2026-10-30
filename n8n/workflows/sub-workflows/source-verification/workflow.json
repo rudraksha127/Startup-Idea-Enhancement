@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - Source Verification Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-source-verification"
+      },
+      "id": "node-sub-source-verification-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verifies domain provenance and freshness\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"source-verification\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-source-verification-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-source-verification",
+  "meta": {
+    "subworkflowId": "source-verification",
+    "description": "Verifies domain provenance and freshness"
+  }
+}

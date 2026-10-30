@@ -1,0 +1,142 @@
+{
+  "name": "AgencyOS - Project Planning Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "project-planning",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-project-planning-trigger",
+      "name": "Webhook Inbound Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "wh-project-planning"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input parameters against contract\nconst payload = $input.first().json.body || $input.first().json;\nif (!payload) {\n  throw new Error(\"Missing payload for Project Planning Agent\");\n}\nreturn [{ json: { ...payload, validatedAt: new Date().toISOString(), agent: \"project-planning\" } }];"
+      },
+      "id": "node-project-planning-validate",
+      "name": "Validate Input Contract",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gemini-2.0-flash",
+        "prompt": "You are the Project Planning Agent for AgencyOS. Execute the following task: Breaks client requirements into structured agile milestones and task backlogs. Input: {{ JSON.stringify($json) }}. Return strictly structured JSON."
+      },
+      "id": "node-project-planning-ai-core",
+      "name": "AI Autonomous Execution",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.AGENCYOS_API_URL || 'http://localhost:4000' }}/api/v1/n8n/webhook/lead-audit",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agentId",
+              "value": "project-planning"
+            },
+            {
+              "name": "result",
+              "value": "={{ $json }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-project-planning-callback",
+      "name": "AgencyOS Backend Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input Contract": {
+      "main": [
+        [
+          {
+            "node": "AI Autonomous Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Autonomous Execution": {
+      "main": [
+        [
+          {
+            "node": "AgencyOS Backend Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "versionId": "1.0.0",
+  "id": "wf-agencyos-project-planning",
+  "meta": {
+    "agentId": "project-planning",
+    "agentName": "Project Planning Agent",
+    "category": "Project Delivery",
+    "tools": [
+      "agile_backlog_generator",
+      "dependency_graph_validator"
+    ],
+    "defaultInputs": {
+      "projectId": "proj-123",
+      "targetLaunchDays": 30
+    },
+    "outputSchema": {
+      "milestones": "array",
+      "tasksCount": "number",
+      "estimatedHours": "number"
+    }
+  }
+}

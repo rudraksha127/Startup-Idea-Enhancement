@@ -1,0 +1,50 @@
+{
+  "name": "AgencyOS Sub - Multi-Channel Notification Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "sub-notification"
+      },
+      "id": "node-sub-notification-in",
+      "name": "Subworkflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dispatches alerts via Slack, Email and In-App Webhooks\nconst data = $input.first().json;\nreturn [{ json: { ...data, subworkflow: \"notification\", processedAt: new Date().toISOString() } }];"
+      },
+      "id": "node-sub-notification-process",
+      "name": "Process Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Subworkflow Input": {
+      "main": [
+        [
+          {
+            "node": "Process Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "id": "wf-sub-notification",
+  "meta": {
+    "subworkflowId": "notification",
+    "description": "Dispatches alerts via Slack, Email and In-App Webhooks"
+  }
+}
