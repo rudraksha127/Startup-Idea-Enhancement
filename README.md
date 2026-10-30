@@ -238,58 +238,81 @@ flowchart TB
 ```text
 AgencyOS/
 ├── .github/                      # CI/CD workflows and issue/PR templates
-│   ├── workflows/ci.yml          # GitHub Actions (Typecheck, Test, Build)
+│   ├── workflows/ci.yml          # GitHub Actions (Typecheck, Test, Build, Security)
 │   ├── ISSUE_TEMPLATE/           # Bug report and feature request templates
 │   └── pull_request_template.md  # Standard pull request verification checklist
 ├── assets/                       # Public media and visual design assets
 │   └── readme/                   # README banners and diagram SVGs
+├── backend/                      # Headless Node.js + Express 4.21 REST API Tier
+│   ├── src/                      # API Source code
+│   │   ├── common/               # Universal developer toolkit (async-handler, api-response, validate)
+│   │   ├── config/               # Database and environment configurations
+│   │   ├── middleware/           # Rate limiting, Helmet, Request-ID, Audit logging, JWT Auth
+│   │   ├── models/               # Mongoose schema definitions
+│   │   ├── modules/              # Plug-and-play vertical slice modules (100% decoupled)
+│   │   │   ├── health/           # Healthcheck & readiness probes
+│   │   │   ├── auth/             # JWT Authentication & Registration
+│   │   │   ├── leads/            # Leads management & opportunity scoring
+│   │   │   ├── clients/          # Client management
+│   │   │   ├── projects/         # Project tracking & workspaces
+│   │   │   ├── campaigns/        # Outreach campaigns
+│   │   │   ├── agents/           # 13 Canonical AI agent execution engines
+│   │   │   ├── dashboard/        # Executive KPI aggregations
+│   │   │   ├── analytics/        # Business intelligence & performance charts
+│   │   │   ├── settings/         # System configuration & compliance settings
+│   │   │   ├── maps/             # Google Maps Platform location intelligence
+│   │   │   ├── templates/        # Industry website templates engine
+│   │   │   ├── billing/          # Invoices & billing metrics
+│   │   │   ├── integrations/     # Provider diagnostics & lead audit runner
+│   │   │   └── index.ts          # Central Module Registry (activeModules)
+│   │   └── server.ts             # Express server entrypoint (Port 4000)
+│   ├── workers/                  # Background worker queue definitions
+│   ├── catalyst.json             # Zoho Catalyst AppSail production manifest
+│   ├── Dockerfile                # Standalone production container for API
+│   ├── package.json              # Backend dependencies
+│   └── tsconfig.json             # Independent backend TypeScript configuration
 ├── database/                     # Database architecture & schemas
 │   ├── schema/schemas.ts         # Portable TypeScript entity contracts
 │   ├── seeds/                    # Seed data definitions and guides
-│   └── README.md                 # MongoDB architecture guide
-├── docs/                         # Comprehensive engineering documentation
-│   ├── ai-agents/                # Autonomous agent catalogs and guardrails
-│   ├── api/                      # REST API endpoint reference contracts
-│   ├── architecture/             # System, security, and data flow architecture
+│   └── README.md                 # MongoDB multi-tenant architecture & pool management
+├── docs/                         # Consolidated single source of truth documentation
+│   ├── architecture/             # System architecture, topology, ADRs
+│   ├── backend/                  # Modular vertical slice developer guide
 │   ├── database/                 # Schema models and entity relationships
-│   ├── decisions/                # Architecture Decision Records (ADR index)
-│   ├── deployment/               # Production deployment and env guides
-│   ├── development/              # Setup, audits, and migration history
+│   ├── deployment/               # Cloudflare Pages, Zoho AppSail, Docker guides
+│   ├── expert-reviews/           # Multi-disciplinary executive council evaluations
 │   ├── operations/               # Runbooks, monitoring, and backups
-│   ├── product/                  # Vision, requirements, and workflows
-│   ├── security/                 # Threat model and pre-deploy checklist
+│   ├── product/                  # PRD, Project Master Brief, User flows, Traceability
+│   ├── research/                 # 11 Research dossiers, evidence matrix, source registry
+│   ├── security/                 # Threat model, DPDP Act compliance, reporting
 │   ├── testing/                  # Testing strategies and validation gates
-│   └── workflows/                # n8n workflow catalog and guides
+│   ├── CHANGELOG.md              # Historical releases & milestone log
+│   ├── CONTRIBUTING.md           # Engineering & contribution standards
+│   └── README.md                 # Central documentation portal index
 ├── infra/                        # Infrastructure and container orchestration
-│   ├── docker/                   # Production multi-stage Dockerfile
-│   └── docker-compose.yml        # Multi-container orchestration (App + DB)
+│   ├── docker/                   # Next.js production multi-stage Dockerfile
+│   ├── docker-compose.yml        # Multi-container orchestration (Web + API + MongoDB)
+│   └── zoho/                     # Zoho Catalyst AppSail deployment runbooks
+├── packages/                     # Monorepo shared packages
+│   ├── config/                   # Shared configurations & environment parsers
+│   ├── contracts/                # Cross-tier TypeScript interfaces
+│   ├── utils/                    # Shared utility helpers (maskApiKey, currency, dates)
+│   └── validation/               # Shared Zod validation schemas
 ├── public/                       # Static public assets (images, fonts, favicon)
-├── src/                          # Application source code
-│   ├── app/                      # Next.js 15 App Router
-│   │   ├── (auth)/               # Auth routes (/login, /register)
-│   │   ├── (dashboard)/          # Dashboard modules (11 primary screens)
-│   │   ├── api/                  # Backend REST API route handlers
-│   │   ├── layout.tsx            # Global layout shell
-│   │   ├── page.tsx              # Landing page
-│   │   └── globals.css           # Global Tailwind CSS definitions
-│   ├── components/               # Reusable UI component library
-│   │   ├── layout/               # Header, Sidebar, Navigation
-│   │   └── ui/                   # Buttons, Badges, Modals, Inputs
-│   ├── lib/                      # Core backend utilities and services
-│   │   ├── auth.ts               # JWT signing, verification, and cookie helpers
-│   │   ├── db.ts                 # Mongoose cached connection singleton
-│   │   ├── models.ts             # Mongoose schemas (User, Lead, Client, Project)
-│   │   └── validations.ts        # Zod input validation schemas
-│   └── types/                    # Global TypeScript interfaces
-├── tests/                        # Vitest automated test suite
-├── workflows/                    # Automation workflow definitions
-│   └── n8n/                      # Portable n8n workflow JSON templates
-├── .env.example                  # Environment configuration template
-├── CONTRIBUTING.md               # Engineering and contribution standards
+├── scripts/                      # Engineering automation tools
+│   └── create-backend-module.js  # CLI generator for plug-and-play vertical slice modules
+├── src/                          # Frontend Tier: Next.js 15 App Router
+│   ├── app/                      # Next.js App Router (11 dashboard pages + auth)
+│   ├── components/               # UI components, layout shell, sidebar, header
+│   ├── features/                 # Modular frontend feature components
+│   ├── hooks/                    # Reusable React hooks
+│   ├── lib/                      # Frontend database client, auth utilities, mock seeders
+│   └── types/                    # Frontend TypeScript interfaces
+├── tests/                        # Vitest automated test suite (50 tests passing)
+│   └── unit/                     # Unit & API contract tests across web & backend
+├── .env.example                  # Validated environment configuration template
 ├── LICENSE                       # MIT Open-Source License
-├── package.json                  # Dependencies and execution scripts
-├── README.md                     # Root project documentation (this file)
-├── SECURITY.md                   # Vulnerability disclosure policy
+├── package.json                  # Root dependencies and orchestration scripts
 └── tsconfig.json                 # TypeScript strict configuration
 ```
 

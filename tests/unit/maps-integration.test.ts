@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app } from "../../apps/api/src/app.js";
-import { MapsService } from "../../apps/api/src/modules/maps/maps.service.js";
+import { app } from "../../backend/src/app.js";
+import { MapsService } from "../../backend/src/modules/maps/maps.service.js";
 
 describe("Google Maps Platform Integration & Location Intelligence", () => {
   it("GET /api/v1/maps/status returns provider attribution and TOS compliance metadata", async () => {

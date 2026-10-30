@@ -53,3 +53,15 @@ Applied by Next.js and Express middleware:
 - **Global API Rate Limit:** 300 requests per 15-minute window per IP address via `express-rate-limit`.
 - **Auth Endpoint Rate Limit:** 10 attempts per 15-minute window on `/api/v1/auth/login`.
 
+---
+
+## 4. Reporting a Vulnerability
+
+We take the security and privacy of AgencyOS, our agency data, and prospective client information seriously.
+
+If you discover a security vulnerability:
+1. **Do not create a public GitHub issue.**
+2. Email full technical details and reproduction steps to `security@agencyos.ai` or contact the core repository maintainers directly.
+3. We will acknowledge receipt of your vulnerability report within 24 hours and provide an estimated remediation timeline.
+
+

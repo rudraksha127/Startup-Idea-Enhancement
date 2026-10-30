@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app } from "../../apps/api/src/app.js";
-import { AgentOrchestrator } from "../../apps/api/src/modules/agents/agent-orchestrator.js";
-import { CANONICAL_AGENTS } from "../../apps/api/src/modules/agents/definitions/index.js";
+import { app } from "../../backend/src/app.js";
+import { AgentOrchestrator } from "../../backend/src/modules/agents/agent-orchestrator.js";
+import { CANONICAL_AGENTS } from "../../backend/src/modules/agents/definitions/index.js";
 
 describe("13 Canonical AI Agents & Orchestrator", () => {
   it("registers exactly 13 canonical system agents with valid definitions", () => {

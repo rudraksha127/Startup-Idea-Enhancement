@@ -12,6 +12,26 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/agencyos
       - JWT_SECRET=change-this-to-a-very-secure-32-byte-hex-secret
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://agencyos-api:4000
+    depends_on:
+      - mongo
+    networks:
+      - agencyos-network
+
+  agencyos-api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    container_name: agencyos-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/agencyos
+      - JWT_SECRET=change-this-to-a-very-secure-32-byte-hex-secret
+      - CORS_ORIGIN=http://localhost:3000
     depends_on:
       - mongo
     networks:

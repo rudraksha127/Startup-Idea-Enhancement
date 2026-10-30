@@ -15,7 +15,7 @@ Every deployment must pass the 3 mandatory release gates before promoting change
 ```bash
 # 1. Static Typecheck (Root & Express API)
 npm run typecheck
-npx tsc -p apps/api/tsconfig.json --noEmit
+npm run typecheck:api
 
 # 2. Automated Test Suite (16 Unit & API Contract Tests)
 npm run test
@@ -62,15 +62,15 @@ npm install -g zcatalyst-cli
 catalyst login
 ```
 
-Initialize Catalyst in the backend directory (`apps/api`):
+Initialize Catalyst in the backend directory (`backend`):
 ```bash
-cd apps/api
+cd backend
 catalyst init
 ```
 Select **AppSail (Standalone Web Service)** and name your service `agencyos-api`.
 
 ### 3.2 Configuration Manifest (`catalyst.json`)
-Create `apps/api/catalyst.json`:
+Create `backend/catalyst.json`:
 ```json
 {
   "appsail": [
@@ -92,8 +92,8 @@ Create `apps/api/catalyst.json`:
 
 ### 3.3 Deploying to Zoho Catalyst
 ```bash
-# Compile TypeScript to JavaScript in apps/api/dist
-cd apps/api
+# Compile TypeScript to JavaScript in backend/dist
+cd backend
 npm run build
 
 # Deploy standalone runtime to Zoho Catalyst

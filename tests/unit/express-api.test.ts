@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app } from "../../apps/api/src/app";
+import { app } from "../../backend/src/app";
 
 describe("Express REST API (/api/v1/*)", () => {
   it("GET / returns service health status and API version", async () => {

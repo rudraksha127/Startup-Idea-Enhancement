@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
 import jwt from "jsonwebtoken";
-import { app } from "../../apps/api/src/app.js";
-import { ENV } from "../../apps/api/src/config/env.js";
+import { app } from "../../backend/src/app.js";
+import { ENV } from "../../backend/src/config/env.js";
 
 const authHeader = `Bearer ${jwt.sign(
   {

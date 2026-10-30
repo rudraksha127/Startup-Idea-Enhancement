@@ -21,7 +21,7 @@ import { integrationsModule } from "./integrations/index.js";
  * Central Module Registry
  * -----------------------
  * To add a new module to AgencyOS:
- * 1. Create a new folder under `apps/api/src/modules/<module-name>/`
+ * 1. Create a new folder under `backend/src/modules/<module-name>/`
  * 2. Implement routes, controller, service, and export an `AppModule` from its `index.ts`
  * 3. Add the exported module to the `activeModules` array below (or run `npm run new:module <name>`)
  *

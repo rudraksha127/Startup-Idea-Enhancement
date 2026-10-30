@@ -33,7 +33,7 @@ flowchart TD
         Utils["@agencyos/utils (Currency, Slugs, Scores)"]
     end
 
-    subgraph Backend["Headless REST API (apps/api)"]
+    subgraph Backend["Headless REST API (backend/)"]
         Express["Express 4.21 + TypeScript Server"]
         Middleware["Auth, CORS, Rate Limit, Helmet, RequestID"]
         Controllers["Auth, Leads, Clients, Agents, Dashboard"]

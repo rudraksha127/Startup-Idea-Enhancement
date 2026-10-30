@@ -2,7 +2,7 @@
 
 **Audit Date:** 30 October 2026  
 **Auditor:** Principal Software Architect & QA Automation Lead  
-**Scope:** Full repository (`apps/web`, `apps/api`, Next.js routes, models, components, config, tests)  
+**Scope:** Full repository (`src/`, `backend/`, Next.js routes, models, components, config, tests)  
 **Status:** Canonical Reference Document  
 
 ---
@@ -10,8 +10,8 @@
 ## 1. Executive Architecture Summary
 
 AgencyOS is an autonomous AI-driven agency operating platform engineered under a dual-tier production topology:
-1. **Frontend Tier (`apps/web` / Next.js 15.1.4):** Next.js App Router, React 19, TypeScript (strict), Tailwind CSS 3.4.17, Lucide Icons, Recharts 2.15, and `next-themes` (Dark/Light/System mode). Deployed to **Cloudflare Pages**.
-2. **Backend API Tier (`apps/api` / Node.js 20 LTS + Express 5.3):** Versioned REST API (`/api/v1/*`), strict Zod schema validation, JWT auth, tenant isolation, centralized error handling, and structured request logging. Deployed to **Zoho Cloud Catalyst AppSail**.
+1. **Frontend Tier (`src/` / Next.js 15.1.4):** Next.js App Router, React 19, TypeScript (strict), Tailwind CSS 3.4.17, Lucide Icons, Recharts 2.15, and `next-themes` (Dark/Light/System mode). Deployed to **Cloudflare Pages**.
+2. **Backend API Tier (`backend/` / Node.js 20 LTS + Express 5.3):** Versioned REST API (`/api/v1/*`), strict Zod schema validation, JWT auth, tenant isolation, centralized error handling, and structured request logging. Deployed to **Zoho Cloud Catalyst AppSail**.
 3. **Database Tier:** MongoDB (v8.9.3 Mongoose ODM) with schemas for Organizations, Users, Leads, Projects, AgentConfigs, Invoices, and Templates. Local development uses `mongodb://127.0.0.1:27017/agencyos`; production uses MongoDB Atlas TLS 1.3.
 
 ---

@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app } from "../../apps/api/src/app.js";
-import { IntegrationsService } from "../../apps/api/src/modules/integrations/integrations.service.js";
-import { ENV } from "../../apps/api/src/config/env.js";
+import { app } from "../../backend/src/app.js";
+import { IntegrationsService } from "../../backend/src/modules/integrations/integrations.service.js";
+import { ENV } from "../../backend/src/config/env.js";
 import jwt from "jsonwebtoken";
 
 describe("Integrations, Lead Audit & Outreach Capabilities", () => {

@@ -3,7 +3,7 @@
 /**
  * AgencyOS Backend Module Scaffolder
  * ----------------------------------
- * Generates an isolated, plug-and-play vertical slice module under `apps/api/src/modules/<name>/`
+ * Generates an isolated, plug-and-play vertical slice module under `backend/src/modules/<name>/`
  * and registers it automatically into the central module registry.
  *
  * Usage:
@@ -51,8 +51,8 @@ const kebabName = toKebabCase(rawName);
 const camelName = toCamelCase(rawName);
 const pascalName = toPascalCase(rawName);
 
-const moduleDir = path.join(rootDir, "apps", "api", "src", "modules", kebabName);
-const registryFile = path.join(rootDir, "apps", "api", "src", "modules", "index.ts");
+const moduleDir = path.join(rootDir, "backend", "src", "modules", kebabName);
+const registryFile = path.join(rootDir, "backend", "src", "modules", "index.ts");
 
 if (fs.existsSync(moduleDir)) {
   console.error(`\x1b[31m[ERROR] Module "${kebabName}" already exists at ${moduleDir}\x1b[0m`);
@@ -173,7 +173,7 @@ fs.writeFileSync(path.join(moduleDir, `${kebabName}.controller.ts`), controllerC
 fs.writeFileSync(path.join(moduleDir, `${kebabName}.routes.ts`), routesContent);
 fs.writeFileSync(path.join(moduleDir, "index.ts"), indexContent);
 
-// 6. Update central registry (apps/api/src/modules/index.ts)
+// 6. Update central registry (backend/src/modules/index.ts)
 if (fs.existsSync(registryFile)) {
   let registryCode = fs.readFileSync(registryFile, "utf-8");
 
@@ -207,7 +207,7 @@ if (fs.existsSync(registryFile)) {
 }
 
 console.log(`\n\x1b[32m✔ Plug-and-play module "${kebabName}" created successfully!\x1b[0m\n`);
-console.log(`📁 Files generated in: apps/api/src/modules/${kebabName}/`);
+console.log(`📁 Files generated in: backend/src/modules/${kebabName}/`);
 console.log(`   ├── ${kebabName}.service.ts    (Business logic & DB queries)`);
 console.log(`   ├── ${kebabName}.controller.ts (HTTP request handlers)`);
 console.log(`   ├── ${kebabName}.routes.ts     (Express route definitions)`);

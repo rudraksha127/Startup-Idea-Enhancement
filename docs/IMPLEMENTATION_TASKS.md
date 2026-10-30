@@ -11,7 +11,7 @@
 - [x] **Phase 1: Codebase Inspection, Full Audit & UI Inventory**
 - [x] **Phase 2: Architectural Partitioning (Frontend, Backend, Database)**
 - [x] **Phase 3: Zero-Dead-Controls Implementation & State Binding**
-- [x] **Phase 4: Production Express REST API Tier Scaffolding (`apps/api`)**
+- [x] **Phase 4: Production Express REST API Tier Scaffolding (`backend/`)**
 - [x] **Phase 5: MongoDB Schema Engineering & Seed Pipeline**
 - [x] **Phase 6: End-to-End Module-by-Module Integration & Verification**
 - [x] **Phase 7: Security Hardening, Multi-Tenant Isolation & Privacy Compliance**
@@ -32,7 +32,7 @@
 - [x] **Task 1.4:** Verify Git state and ensure all previous hotfixes are committed without regression.
 
 ### Phase 2 — Architectural Partitioning
-- [x] **Task 2.1:** Scaffold independent Express API directory structure under `apps/api/`.
+- [x] **Task 2.1:** Scaffold independent Express API directory structure under `backend/`.
 - [x] **Task 2.2:** Establish shared validation schemas and typed contracts between frontend and backend.
 - [x] **Task 2.3:** Configure TypeScript path aliases (`@/*`, `@agencyos/*`) and independent compilation pipelines.
 - [x] **Task 2.4:** Build dual-tier start scripts (`npm run dev` and `npm run dev:api`).
@@ -46,8 +46,8 @@
 - [x] **Task 3.5:** Standardize all chart tooltips across Analytics, Billing, Outreach, AI Agents with `WHITE_TOOLTIP_STYLE`.
 - [x] **Task 3.6:** Implement 3-way Theme Toggle (Light / Dark / System Default) in Header, Sidebar, and Settings with pure white light mode across subpages.
 
-### Phase 4 — Express REST API Tier (`apps/api/`)
-- [x] **Task 4.1:** Scaffold Express 4.21 server with TypeScript (`apps/api/src/server.ts`).
+### Phase 4 — Express REST API Tier (`backend/`)
+- [x] **Task 4.1:** Scaffold Express 4.21 server with TypeScript (`backend/src/server.ts`).
 - [x] **Task 4.2:** Implement security middlewares: CORS, Request-ID tracing, Error Handler, Rate Limiting, and JWT Auth.
 - [x] **Task 4.3:** Build REST controllers:
   - `auth.controller.ts` (register, login, session probe)
@@ -104,9 +104,9 @@
 - [x] **Task 9.4:** Author `docs/TESTING.md`.
 
 ### Phase 12 — Plug-and-Play Vertical Slice Backend Architecture
-- [x] **Task 12.1:** Design `AppModule` interface and universal backend developer toolkit in `apps/api/src/common/` (`async-handler.ts`, `api-response.ts`, `validate.middleware.ts`, `resolve-org.ts`).
-- [x] **Task 12.2:** Partition all API business domains into 10 isolated, self-contained vertical slices under `apps/api/src/modules/` (`health`, `auth`, `leads`, `clients`, `projects`, `campaigns`, `agents`, `dashboard`, `analytics`, `settings`).
-- [x] **Task 12.3:** Implement Central Module Registry (`apps/api/src/modules/index.ts`) with `activeModules` and automatic mounting via `registerAllModules()`.
+- [x] **Task 12.1:** Design `AppModule` interface and universal backend developer toolkit in `backend/src/common/` (`async-handler.ts`, `api-response.ts`, `validate.middleware.ts`, `resolve-org.ts`).
+- [x] **Task 12.2:** Partition all API business domains into 10 isolated, self-contained vertical slices under `backend/src/modules/` (`health`, `auth`, `leads`, `clients`, `projects`, `campaigns`, `agents`, `dashboard`, `analytics`, `settings`).
+- [x] **Task 12.3:** Implement Central Module Registry (`backend/src/modules/index.ts`) with `activeModules` and automatic mounting via `registerAllModules()`.
 - [x] **Task 12.4:** Build CLI Module Scaffolder (`scripts/create-backend-module.js` and `npm run new:module <name>`) allowing instant creation and auto-registration of new modules in 30 seconds without reading existing codebase.
 - [x] **Task 12.5:** Author canonical developer manual `docs/backend/MODULAR_ARCHITECTURE_GUIDE.md`.
 - [x] **Task 12.6:** Write unit & integration tests in `tests/unit/modules.test.ts` (all 29/29 tests passing).

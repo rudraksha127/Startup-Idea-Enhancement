@@ -15,7 +15,7 @@ This avoids deploying backend and database changes simultaneously.
 
 ## Current Schema Version: 1.0.0
 
-All models defined in `apps/api/src/models/`. No breaking migrations have been applied yet.
+All models defined in `backend/src/models/` and `src/models/`. No breaking migrations have been applied yet.
 
 ---
 

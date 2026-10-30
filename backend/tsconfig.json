@@ -12,12 +12,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "paths": {
-      "@agencyos/contracts": ["../../packages/contracts/src/index.ts"],
-      "@agencyos/validation": ["../../packages/validation/src/index.ts"],
-      "@agencyos/config": ["../../packages/config/src/index.ts"],
-      "@agencyos/utils": ["../../packages/utils/src/index.ts"]
+      "@agencyos/contracts": ["../packages/contracts/src/index.ts"],
+      "@agencyos/validation": ["../packages/validation/src/index.ts"],
+      "@agencyos/config": ["../packages/config/src/index.ts"],
+      "@agencyos/utils": ["../packages/utils/src/index.ts"]
     }
   },
   "include": ["src/**/*"]
 }
-

@@ -51,9 +51,9 @@ The application is ready for staging deployment and final pre-production validat
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
-| 10 modular vertical slices | ✅ PASS | `apps/api/src/modules/` |
+| 10 modular vertical slices | ✅ PASS | `backend/src/modules/` |
 | CLI module scaffolder | ✅ PASS | `npm run new:module <name>` tested |
-| TypeScript strict compile | ✅ PASS | `tsc -p apps/api/tsconfig.json --noEmit` |
+| TypeScript strict compile | ✅ PASS | `tsc -p backend/tsconfig.json --noEmit` |
 | Rate limiting (general) | ✅ PASS | 100 req/min via `express-rate-limit` |
 | Rate limiting (auth) | ✅ PASS | 10 req/15min on `/auth/*` |
 | Rate limiting (agents) | ✅ PASS | 20 runs/min on `/agents/:id/run` |

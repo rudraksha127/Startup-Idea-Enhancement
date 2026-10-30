@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app } from "../../apps/api/src/app";
-import { activeModules, getModule } from "../../apps/api/src/modules/index";
+import { app } from "../../backend/src/app";
+import { activeModules, getModule } from "../../backend/src/modules/index";
 
 describe("Backend Modular Architecture & Registry", () => {
   it("registers all core vertical slice modules", () => {

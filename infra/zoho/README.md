@@ -1,6 +1,6 @@
 # Zoho Catalyst AppSail Deployment Guide — AgencyOS REST API
 
-This guide provides step-by-step instructions for deploying the **AgencyOS Express REST API (`apps/api/`)** on **Zoho Catalyst AppSail**.
+This guide provides step-by-step instructions for deploying the **AgencyOS Express REST API (`backend/`)** on **Zoho Catalyst AppSail**.
 
 ---
 
@@ -22,7 +22,7 @@ Create `infra/zoho/catalyst.json` or place it in the project root:
   "appsail": [
     {
       "name": "agencyos-api",
-      "source": "apps/api",
+      "source": "backend",
       "build": "npm run build",
       "run": "node dist/server.js",
       "env_variables": {

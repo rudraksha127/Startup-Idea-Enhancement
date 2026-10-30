@@ -109,7 +109,7 @@ flowchart TB
 
 ### 3.2 Express API Backend (Zoho Cloud AppSail)
 - **Runtime:** Node.js 20 LTS.
-- **Framework:** Express.js with TypeScript (`apps/api`).
+- **Framework:** Express.js with TypeScript (`backend/`).
 - **Architecture:** Layered Controller-Service-Repository pattern:
   - `routes/`: Versioned route definitions (`/api/v1/auth`, `/api/v1/leads`, etc.).
   - `controllers/`: HTTP request/response handlers with typed payloads.

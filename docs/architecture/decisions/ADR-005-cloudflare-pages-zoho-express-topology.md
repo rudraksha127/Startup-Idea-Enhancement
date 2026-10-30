@@ -31,7 +31,7 @@ We will implement a **Dual-Tier Decoupled Architecture**:
    - All presentation logic, UI components, Tailwind CSS styling, Recharts visualization, and client-side route navigation execute at the edge on Cloudflare CDN.
    - Communicates with the backend exclusively via HTTPS/JSON REST API calls using `NEXT_PUBLIC_API_URL`.
 
-2. **Backend (`apps/api` / Node.js + Express.js + TypeScript):**
+2. **Backend (`backend/` / Node.js + Express.js + TypeScript):**
    - Runs on **Zoho Cloud (Catalyst AppSail)** in Node.js 20 LTS runtime.
    - Hosts all REST API endpoints under `/api/v1/...` and legacy `/api/...`.
    - Manages Mongoose connection pooling, schema validation, Zod request parsers, JWT authentication, bcrypt password hashing, and business logic.

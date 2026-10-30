@@ -8,7 +8,7 @@
 
 ## 1. Architectural Philosophy: Plug-and-Play Vertical Slices
 
-In AgencyOS, the backend is strictly organized into **self-contained, isolated vertical slice modules** under `apps/api/src/modules/`.
+In AgencyOS, the backend is strictly organized into **self-contained, isolated vertical slice modules** under `backend/src/modules/`.
 
 ### 🔑 The Core Rule
 > **You do NOT need to read, understand, or modify existing modules to build or integrate a new feature.**
@@ -16,7 +16,7 @@ In AgencyOS, the backend is strictly organized into **self-contained, isolated v
 > Every module is a standalone package containing its own routes, controller, service, and lifecycle hooks. New modules are plugged in by dropping a folder and adding one entry to the central registry.
 
 ```
-apps/api/src/
+backend/src/
 ├── common/                  <-- Universal Developer Toolkit (reused everywhere)
 │   ├── api-response.ts      (sendSuccess, sendError, sendPaginated)
 │   ├── async-handler.ts     (zero try/catch boilerplate)
@@ -46,7 +46,7 @@ apps/api/src/
 Every module folder follows the exact same 4-file structure:
 
 ```
-apps/api/src/modules/<name>/
+backend/src/modules/<name>/
 ├── <name>.service.ts    # Business logic & database operations
 ├── <name>.controller.ts # Express request/response handling
 ├── <name>.routes.ts     # Route mapping & middleware attachment
@@ -79,12 +79,12 @@ npm run new:module invoices
 ```
 
 This single command automatically:
-1. Creates `apps/api/src/modules/invoices/`
+1. Creates `backend/src/modules/invoices/`
 2. Generates `invoices.service.ts` with standard CRUD operations
 3. Generates `invoices.controller.ts` with typed handlers
 4. Generates `invoices.routes.ts` with REST endpoints
 5. Generates `index.ts` exporting `invoicesModule: AppModule`
-6. **Registers the module automatically** in `apps/api/src/modules/index.ts`
+6. **Registers the module automatically** in `backend/src/modules/index.ts`
 
 ### Immediately Available Endpoints:
 ```
@@ -98,7 +98,7 @@ DELETE /api/v1/invoices/:id   (Delete invoice)
 
 ---
 
-## 4. Universal Developer Toolkit (`apps/api/src/common/`)
+## 4. Universal Developer Toolkit (`backend/src/common/`)
 
 All modules share a standard zero-boilerplate toolkit. Never re-invent these utilities.
 
@@ -182,7 +182,7 @@ export const billingModule: AppModule = {
 ## 6. Manual Registration (If Not Using CLI)
 
 If you create a module folder manually:
-1. Open `apps/api/src/modules/index.ts`
+1. Open `backend/src/modules/index.ts`
 2. Import your module:
    ```typescript
    import { myModule } from "./my-module/index.js";
@@ -206,5 +206,5 @@ When writing code inside any module:
 
 1. **Strict Source Policy:** Never implement Google Maps scraping. Respect Indian DPDP Act 2023 and TRAI regulations.
 2. **Deterministic Outbound Actions:** Any action that sends emails, WhatsApp messages, or spends money must default to `dry_run = true` unless explicit authorization is verified.
-3. **NodeNext Import Conventions:** In `apps/api/`, always write explicit `.js` extensions for relative TypeScript imports (e.g., `import { LeadsService } from "./leads.service.js";`).
+3. **NodeNext Import Conventions:** In `backend/`, always write explicit `.js` extensions for relative TypeScript imports (e.g., `import { LeadsService } from "./leads.service.js";`).
 

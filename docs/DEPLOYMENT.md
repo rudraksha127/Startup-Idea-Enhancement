@@ -66,9 +66,9 @@ Release Criteria: **0 TypeScript errors, 100% test pass rate, 0 critical lint er
 5. Trigger initial deployment.
 
 ### 3.3. Backend API Deployment (Zoho Catalyst)
-1. Navigate to `apps/api`:
+1. Navigate to `backend`:
    ```bash
-   cd apps/api
+   cd backend
    npm run build
    ```
 2. Deploy via Catalyst CLI:
