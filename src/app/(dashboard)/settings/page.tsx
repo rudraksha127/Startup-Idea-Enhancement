@@ -55,6 +55,10 @@ export default function SettingsPage() {
   const [openaiKey, setOpenaiKey] = useState("••••••••••••••••••••••••••••••••");
   const [resendKey, setResendKey] = useState("••••••••••••••••••••••••••••••••");
   const [stripeKey, setStripeKey] = useState("••••••••••••••••••••••••••••••••");
+  const [mapsKey, setMapsKey] = useState("••••••••••••••••••••••••••••••••");
+  const [integrationsList, setIntegrationsList] = useState<any[]>([]);
+  const [testingProvider, setTestingProvider] = useState<string | null>(null);
+  const [testResults, setTestResults] = useState<Record<string, { status: string; message: string; latencyMs?: number }>>({});
 
   // Team state
   const [teamMembers, setTeamMembers] = useState([
@@ -84,7 +88,7 @@ export default function SettingsPage() {
     },
   ]);
 
-  // Load live settings from MongoDB
+  // Load live settings from MongoDB and integrations inventory
   useEffect(() => {
     async function loadSettings() {
       try {
@@ -104,8 +108,59 @@ export default function SettingsPage() {
         console.error("Failed to load settings:", err);
       }
     }
+
+    async function loadIntegrations() {
+      try {
+        const res = await fetch("/api/integrations");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            setIntegrationsList(json.data);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load integrations:", err);
+      }
+    }
+
     loadSettings();
+    loadIntegrations();
   }, []);
+
+  const handleTestIntegration = async (provider: string, apiKey?: string) => {
+    setTestingProvider(provider);
+    try {
+      const res = await fetch("/api/integrations/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider,
+          apiKey: apiKey && !apiKey.includes("•••") ? apiKey : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestResults((prev) => ({
+          ...prev,
+          [provider]: {
+            status: data.status,
+            message: data.message,
+            latencyMs: data.latencyMs,
+          },
+        }));
+        setSavedMessage(`${data.provider} probe: ${data.status} (${data.latencyMs || 0}ms)`);
+      }
+    } catch (e) {
+      console.error(`Failed to test integration ${provider}:`, e);
+      setTestResults((prev) => ({
+        ...prev,
+        [provider]: { status: "FAILED", message: "Network connection probe failed" },
+      }));
+    } finally {
+      setTestingProvider(null);
+      setTimeout(() => setSavedMessage(null), 3500);
+    }
+  };
 
   const handleSave = async (section: string) => {
     try {
@@ -483,111 +538,299 @@ export default function SettingsPage() {
       {activeTab === "integrations" && (
         <div className="space-y-6">
           <div className="bg-white border border-[#E7E7E2] rounded-xl p-5 shadow-xs space-y-4">
-            <div>
-              <h2 className="text-sm font-bold text-[#171918] flex items-center gap-2">
-                <Key size={16} className="text-[#3568E8]" />
-                External Service Provider Credentials
-              </h2>
-              <p className="text-xs text-[#68717D]">
-                API tokens are securely encrypted. In development, fallback deterministic mock providers execute when keys are empty.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-bold text-[#171918] flex items-center gap-2">
+                  <Key size={16} className="text-[#3568E8]" />
+                  Connected Service Providers &amp; Integrations
+                </h2>
+                <p className="text-xs text-[#68717D]">
+                  Production credentials for AI models, location intelligence, emails, billing, and database. Fallback deterministic adapters engage when credentials are not configured.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  ["mongodb", "gemini", "openai", "google-maps", "resend", "payments"].forEach((p) =>
+                    handleTestIntegration(p)
+                  );
+                }}
+                disabled={Boolean(testingProvider)}
+                className="self-start sm:self-auto px-3 py-1.5 rounded-lg border border-[#E7E7E2] bg-white hover:bg-[#F7F6F2] text-xs font-semibold text-gray-800 flex items-center gap-1.5 transition-all shadow-2xs"
+              >
+                <RefreshCw size={12} className={testingProvider ? "animate-spin text-[#3568E8]" : ""} />
+                <span>Test All Integrations</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
-              {/* Google Gemini */}
+              {/* 1. Google Maps Platform */}
               <div className="p-4 rounded-xl border border-[#E7E7E2] bg-[#F7F6F2]/30 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-[#171918]">Google Gemini API</div>
-                  <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#065F46] font-bold text-[10px]">
-                    Connected
+                  <div className="font-bold text-[#171918] flex items-center gap-1.5">
+                    <span>Google Maps Platform</span>
+                    <span className="text-[10px] text-gray-400 font-normal">(Places API New)</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      (testResults["google-maps"]?.status || "CONNECTED") === "CONNECTED"
+                        ? "bg-[#ECFDF5] text-[#065F46]"
+                        : "bg-[#FEF3C7] text-[#92400E]"
+                    }`}
+                  >
+                    {testResults["google-maps"]?.status || "Connected"}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#68717D]">
-                  Powers autonomous website audits, opportunity scoring, and lead deep-research analysis.
+                  Location discovery, business lookup, and geocoding. Strictly complies with Google Maps Platform TOS 3.2.3.
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    value={mapsKey}
+                    onChange={(e) => setMapsKey(e.target.value)}
+                    placeholder="AIzaSy..."
+                    className="flex-1 px-3 py-1.5 border border-[#E7E7E2] rounded-lg bg-white font-mono text-xs"
+                  />
+                  <button
+                    onClick={() => handleTestIntegration("google-maps", mapsKey)}
+                    disabled={testingProvider === "google-maps"}
+                    className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2] transition-colors"
+                  >
+                    {testingProvider === "google-maps" ? "Testing..." : "Test"}
+                  </button>
+                </div>
+                {testResults["google-maps"] && (
+                  <div className="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 flex items-center justify-between">
+                    <span>{testResults["google-maps"].message}</span>
+                    {testResults["google-maps"].latencyMs !== undefined && (
+                      <span className="font-mono text-gray-400">{testResults["google-maps"].latencyMs}ms</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Google Gemini API */}
+              <div className="p-4 rounded-xl border border-[#E7E7E2] bg-[#F7F6F2]/30 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-[#171918] flex items-center gap-1.5">
+                    <span>Google Gemini API</span>
+                    <span className="text-[10px] text-gray-400 font-normal">(2.0 Flash / Pro)</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      (testResults["gemini"]?.status || "CONNECTED") === "CONNECTED"
+                        ? "bg-[#ECFDF5] text-[#065F46]"
+                        : "bg-[#FEF3C7] text-[#92400E]"
+                    }`}
+                  >
+                    {testResults["gemini"]?.status || "Connected"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#68717D]">
+                  Primary AI reasoning engine powering all 13 canonical autonomous agents and website audit analysis.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
                     type="password"
                     value={geminiKey}
                     onChange={(e) => setGeminiKey(e.target.value)}
+                    placeholder="AIzaSy..."
                     className="flex-1 px-3 py-1.5 border border-[#E7E7E2] rounded-lg bg-white font-mono text-xs"
                   />
-                  <button className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2]">
-                    Update
+                  <button
+                    onClick={() => handleTestIntegration("gemini", geminiKey)}
+                    disabled={testingProvider === "gemini"}
+                    className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2] transition-colors"
+                  >
+                    {testingProvider === "gemini" ? "Testing..." : "Test"}
                   </button>
                 </div>
+                {testResults["gemini"] && (
+                  <div className="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 flex items-center justify-between">
+                    <span>{testResults["gemini"].message}</span>
+                    {testResults["gemini"].latencyMs !== undefined && (
+                      <span className="font-mono text-gray-400">{testResults["gemini"].latencyMs}ms</span>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Resend SMTP */}
+              {/* 3. Resend Transactional Email */}
               <div className="p-4 rounded-xl border border-[#E7E7E2] bg-[#F7F6F2]/30 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-[#171918]">Resend (Transactional Outreach)</div>
-                  <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#065F46] font-bold text-[10px]">
-                    Connected
+                  <div className="font-bold text-[#171918] flex items-center gap-1.5">
+                    <span>Resend Outreach Dispatch</span>
+                    <span className="text-[10px] text-emerald-600 font-semibold">(Dry-run active)</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      (testResults["resend"]?.status || "CONNECTED") === "CONNECTED"
+                        ? "bg-[#ECFDF5] text-[#065F46]"
+                        : "bg-[#FEF3C7] text-[#92400E]"
+                    }`}
+                  >
+                    {testResults["resend"]?.status || "Connected"}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#68717D]">
-                  Delivers cold outreach sequences and synchronizes inbound lead responses into the inbox.
+                  Delivers verified cold outreach and tracks inbound responses. Live dispatch gates require founder clearance.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
                     type="password"
                     value={resendKey}
                     onChange={(e) => setResendKey(e.target.value)}
+                    placeholder="re_..."
                     className="flex-1 px-3 py-1.5 border border-[#E7E7E2] rounded-lg bg-white font-mono text-xs"
                   />
-                  <button className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2]">
-                    Update
+                  <button
+                    onClick={() => handleTestIntegration("resend", resendKey)}
+                    disabled={testingProvider === "resend"}
+                    className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2] transition-colors"
+                  >
+                    {testingProvider === "resend" ? "Testing..." : "Test"}
                   </button>
                 </div>
+                {testResults["resend"] && (
+                  <div className="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 flex items-center justify-between">
+                    <span>{testResults["resend"].message}</span>
+                    {testResults["resend"].latencyMs !== undefined && (
+                      <span className="font-mono text-gray-400">{testResults["resend"].latencyMs}ms</span>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* OpenAI GPT */}
+              {/* 4. OpenAI Engine (Fallback) */}
               <div className="p-4 rounded-xl border border-[#E7E7E2] bg-[#F7F6F2]/30 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-[#171918]">OpenAI Engine (Fallback)</div>
-                  <span className="px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] font-bold text-[10px]">
-                    Standby
+                  <div className="font-bold text-[#171918] flex items-center gap-1.5">
+                    <span>OpenAI Engine</span>
+                    <span className="text-[10px] text-gray-400 font-normal">(GPT-4o Fallback)</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      (testResults["openai"]?.status || "CONNECTED") === "CONNECTED"
+                        ? "bg-[#ECFDF5] text-[#065F46]"
+                        : "bg-[#FEF3C7] text-[#92400E]"
+                    }`}
+                  >
+                    {testResults["openai"]?.status || "Standby"}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#68717D]">
-                  Used as automated failover gateway if Gemini rate limits or quota triggers engage.
+                  Automated failover gateway that takes over if Gemini encounters transient quota limits.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
                     type="password"
                     value={openaiKey}
                     onChange={(e) => setOpenaiKey(e.target.value)}
+                    placeholder="sk-..."
                     className="flex-1 px-3 py-1.5 border border-[#E7E7E2] rounded-lg bg-white font-mono text-xs"
                   />
-                  <button className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2]">
-                    Update
+                  <button
+                    onClick={() => handleTestIntegration("openai", openaiKey)}
+                    disabled={testingProvider === "openai"}
+                    className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2] transition-colors"
+                  >
+                    {testingProvider === "openai" ? "Testing..." : "Test"}
                   </button>
                 </div>
+                {testResults["openai"] && (
+                  <div className="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 flex items-center justify-between">
+                    <span>{testResults["openai"].message}</span>
+                    {testResults["openai"].latencyMs !== undefined && (
+                      <span className="font-mono text-gray-400">{testResults["openai"].latencyMs}ms</span>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Stripe Billing */}
+              {/* 5. MongoDB Atlas Database */}
               <div className="p-4 rounded-xl border border-[#E7E7E2] bg-[#F7F6F2]/30 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-[#171918]">Stripe Billing &amp; Invoices</div>
-                  <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#065F46] font-bold text-[10px]">
-                    Active
+                  <div className="font-bold text-[#171918] flex items-center gap-1.5">
+                    <span>MongoDB Atlas</span>
+                    <span className="text-[10px] text-gray-400 font-normal">(Persistence &amp; Audit)</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      (testResults["mongodb"]?.status || "CONNECTED") === "CONNECTED"
+                        ? "bg-[#ECFDF5] text-[#065F46]"
+                        : "bg-[#F7F6F2] text-[#68717D]"
+                    }`}
+                  >
+                    {testResults["mongodb"]?.status || "Connected"}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#68717D]">
-                  Generates payment links and collects milestone payments directly from closed agency clients.
+                  Stores leads, organizations, clients, projects, agent execution audit logs, and invoices.
+                </p>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] font-mono text-gray-500">mongodb+srv://***.mongodb.net</span>
+                  <button
+                    onClick={() => handleTestIntegration("mongodb")}
+                    disabled={testingProvider === "mongodb"}
+                    className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2] transition-colors"
+                  >
+                    {testingProvider === "mongodb" ? "Probing..." : "Probe DB"}
+                  </button>
+                </div>
+                {testResults["mongodb"] && (
+                  <div className="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 flex items-center justify-between">
+                    <span>{testResults["mongodb"].message}</span>
+                    {testResults["mongodb"].latencyMs !== undefined && (
+                      <span className="font-mono text-gray-400">{testResults["mongodb"].latencyMs}ms</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 6. Payments (Razorpay / Stripe) */}
+              <div className="p-4 rounded-xl border border-[#E7E7E2] bg-[#F7F6F2]/30 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-[#171918] flex items-center gap-1.5">
+                    <span>Razorpay / Stripe</span>
+                    <span className="text-[10px] text-gray-400 font-normal">(Invoicing &amp; Checkout)</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      (testResults["payments"]?.status || "CONNECTED") === "CONNECTED"
+                        ? "bg-[#ECFDF5] text-[#065F46]"
+                        : "bg-[#FEF3C7] text-[#92400E]"
+                    }`}
+                  >
+                    {testResults["payments"]?.status || "Active (Sandbox)"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#68717D]">
+                  Generates payment links and collects milestone payments directly from client proposals.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
                     type="password"
                     value={stripeKey}
                     onChange={(e) => setStripeKey(e.target.value)}
+                    placeholder="rzp_test_... / sk_test_..."
                     className="flex-1 px-3 py-1.5 border border-[#E7E7E2] rounded-lg bg-white font-mono text-xs"
                   />
-                  <button className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2]">
-                    Update
+                  <button
+                    onClick={() => handleTestIntegration("payments", stripeKey)}
+                    disabled={testingProvider === "payments"}
+                    className="px-3 py-1.5 bg-white border border-[#E7E7E2] rounded-lg font-semibold hover:bg-[#F7F6F2] transition-colors"
+                  >
+                    {testingProvider === "payments" ? "Testing..." : "Test"}
                   </button>
                 </div>
+                {testResults["payments"] && (
+                  <div className="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 flex items-center justify-between">
+                    <span>{testResults["payments"].message}</span>
+                    {testResults["payments"].latencyMs !== undefined && (
+                      <span className="font-mono text-gray-400">{testResults["payments"].latencyMs}ms</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

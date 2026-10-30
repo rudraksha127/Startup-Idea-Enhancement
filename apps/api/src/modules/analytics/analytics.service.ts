@@ -12,8 +12,8 @@ export class AnalyticsService {
           conversionRate: "4.8%",
           activeClients: 24,
           activeCampaigns: 8,
-          mrr: "₹85,000",
-          arr: "₹10,20,000",
+          mrr: "₹1,85,000",
+          arr: "₹1,10,20,000",
         },
         funnel: [
           { stage: "Discovered", count: 2847, percentage: 100 },
@@ -47,8 +47,8 @@ export class AnalyticsService {
         conversionRate: `${conversionRate}%`,
         activeClients: totalClients || 24,
         activeCampaigns: totalCampaigns || 8,
-        mrr: "₹85,000",
-        arr: "₹10,20,000",
+        mrr: "₹1,85,000",
+        arr: "₹1,10,20,000",
       },
       funnel: [
         { stage: "Discovered", count: totalLeads || 2847, percentage: 100 },

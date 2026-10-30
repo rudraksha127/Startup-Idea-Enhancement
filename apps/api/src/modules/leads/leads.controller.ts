@@ -49,4 +49,20 @@ export class LeadsController {
 
     return res.status(200).json({ success: true, lead });
   };
+
+  static runLeadAudit = async (req: Request, res: Response) => {
+    const leadId = extractId(req.params.leadId);
+    const orgId = await resolveOrgId(req);
+
+    const lead = await LeadsService.runLeadAudit(leadId, orgId);
+    if (!lead) {
+      return res.status(404).json({ error: "Lead not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Autonomous audit executed for ${lead.businessName}`,
+      lead,
+    });
+  };
 }

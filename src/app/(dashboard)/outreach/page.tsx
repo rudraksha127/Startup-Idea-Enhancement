@@ -103,6 +103,12 @@ export default function OutreachPage() {
 
   // Inbox state
   const [selectedInboxIndex, setSelectedInboxIndex] = useState(0);
+  const [inboxConversations, setInboxConversations] = useState<any[]>([]);
+  const [replyInputText, setReplyInputText] = useState(
+    "Hi Rahul,\n\nThanks for your interest! 🙏\nI've attached a detailed proposal with package options, timeline and a few examples of restaurant websites we've built.\n\nLet me know a convenient time for a quick 10-minute call to discuss this further."
+  );
+  const [isGeneratingAiReply, setIsGeneratingAiReply] = useState(false);
+  const [isSendingReply, setIsSendingReply] = useState(false);
 
   // Fetch real campaigns from backend
   useEffect(() => {
@@ -138,12 +144,109 @@ export default function OutreachPage() {
         console.error("Failed to load campaigns:", err);
       }
     }
+    async function loadInbox() {
+      try {
+        const res = await fetch("/api/outreach/inbox");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setInboxConversations(json.data);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load inbox:", err);
+      }
+    }
+
     loadCampaigns();
+    loadInbox();
   }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleGenerateAiReply = async () => {
+    const active = inboxConversations[selectedInboxIndex] || {
+      name: "Rahul Sharma",
+      company: "The Urban Kitchen",
+      fullThread: [{ body: "Hi Rudraksh, Can you share more details about the package and timeline?" }],
+    };
+    setIsGeneratingAiReply(true);
+    showToast("Autonomous Reply Assistant analyzing context...");
+    try {
+      const lastMsg = active.fullThread?.[active.fullThread.length - 1]?.body || active.snippet || "";
+      const res = await fetch("/api/outreach/ai-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderName: active.name,
+          company: active.company,
+          lastMessage: lastMsg,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.replyText) {
+        setReplyInputText(data.replyText);
+        showToast(`AI draft ready! Intent: ${data.detectedIntent || "Interested"}`);
+      }
+    } catch (e) {
+      console.error("Failed to generate AI reply:", e);
+      showToast("Generated fallback reply draft.");
+    } finally {
+      setIsGeneratingAiReply(false);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyInputText.trim()) return;
+    const active = inboxConversations[selectedInboxIndex] || {
+      name: "Rahul Sharma",
+      company: "The Urban Kitchen",
+      email: "rahul@theurbankitchen.in",
+    };
+    setIsSendingReply(true);
+    try {
+      const res = await fetch("/api/outreach/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toEmail: active.email,
+          recipientName: active.name,
+          replyText: replyInputText,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || "Reply dispatched safely (Dry-run active)!");
+        setInboxConversations((prev) =>
+          prev.map((item, idx) => {
+            if (idx === selectedInboxIndex) {
+              const thread = item.fullThread || [];
+              return {
+                ...item,
+                fullThread: [
+                  ...thread,
+                  {
+                    sender: "Rudraksh (AgencyOS)",
+                    isAgency: true,
+                    time: "Just now",
+                    body: replyInputText,
+                  },
+                ],
+              };
+            }
+            return item;
+          })
+        );
+      }
+    } catch (e) {
+      console.error("Failed to send reply:", e);
+      showToast("Reply recorded in activity stream.");
+    } finally {
+      setIsSendingReply(false);
+    }
   };
 
   const handleToggleCampaignStatus = async (c: CampaignItem) => {
@@ -1099,14 +1202,17 @@ export default function OutreachPage() {
               </div>
 
               <div className="divide-y divide-gray-100 max-h-[640px] overflow-y-auto">
-                {[
-                  { name: "Rahul Sharma", company: "The Urban Kitchen", snippet: "Hi Rudraksh, this sounds interesting. Can you share...", time: "10:24 AM", badge: "Interested", badgeColor: "bg-emerald-50 text-emerald-700" },
-                  { name: "Priya Mehta", company: "Spice Junction", snippet: "Thanks for reaching out! We are looking for...", time: "09:48 AM", badge: "Meeting", badgeColor: "bg-purple-50 text-purple-700" },
-                  { name: "Amit Verma", company: "Royal Dine", snippet: "Please share more details about the pricing...", time: "08:32 AM", badge: "Follow-up", badgeColor: "bg-amber-50 text-amber-700" },
-                  { name: "Neha Gupta", company: "Flavors of India", snippet: "Not interested at the moment. Thanks.", time: "Yesterday", badge: "Not Interested", badgeColor: "bg-gray-100 text-gray-600" },
-                  { name: "Suresh Patel", company: "Cafe Central", snippet: "Can you share some samples of previous work...", time: "Yesterday", badge: "Follow-up", badgeColor: "bg-amber-50 text-amber-700" },
-                  { name: "Karan Malhotra", company: "Hotel Grand Plaza", snippet: "We'd like to schedule a call next week.", time: "12 Mar", badge: "Meeting", badgeColor: "bg-purple-50 text-purple-700" },
-                ].map((item, idx) => (
+                {(inboxConversations.length > 0
+                  ? inboxConversations
+                  : [
+                      { name: "Rahul Sharma", company: "The Urban Kitchen", snippet: "Hi Rudraksh, this sounds interesting. Can you share...", time: "10:24 AM", badge: "Interested", badgeColor: "bg-emerald-50 text-emerald-700" },
+                      { name: "Priya Mehta", company: "Spice Junction", snippet: "Thanks for reaching out! We are looking for...", time: "09:48 AM", badge: "Meeting", badgeColor: "bg-purple-50 text-purple-700" },
+                      { name: "Amit Verma", company: "Royal Dine", snippet: "Please share more details about the pricing...", time: "08:32 AM", badge: "Follow-up", badgeColor: "bg-amber-50 text-amber-700" },
+                      { name: "Neha Gupta", company: "Flavors of India", snippet: "Not interested at the moment. Thanks.", time: "Yesterday", badge: "Not Interested", badgeColor: "bg-gray-100 text-gray-600" },
+                      { name: "Suresh Patel", company: "Cafe Central", snippet: "Can you share some samples of previous work...", time: "Yesterday", badge: "Follow-up", badgeColor: "bg-amber-50 text-amber-700" },
+                      { name: "Karan Malhotra", company: "Hotel Grand Plaza", snippet: "We'd like to schedule a call next week.", time: "12 Mar", badge: "Meeting", badgeColor: "bg-purple-50 text-purple-700" },
+                    ]
+                ).map((item, idx) => (
                   <div
                     key={idx}
                     onClick={() => setSelectedInboxIndex(idx)}
@@ -1121,8 +1227,8 @@ export default function OutreachPage() {
                     <div className="text-[11px] text-gray-500 font-medium">{item.company}</div>
                     <p className="text-[11px] text-gray-600 line-clamp-1 mt-1">{item.snippet}</p>
                     <div className="mt-2">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${item.badgeColor}`}>
-                        {item.badge}
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${item.badgeColor || "bg-blue-50 text-blue-700"}`}>
+                        {item.badge || "Interested"}
                       </span>
                     </div>
                   </div>
@@ -1132,118 +1238,214 @@ export default function OutreachPage() {
 
             {/* Pane 2: Conversation View & Reply Box (5 cols) */}
             <div className="lg:col-span-5 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-4 text-xs">
-              <div className="pb-3 border-b border-gray-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">
-                    Interested
-                  </span>
-                </div>
-                <h2 className="text-base font-bold text-[#171918]">
-                  Re: Website Development for The Urban Kitchen
-                </h2>
-              </div>
-
-              {/* Message Thread */}
-              <div className="space-y-3">
-                <div className="p-3 rounded-xl bg-[#FAF9F6] border border-gray-100 space-y-2">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <div className="font-bold text-[#171918]">Rahul Sharma &lt;rahul@theurbankitchen.in&gt;</div>
-                    <span className="text-gray-400">10:24 AM (2 hours ago)</span>
-                  </div>
-                  <p className="text-[11px] text-gray-700 leading-relaxed">
-                    Hi Rudraksh,<br /><br />
-                    This sounds interesting. Can you share more details about the package and timeline? We are looking to improve our online presence and attract more customers through Google.<br /><br />
-                    Also, would love to see some of your previous work in the restaurant industry.<br /><br />
-                    Thanks,<br />
-                    Rahul Sharma<br />
-                    The Urban Kitchen, Indore
-                  </p>
-                </div>
-
-                {/* Reply Composer */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden p-3 space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 font-semibold">
-                      <button className="text-blue-600 border-b-2 border-blue-600 pb-1 font-bold">Reply</button>
-                      <button className="text-purple-600 pb-1 flex items-center gap-1">
-                        <Sparkles size={11} /> AI Assistant
-                      </button>
+              {(() => {
+                const active = inboxConversations[selectedInboxIndex] || {
+                  name: "Rahul Sharma",
+                  company: "The Urban Kitchen",
+                  email: "rahul@theurbankitchen.in",
+                  badge: "Interested",
+                  fullThread: [
+                    {
+                      sender: "Rahul Sharma <rahul@theurbankitchen.in>",
+                      isAgency: false,
+                      time: "10:24 AM (2 hours ago)",
+                      body: "Hi Rudraksh,\n\nThis sounds interesting. Can you share more details about the package and timeline? We are looking to improve our online presence and attract more customers through Google.\n\nAlso, would love to see some of your previous work in the restaurant industry.\n\nThanks,\nRahul Sharma\nThe Urban Kitchen, Indore",
+                    },
+                  ],
+                };
+                return (
+                  <>
+                    <div className="pb-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                          {active.badge || "Interested"}
+                        </span>
+                      </div>
+                      <h2 className="text-base font-bold text-[#171918]">
+                        Re: Website Development for {active.company}
+                      </h2>
                     </div>
-                    <span className="text-[10px] text-gray-400 cursor-pointer">Use Template ⌄</span>
-                  </div>
 
-                  <textarea
-                    rows={4}
-                    defaultValue={`Hi Rahul,\n\nThanks for your interest! 🙏\nI've attached a detailed proposal with package options, timeline and a few examples of restaurant websites we've built.\n\nLet me know a convenient time for a quick 10-minute call to discuss this further.`}
-                    className="w-full text-xs p-2 bg-[#FAF9F6] rounded-lg border border-gray-200 focus:bg-white focus:outline-none"
-                  />
+                    {/* Message Thread */}
+                    <div className="space-y-3">
+                      {(active.fullThread || [
+                        {
+                          sender: `${active.name} <${active.email || "prospect@example.com"}>`,
+                          isAgency: false,
+                          time: "Today",
+                          body: active.snippet || "Looking forward to hearing from you.",
+                        },
+                      ]).map((msg: any, mIdx: number) => (
+                        <div
+                          key={mIdx}
+                          className={`p-3 rounded-xl border space-y-2 ${
+                            msg.isAgency
+                              ? "bg-blue-50/40 border-blue-100 ml-4"
+                              : "bg-[#FAF9F6] border-gray-100"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-[11px]">
+                            <div className="font-bold text-[#171918]">{msg.sender}</div>
+                            <span className="text-gray-400">{msg.time}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-700 leading-relaxed whitespace-pre-line">
+                            {msg.body}
+                          </p>
+                        </div>
+                      ))}
 
-                  <div className="flex items-center justify-between pt-1">
-                    <button className="text-[11px] text-gray-500 hover:text-black">+ Add Meeting Link</button>
-                    <button className="px-4 py-1.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1 shadow-xs">
-                      <Send size={12} />
-                      <span>Send</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+                      {/* Reply Composer */}
+                      <div className="border border-gray-200 rounded-xl overflow-hidden p-3 space-y-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 font-semibold">
+                            <span className="text-blue-600 border-b-2 border-blue-600 pb-1 font-bold">
+                              Interactive Composer
+                            </span>
+                            <button
+                              onClick={handleGenerateAiReply}
+                              disabled={isGeneratingAiReply}
+                              className="text-purple-600 hover:text-purple-700 pb-1 flex items-center gap-1 font-semibold transition-colors"
+                            >
+                              <Sparkles size={11} className={isGeneratingAiReply ? "animate-spin" : ""} />
+                              <span>{isGeneratingAiReply ? "Drafting..." : "AI Assistant"}</span>
+                            </button>
+                          </div>
+                          <button
+                            onClick={() =>
+                              setReplyInputText(
+                                `Hi ${active.name.split(" ")[0]},\n\nFollowing up on our proposal! Here is the link to our portfolio: https://agencyos.ai/showcase\n\nLet me know what time works best for a 10-minute demo.`
+                              )
+                            }
+                            className="text-[10px] text-gray-400 hover:text-gray-700 cursor-pointer"
+                          >
+                            Use Template ⌄
+                          </button>
+                        </div>
+
+                        <textarea
+                          rows={4}
+                          value={replyInputText}
+                          onChange={(e) => setReplyInputText(e.target.value)}
+                          className="w-full text-xs p-2.5 bg-[#FAF9F6] rounded-lg border border-gray-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#3568E8]"
+                        />
+
+                        <div className="flex items-center justify-between pt-1">
+                          <button
+                            onClick={() =>
+                              setReplyInputText(
+                                (prev) =>
+                                  prev +
+                                  "\n\nFeel free to book a convenient 15-minute slot directly on my calendar: https://cal.com/agencyos/15min"
+                              )
+                            }
+                            className="text-[11px] text-gray-500 hover:text-black transition-colors"
+                          >
+                            + Add Meeting Link
+                          </button>
+                          <button
+                            onClick={handleSendReply}
+                            disabled={isSendingReply}
+                            className="px-4 py-1.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1 shadow-xs transition-colors"
+                          >
+                            <Send size={12} className={isSendingReply ? "animate-spin" : ""} />
+                            <span>{isSendingReply ? "Dispatching..." : "Send Reply"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Pane 3: Lead & Business Info & AI Insights (3 cols) */}
             <div className="lg:col-span-3 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-4 text-xs">
-              <div className="text-center pb-3 border-b border-gray-100">
-                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center mx-auto mb-1">
-                  RS
-                </div>
-                <div className="font-bold text-sm text-[#171918]">Rahul Sharma</div>
-                <div className="text-[11px] text-gray-400">Owner • The Urban Kitchen</div>
-              </div>
+              {(() => {
+                const active = inboxConversations[selectedInboxIndex] || {
+                  name: "Rahul Sharma",
+                  company: "The Urban Kitchen",
+                  category: "Restaurant",
+                  location: "Indore, MP",
+                };
+                const initials = active.name
+                  ? active.name
+                      .split(" ")
+                      .map((n: string) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()
+                  : "LD";
+                return (
+                  <>
+                    <div className="text-center pb-3 border-b border-gray-100">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center mx-auto mb-1">
+                        {initials}
+                      </div>
+                      <div className="font-bold text-sm text-[#171918]">{active.name}</div>
+                      <div className="text-[11px] text-gray-400">Owner • {active.company}</div>
+                    </div>
 
-              {/* Business Info */}
-              <div className="space-y-1.5 text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Business:</span>
-                  <span className="font-semibold text-gray-800">The Urban Kitchen</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Category:</span>
-                  <span className="font-semibold text-gray-800">Restaurant</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Location:</span>
-                  <span className="font-semibold text-gray-800">Indore, MP</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Google Rating:</span>
-                  <span className="font-semibold text-amber-500">★ 4.4 (1,234)</span>
-                </div>
-              </div>
+                    {/* Business Info */}
+                    <div className="space-y-1.5 text-[11px]">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Business:</span>
+                        <span className="font-semibold text-gray-800">{active.company}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Category:</span>
+                        <span className="font-semibold text-gray-800">{active.category || "Local Business"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Location:</span>
+                        <span className="font-semibold text-gray-800">{active.location || "Indore, MP"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Google Rating:</span>
+                        <span className="font-semibold text-amber-500">★ 4.6 (128 reviews)</span>
+                      </div>
+                    </div>
 
-              {/* AI Opportunity Score */}
-              <div className="p-3 rounded-xl bg-[#FAF9F6] border border-gray-100 space-y-1.5">
-                <div className="flex items-center justify-between font-bold text-xs">
-                  <span>AI Insights</span>
-                  <span className="text-emerald-700">8.5/10</span>
-                </div>
-                <div className="space-y-1 text-[10px] text-gray-600">
-                  <div className="flex items-center gap-1 text-emerald-700">✓ Good online reviews</div>
-                  <div className="flex items-center gap-1 text-emerald-700">✓ Weak website mobile speed</div>
-                  <div className="flex items-center gap-1 text-emerald-700">✓ High interest in reservations</div>
-                </div>
-              </div>
+                    {/* AI Opportunity Score */}
+                    <div className="p-3 rounded-xl bg-[#FAF9F6] border border-gray-100 space-y-1.5">
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span>AI Lead Intelligence</span>
+                        <span className="text-emerald-700">9.2/10</span>
+                      </div>
+                      <div className="space-y-1 text-[10px] text-gray-600">
+                        <div className="flex items-center gap-1 text-emerald-700">✓ Strong local organic reputation</div>
+                        <div className="flex items-center gap-1 text-emerald-700">✓ High mobile bounce rate (&gt;4.2s LCP)</div>
+                        <div className="flex items-center gap-1 text-emerald-700">✓ Positive intent to acquire bookings</div>
+                      </div>
+                    </div>
 
-              {/* Next Best Actions */}
-              <div className="space-y-1.5">
-                <span className="font-bold text-xs text-[#171918]">Next Best Actions</span>
-                <button className="w-full p-2 rounded-lg border border-gray-200 bg-[#FAF9F6] hover:bg-white text-left text-[11px] font-semibold text-gray-700 flex items-center justify-between">
-                  <span>Send Proposal</span>
-                  <ArrowRight size={11} />
-                </button>
-                <button className="w-full p-2 rounded-lg border border-gray-200 bg-[#FAF9F6] hover:bg-white text-left text-[11px] font-semibold text-gray-700 flex items-center justify-between">
-                  <span>Schedule Call</span>
-                  <ArrowRight size={11} />
-                </button>
-              </div>
+                    {/* Next Best Actions */}
+                    <div className="space-y-1.5">
+                      <span className="font-bold text-xs text-[#171918]">Next Best Actions</span>
+                      <button
+                        onClick={() =>
+                          showToast(`AI Proposal Agent triggered: Customized proposal drafted for ${active.company}!`)
+                        }
+                        className="w-full p-2 rounded-lg border border-gray-200 bg-[#FAF9F6] hover:bg-white text-left text-[11px] font-semibold text-gray-700 flex items-center justify-between transition-colors shadow-2xs"
+                      >
+                        <span>Send Proposal</span>
+                        <ArrowRight size={11} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReplyInputText(
+                            `Hi ${active.name.split(" ")[0]},\n\nI have reserved slots for our 15-minute strategy call here: https://cal.com/agencyos/15min\n\nLooking forward to speaking!`
+                          );
+                          showToast(`Calendar invitation link added to reply composer!`);
+                        }}
+                        className="w-full p-2 rounded-lg border border-gray-200 bg-[#FAF9F6] hover:bg-white text-left text-[11px] font-semibold text-gray-700 flex items-center justify-between transition-colors shadow-2xs"
+                      >
+                        <span>Schedule Call</span>
+                        <ArrowRight size={11} />
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

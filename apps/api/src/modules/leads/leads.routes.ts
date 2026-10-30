@@ -10,4 +10,5 @@ leadsRouter.get("/", asyncHandler(LeadsController.getLeads));
 leadsRouter.post("/", validateBody(createLeadSchema), asyncHandler(LeadsController.createLead));
 leadsRouter.get("/:leadId", asyncHandler(LeadsController.getLeadById));
 leadsRouter.patch("/:leadId", validateBody(updateLeadStatusSchema), asyncHandler(LeadsController.updateLeadStatus));
+leadsRouter.post("/:leadId/audit", asyncHandler(LeadsController.runLeadAudit));
 

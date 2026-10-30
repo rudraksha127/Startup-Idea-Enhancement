@@ -16,10 +16,14 @@ erDiagram
     ORGANIZATION ||--o{ PROJECT : "manages projects"
     ORGANIZATION ||--o{ CAMPAIGN : "runs campaigns"
     ORGANIZATION ||--o{ AGENT_CONFIG : "configures agents"
+    ORGANIZATION ||--o{ AGENT_EXECUTION : "logs agent runs"
+    ORGANIZATION ||--o{ INVOICE : "issues invoices"
+    ORGANIZATION ||--o{ TEMPLATE : "maintains templates"
     LEAD ||--o{ LEAD_NOTE : "has notes"
     LEAD ||--o{ OUTREACH_MESSAGE : "receives dispatches"
     CAMPAIGN ||--o{ OUTREACH_MESSAGE : "tracks messages"
     CLIENT ||--o{ PROJECT : "commissions"
+    CLIENT ||--o{ INVOICE : "billed via"
 ```
 
 ---
@@ -120,13 +124,85 @@ Configurations and execution telemetry for AI agent workers.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `organizationId` | ObjectId | Yes | Tenant reference |
-| `agentId` | String | Yes | Agent type (`researcher`, `auditor`, `outreach`, `followup`) |
+| `agentId` | String | Yes | Agent type (`researcher`, `auditor`, `outreach`, `followup`, etc.) |
 | `name` | String | Yes | Human-readable title |
 | `status` | String | Yes | `active` \| `paused` |
 | `model` | String | Yes | Model identifier (`gemini-2.5-flash`, etc.) |
 | `processedToday` | Number | Yes | Daily action count |
 | `dailyCap` | Number | Yes | Maximum allowed runs per day |
 | `lastRunAt` | Date | No | Timestamp of most recent execution |
+
+### 2.8. `agent_executions` Collection
+Comprehensive audit trail, lifecycle state transitions, tokens, and approval records for all 13 AI agents.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `agentId` | String | Yes | Canonical agent identifier (e.g. `market-researcher`, `audit-analyst`) |
+| `agentName` | String | Yes | Human-readable agent title |
+| `organizationId` | ObjectId | Yes | Tenant boundary reference |
+| `triggeredBy` | String | Yes | `USER` \| `SCHEDULE` \| `WEBHOOK` \| `PIPELINE` |
+| `status` | String | Yes | `CREATED` \| `QUEUED` \| `VALIDATING` \| `RUNNING` \| `AWAITING_APPROVAL` \| `COMPLETED` \| `FAILED` \| `REJECTED` |
+| `requiresApproval` | Boolean | Yes | True for supervised agents (outreach, code deploy) |
+| `approvalStatus` | String | Yes | `NOT_REQUIRED` \| `PENDING` \| `APPROVED` \| `REJECTED` |
+| `inputPayload` | Object | Yes | Validated Zod input parameters |
+| `outputPayload` | Object | No | Structured JSON execution result |
+| `executionMetrics` | Object | Yes | Duration (ms), token usage, estimated cost, attempts count |
+| `creditsDeducted` | Number | Yes | System credits deducted |
+
+### 2.9. `invoices` Collection
+Financial ledger tracking client milestones, payment gateway sessions, and tax invoices.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `invoiceNumber` | String | Yes | Formatted sequential ID (e.g. `INV-2024-001`) |
+| `organizationId` | ObjectId | Yes | Tenant reference |
+| `clientId` | ObjectId / String | Yes | Client reference |
+| `clientName` | String | Yes | Client or business name |
+| `amount` | Number | Yes | Total milestone amount in INR |
+| `currency` | String | Yes | `INR` \| `USD` (default: `INR`) |
+| `status` | String | Yes | `PAID` \| `PENDING` \| `OVERDUE` \| `DRAFT` |
+| `dueDate` | Date | Yes | Payment deadline timestamp |
+| `paidAt` | Date | No | Payment completion timestamp |
+| `items` | Array | Yes | Line items with description, quantity, and unit price |
+
+### 2.10. `templates` Collection
+Industry website templates and component scaffolds ready for one-click project initialization.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | String | Yes | Template title (e.g. `Restaurant & Cafe Bistro`) |
+| `slug` | String | Yes | URL slug identifier |
+| `category` | String | Yes | `Restaurant` \| `Clinic` \| `Fitness` \| `Salon` \| `Hotel` \| `Corporate` |
+| `description` | String | Yes | Architectural summary and tech stack |
+| `features` | Array | Yes | Included interactive capabilities |
+| `isCustom` | Boolean | Yes | Whether created by user or built-in system template |
+| `downloads` | Number | Yes | Count of projects spawned |
+
+### 2.11. `lead_notes` Collection
+Activity timeline, internal notes, and team collaboration records on individual leads.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `leadId` | ObjectId | Yes | Reference to target lead |
+| `organizationId` | ObjectId | Yes | Tenant boundary |
+| `author` | String | Yes | Name of note creator |
+| `content` | String | Yes | Note text content |
+| `type` | String | Yes | `note` \| `call_log` \| `status_change` \| `audit` |
+
+### 2.12. `outreach_messages` Collection
+Outbound and inbound communication dispatches across Email, WhatsApp, and SMS with dry-run safety flags.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `organizationId` | ObjectId | Yes | Tenant reference |
+| `leadId` | ObjectId | Yes | Reference to lead prospect |
+| `toEmail` | String | Yes | Recipient email address |
+| `recipientName` | String | Yes | Recipient contact or business name |
+| `subject` | String | Yes | Email subject line |
+| `body` | String | Yes | Dispatched message body |
+| `status` | String | Yes | `Sent` \| `Delivered` \| `Opened` \| `Replied` \| `Bounced` |
+| `templateUsed` | String | No | Template identifier |
+| `sentAt` | Date | Yes | Dispatch timestamp |
 
 ---
 
@@ -139,4 +215,8 @@ Configurations and execution telemetry for AI agent workers.
 - `campaigns.organizationId_1_status_1`: Compound index
 - `projects.organizationId_1_status_1`: Compound index
 - `agent_configs.organizationId_1_agentId_1`: Unique compound index
+- `agent_executions.organizationId_1_agentId_1_createdAt_-1`: Fast audit search index
+- `invoices.organizationId_1_status_1`: Invoicing ledger compound index
+- `templates.organizationId_1_category_1`: Template filtering index
+- `outreach_messages.organizationId_1_leadId_1`: Prospect communication timeline index
 

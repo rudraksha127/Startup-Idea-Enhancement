@@ -6,16 +6,20 @@ import { Organization } from "../models/Organization.js";
  * Resolves the active organization ID from request user auth or default demo organization.
  * Safely guards against Mongoose command buffering when disconnected (e.g. in test suite).
  */
+const DEFAULT_ORG_ID = "507f191e810c19729de860ea";
+
 export async function resolveOrgId(req: Request): Promise<string> {
-  if (req.user?.organizationId) return req.user.organizationId;
+  if (req.user?.organizationId && /^[0-9a-fA-F]{24}$/.test(req.user.organizationId)) {
+    return req.user.organizationId;
+  }
   if (mongoose.connection.readyState !== 1) {
-    return "demo-org-id";
+    return DEFAULT_ORG_ID;
   }
   try {
     const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-    return defaultOrg?._id?.toString() || "demo-org-id";
+    return defaultOrg?._id?.toString() || DEFAULT_ORG_ID;
   } catch {
-    return "demo-org-id";
+    return DEFAULT_ORG_ID;
   }
 }
 
