@@ -52,3 +52,4 @@ Applied by Next.js and Express middleware:
 ### 3.3. Abuse Prevention & Rate Limiting
 - **Global API Rate Limit:** 300 requests per 15-minute window per IP address via `express-rate-limit`.
 - **Auth Endpoint Rate Limit:** 10 attempts per 15-minute window on `/api/v1/auth/login`.
+

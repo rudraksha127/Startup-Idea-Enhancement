@@ -139,3 +139,4 @@ Configurations and execution telemetry for AI agent workers.
 - `campaigns.organizationId_1_status_1`: Compound index
 - `projects.organizationId_1_status_1`: Compound index
 - `agent_configs.organizationId_1_agentId_1`: Unique compound index
+

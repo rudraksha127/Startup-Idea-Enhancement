@@ -82,3 +82,4 @@ npm run typecheck:api   # Express Backend & Controllers
 5. **`tests/unit/components.test.tsx`**:
    - Theme toggle rendering
    - Active state and selector dropdowns
+

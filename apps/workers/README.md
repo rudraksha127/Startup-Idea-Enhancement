@@ -43,3 +43,4 @@ Used in serverless Catalyst deployments:
    Lead enrichment operates exclusively on provided URLs or compliant search providers. Web scraping against Google Maps endpoints is strictly rejected per Section 3.2.3 of Google Maps TOS and the Indian DPDP Act 2023.
 3. **Job Idempotency:**
    Every queued task utilizes an `idempotencyKey` formatted as `leadId:campaignId:stepNumber` to prevent accidental duplicate messaging.
+

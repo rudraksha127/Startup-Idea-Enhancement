@@ -112,3 +112,4 @@ agencyos/
 2. **Deterministic Safety Boundaries:** All outbound communication (emails, SMS, WhatsApp, ad spends) enforces `dry_run = true` by default. Real dispatches require explicit operator gate approval.
 3. **Strict Compliance Policy:** Scraping Google Maps / Places endpoints is prohibited per Section 3.2.3 of Google Maps TOS and the Indian DPDP Act 2023. Lead acquisition uses compliant APIs and explicit data sources.
 4. **Shared Contract Validation:** Data exchanged between frontend forms, API route handlers, and backend controllers is strictly validated via `@agencyos/validation` Zod schemas.
+

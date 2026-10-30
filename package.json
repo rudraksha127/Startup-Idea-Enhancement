@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "seed": "tsx src/lib/seed/seed-data.ts"
+    "seed": "tsx src/lib/seed/seed-data.ts",
+    "new:module": "node scripts/create-backend-module.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

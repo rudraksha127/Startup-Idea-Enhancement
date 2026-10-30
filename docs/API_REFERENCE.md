@@ -137,3 +137,4 @@ These endpoints power client interactions directly within the Next.js applicatio
 | `POST` | `/api/agents/[id]/run` | Dispatches single AI agent task and updates telemetry |
 | `GET` | `/api/analytics/overview` | Aggregated lead/client/campaign performance metrics |
 | `GET, PATCH` | `/api/settings` | Fetches and updates workspace settings and API keys |
+

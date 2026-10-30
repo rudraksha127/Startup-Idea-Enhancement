@@ -82,3 +82,4 @@ AppSail utilizes HTTP probes to determine container vitality.
 - **Probe Endpoint:** `GET /api/v1/health`
 - **Expected Status:** `200 OK` (when MongoDB is connected) or `503 Service Unavailable` (structured JSON payload with `requestId` and error details).
 - **Service Root Probe:** `GET /` returns API version and uptime metrics.
+

@@ -70,3 +70,4 @@ Cloudflare Pages automatically applies the security headers configured in `next.
 - [ ] Authentication sets secure HTTP-only cookies
 - [ ] `/dashboard`, `/leads`, `/map-explorer`, `/ai-agents`, `/outreach`, `/clients`, `/projects` load and render real database entities
 - [ ] All outbound actions retain `dry_run = true` safety defaults
+
