@@ -26,7 +26,7 @@ export default function DashboardLayout({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F7F6F2] dark:bg-[#0B0F0E] flex text-[#171918] dark:text-[#F7F9F8] transition-colors duration-200">
+    <div className="min-h-screen bg-white dark:bg-[#0B0F0E] flex text-[#0F172A] dark:text-[#F7F9F8] transition-colors duration-200">
       {/* Sidebar */}
       <AppSidebar
         leadCount={leadCount}
@@ -50,13 +50,13 @@ export default function DashboardLayout({
           {children}
         </main>
 
-        <footer className="border-t border-[#E7E7E2] dark:border-[#22302B] bg-white/40 dark:bg-[#121816]/40 px-6 py-3 flex flex-col sm:flex-row items-center justify-between text-xs text-[#68717D] dark:text-[#9AA29E] gap-2">
+        <footer className="border-t border-[#E2E8F0] dark:border-[#22302B] bg-white dark:bg-[#121816]/40 px-6 py-3 flex flex-col sm:flex-row items-center justify-between text-xs text-[#64748B] dark:text-[#9AA29E] gap-2">
           <span>© 2024–2026 AgencyOS</span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.2)]" />
             All systems operational
           </span>
-          <Link href="/" className="hover:text-[#171918] dark:hover:text-white font-medium transition-colors">
+          <Link href="/" className="hover:text-[#0F172A] dark:hover:text-white font-medium transition-colors">
             Marketing site →
           </Link>
         </footer>

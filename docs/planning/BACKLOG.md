@@ -30,7 +30,7 @@
 | **TASK-018** | `FR-014` | **P2** | M4 | Build Monthly Client Performance & Uptime PDF Report Dispatcher | `PROPOSED` |
 | **TASK-019** | `FR-015` | **P0** | M1 | Implement Global Operator Emergency Kill Switch in UI & API | `PROPOSED` |
 | **TASK-020** | `NFR-007` | **P1** | M1 | Configure Strict TypeScript Types & Zod Request Validation | `PROPOSED` |
-| **TASK-021** | `NFR-006` | **P2** | M1 | Apply Tailwind CSS Dark/Light Accessible Admin Theme (WCAG AA) | `PROPOSED` |
+| **TASK-021** | `NFR-006` | **P2** | M1 | Apply Tailwind CSS Dark/Light Accessible Admin Theme (WCAG AA) | `COMPLETED` |
 | **TASK-022** | `NFR-003` | **P1** | M2 | Implement Exponential Backoff & Retry Policies in n8n Workflows | `PROPOSED` |
 | **TASK-023** | `BM-04` | **P2** | M4 | Build Retainer Subscription Lifecycle & Quarterly Billing Tracker | `PROPOSED` |
 | **TASK-024** | `NFR-008` | **P1** | M4 | Implement Infrastructure Cost & Token Budget Monitor | `PROPOSED` |
