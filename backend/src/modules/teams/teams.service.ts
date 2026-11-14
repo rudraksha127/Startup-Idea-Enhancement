@@ -1,113 +1,78 @@
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import { User, IUser } from "../../models/User.js";
-
-const DEFAULT_MEMBERS = [
-  { id: "mem-1", name: "Alex Rivera", email: "alex@agencyos.ai", role: "Founder", twoFactor: true, status: "Active" },
-  { id: "mem-2", name: "Sarah Chen", email: "sarah@agencyos.ai", role: "Developer", twoFactor: true, status: "Active" },
-  { id: "mem-3", name: "Marcus Vance", email: "marcus@agencyos.ai", role: "Operator", twoFactor: false, status: "Active" },
-  { id: "mem-4", name: "Elena Rostova", email: "elena@agencyos.ai", role: "Admin", twoFactor: true, status: "Invited" },
-];
+import { UsersRepository } from "../../repositories/users.repository.js";
+import { OrganizationsRepository } from "../../repositories/organizations.repository.js";
+import { UserRecord } from "../../infrastructure/persistence/zoho-catalyst/catalyst.types.js";
 
 export class TeamsService {
   /**
-   * Retrieves all team members belonging to the tenant's organization boundary.
+   * Retrieves all team members belonging strictly to the tenant's organization boundary.
    */
   static async listMembers(orgId: string) {
-    if (mongoose.connection.readyState !== 1) {
-      return DEFAULT_MEMBERS;
+    let users = await UsersRepository.findByOrg(orgId);
+    if (users.length === 0) {
+      // Auto-provision primary founder/owner record for tenant in local/test store
+      const founder = await UsersRepository.create({
+        userId: `usr_founder_${orgId}`,
+        organizationId: orgId,
+        name: "Agency Founder",
+        email: "founder@agencyos.io",
+        passwordHash: "$2a$10$xyz",
+        role: "Founder",
+      });
+      users = [founder];
     }
-
-    try {
-      const users = await User.find({ organizationId: orgId }).select("-passwordHash").lean();
-      if (users.length === 0) {
-        // Seed default team members for tenant
-        const seeded = [];
-        for (const m of DEFAULT_MEMBERS) {
-          const pass = await bcrypt.hash("Password123!", 10);
-          const u = await User.create({
-            name: m.name,
-            email: m.email,
-            passwordHash: pass,
-            role: m.role as any,
-            organizationId: new mongoose.Types.ObjectId(orgId),
-            avatarInitials: m.name.split(" ").map((n) => n[0]).join(""),
-          });
-          seeded.push({
-            id: u._id.toString(),
-            name: u.name,
-            email: u.email,
-            role: u.role,
-            twoFactor: true,
-            status: "Active",
-            createdAt: u.createdAt,
-          });
-        }
-        return seeded;
-      }
-
-      return users.map((u) => ({
-        id: u._id.toString(),
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        twoFactor: true,
-        status: "Active",
-        createdAt: u.createdAt,
-      }));
-    } catch {
-      return DEFAULT_MEMBERS;
-    }
+    return users.map((u) => ({
+      id: u.userId,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      twoFactor: true,
+      status: "Active",
+      createdAt: u.createdAt,
+    }));
   }
 
   /**
-   * Invites a new team member to collaborate within the tenant organization.
+   * Invites a new team member to collaborate within the tenant organization boundary.
    */
   static async inviteMember(orgId: string, data: { name: string; email: string; role?: string }) {
     if (!data.email || !data.name) {
       throw new Error("Name and email are required to invite a team member");
     }
 
-    const role = (data.role || "Operator") as "Founder" | "Admin" | "Operator" | "Developer";
-    const initials = data.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-
-    if (mongoose.connection.readyState !== 1) {
-      const mockId = "mem-" + Date.now().toString(36);
-      return {
-        id: mockId,
-        name: data.name,
-        email: data.email.toLowerCase(),
-        role,
-        twoFactor: false,
-        status: "Invited",
-        organizationId: orgId,
-        invitationToken: "inv_tok_" + Date.now().toString(36),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        createdAt: new Date(),
-      };
+    let org = await OrganizationsRepository.findById(orgId);
+    if (!org) {
+      org = await OrganizationsRepository.create({
+        orgId,
+        name: "Acme Agency",
+        slug: "acme-agency",
+        plan: "growth",
+        credits: 1000,
+      });
     }
 
-    // Check for existing user in org
-    const existing = await User.findOne({
-      email: data.email.toLowerCase(),
-      organizationId: orgId,
-    });
-    if (existing) {
+    const assignedRole = data.role || "Operator";
+
+    // Check for existing user with this email in the organization
+    const existing = await UsersRepository.findByEmail(data.email.toLowerCase());
+    if (existing && existing.organizationId === orgId) {
       throw new Error(`User with email "${data.email}" is already a member of this organization`);
     }
 
-    const tempPasswordHash = await bcrypt.hash("TempPass" + Date.now(), 10);
-    const newUser = await User.create({
+    const tempPasswordHash = await bcrypt.hash(`InvitedUser_${Date.now()}_Secret!`, 10);
+    const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
+    const newUser = await UsersRepository.create({
+      userId,
       name: data.name,
       email: data.email.toLowerCase(),
       passwordHash: tempPasswordHash,
-      role,
-      organizationId: new mongoose.Types.ObjectId(orgId),
-      avatarInitials: initials,
+      role: assignedRole,
+      organizationId: orgId,
     });
 
     return {
-      id: newUser._id.toString(),
+      id: newUser.userId,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
@@ -121,30 +86,18 @@ export class TeamsService {
   }
 
   /**
-   * Updates an existing team member's role with deterministic authorization rules.
+   * Updates an existing team member's role within the organization tenant boundary.
    */
   static async updateMemberRole(memberId: string, orgId: string, role: string) {
-    const validRoles = ["Founder", "Admin", "Operator", "Developer"];
-    if (!validRoles.includes(role)) {
-      throw new Error(`Invalid role "${role}". Allowed roles: ${validRoles.join(", ")}`);
-    }
-
-    if (mongoose.connection.readyState !== 1) {
-      return { id: memberId, role, updated: true };
-    }
-
-    const updated = await User.findOneAndUpdate(
-      { _id: memberId, organizationId: orgId },
-      { $set: { role } },
-      { new: true }
-    ).select("-passwordHash").lean();
-
-    if (!updated) {
+    const user = await UsersRepository.findById(memberId);
+    if (!user || user.organizationId !== orgId) {
       throw new Error("Team member not found or access denied");
     }
 
+    const updated = await UsersRepository.update(user.userId, { role });
+
     return {
-      id: updated._id.toString(),
+      id: updated.userId,
       name: updated.name,
       email: updated.email,
       role: updated.role,
@@ -156,20 +109,16 @@ export class TeamsService {
    * Removes a team member from the organization tenant boundary.
    */
   static async removeMember(memberId: string, orgId: string) {
-    if (mongoose.connection.readyState !== 1) {
-      return { success: true, removedId: memberId };
-    }
-
-    const result = await User.findOneAndDelete({
-      _id: memberId,
-      organizationId: orgId,
-    });
-
-    if (!result) {
+    const user = await UsersRepository.findById(memberId);
+    if (!user || user.organizationId !== orgId) {
       throw new Error("Team member not found or access denied");
     }
 
-    return { success: true, removedId: memberId, email: result.email };
+    if (user.role === "owner") {
+      throw new Error("Cannot remove the organization owner");
+    }
+
+    await UsersRepository.delete(user.userId);
+    return { success: true, removedId: memberId, email: user.email };
   }
 }
-

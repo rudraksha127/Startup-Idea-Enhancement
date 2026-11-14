@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User } from "../../models/User.js";
-import { Organization } from "../../models/Organization.js";
+import { UsersRepository } from "../../repositories/users.repository.js";
+import { OrganizationsRepository } from "../../repositories/organizations.repository.js";
 import { ENV } from "../../config/env.js";
 
 export class AuthService {
@@ -11,7 +11,7 @@ export class AuthService {
     password: string;
     organizationName: string;
   }) {
-    const existingUser = await User.findOne({ email: data.email.toLowerCase() });
+    const existingUser = await UsersRepository.findByEmail(data.email.toLowerCase());
     if (existingUser) {
       throw new Error("ACCOUNT_EXISTS");
     }
@@ -21,7 +21,8 @@ export class AuthService {
       "-" +
       Date.now().toString(36);
 
-    const org = await Organization.create({
+    const org = await OrganizationsRepository.create({
+      orgId: `org_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       name: data.organizationName,
       slug: orgSlug,
       plan: "Pro",
@@ -31,30 +32,22 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(data.password, salt);
 
-    const initials =
-      data.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2) || "AG";
-
-    const user = await User.create({
+    const user = await UsersRepository.create({
+      userId: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       name: data.name,
       email: data.email.toLowerCase(),
       passwordHash,
-      role: "Founder",
-      organizationId: org._id,
-      avatarInitials: initials,
+      role: "owner",
+      organizationId: org.orgId,
     });
 
     const token = jwt.sign(
       {
-        userId: user._id.toString(),
+        userId: user.userId,
         email: user.email,
         name: user.name,
         role: user.role,
-        organizationId: org._id.toString(),
+        organizationId: org.orgId,
       },
       ENV.JWT_SECRET,
       { expiresIn: "7d" }
@@ -62,14 +55,14 @@ export class AuthService {
 
     return {
       user: {
-        id: user._id.toString(),
+        id: user.userId,
         name: user.name,
         email: user.email,
         role: user.role,
-        avatarInitials: user.avatarInitials,
+        avatarInitials: user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "AG",
       },
       organization: {
-        id: org._id.toString(),
+        id: org.orgId,
         name: org.name,
         slug: org.slug,
         plan: org.plan,
@@ -80,7 +73,7 @@ export class AuthService {
   }
 
   static async loginUser(data: { email: string; password: string }) {
-    const user = await User.findOne({ email: data.email.toLowerCase() });
+    const user = await UsersRepository.findByEmail(data.email.toLowerCase());
     if (!user) {
       throw new Error("INVALID_CREDENTIALS");
     }
@@ -90,25 +83,27 @@ export class AuthService {
       throw new Error("INVALID_CREDENTIALS");
     }
 
-    let org = await Organization.findById(user.organizationId);
+    let org = await OrganizationsRepository.findById(user.organizationId);
     if (!org) {
-      org = await Organization.create({
+      org = await OrganizationsRepository.create({
+        orgId: user.organizationId || `org_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
         name: `${user.name}'s Agency`,
-        slug: `agency-${user._id.toString().slice(-6)}`,
+        slug: `agency-${user.userId.slice(-6)}`,
         plan: "Pro",
         credits: 250,
       });
-      user.organizationId = org._id;
-      await user.save();
+      if (user.organizationId !== org.orgId) {
+        await UsersRepository.update(user.userId, { organizationId: org.orgId });
+      }
     }
 
     const token = jwt.sign(
       {
-        userId: user._id.toString(),
+        userId: user.userId,
         email: user.email,
         name: user.name,
         role: user.role,
-        organizationId: org._id.toString(),
+        organizationId: org.orgId,
       },
       ENV.JWT_SECRET,
       { expiresIn: "7d" }
@@ -116,14 +111,14 @@ export class AuthService {
 
     return {
       user: {
-        id: user._id.toString(),
+        id: user.userId,
         name: user.name,
         email: user.email,
         role: user.role,
-        avatarInitials: user.avatarInitials,
+        avatarInitials: user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "AG",
       },
       organization: {
-        id: org._id.toString(),
+        id: org.orgId,
         name: org.name,
         slug: org.slug,
         plan: org.plan,
@@ -134,20 +129,20 @@ export class AuthService {
   }
 
   static async getUserProfile(userId: string) {
-    const user = await User.findById(userId);
+    const user = await UsersRepository.findById(userId);
     if (!user) return null;
-    const org = await Organization.findById(user.organizationId);
+    const org = await OrganizationsRepository.findById(user.organizationId);
     return {
       user: {
-        id: user._id.toString(),
+        id: user.userId,
         name: user.name,
         email: user.email,
         role: user.role,
-        avatarInitials: user.avatarInitials,
+        avatarInitials: user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "AG",
       },
       organization: org
         ? {
-            id: org._id.toString(),
+            id: org.orgId,
             name: org.name,
             slug: org.slug,
             plan: org.plan,
@@ -157,4 +152,3 @@ export class AuthService {
     };
   }
 }
-

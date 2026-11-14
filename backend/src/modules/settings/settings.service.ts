@@ -1,20 +1,12 @@
-import mongoose from "mongoose";
-import { Organization } from "../../models/Organization.js";
+import { OrganizationsRepository } from "../../repositories/organizations.repository.js";
 
 export class SettingsService {
   static async getSettings(orgId: string) {
-    let org = null;
-    if (mongoose.connection.readyState === 1) {
-      try {
-        org = await Organization.findById(orgId);
-      } catch {
-        org = null;
-      }
-    }
+    const org = await OrganizationsRepository.findById(orgId);
 
     return {
       organization: {
-        id: org?._id?.toString() || orgId,
+        id: org?.orgId || orgId,
         name: org?.name || "AgencyOS Pro",
         slug: org?.slug || "agencyos-demo",
         plan: org?.plan || "Pro",
@@ -25,6 +17,7 @@ export class SettingsService {
         traiOptOutHonored: true,
         noGoogleMapsScraping: true,
         defaultDryRun: true,
+        zohoCatalystCloudScale: true,
       },
       notifications: {
         emailAlerts: true,
@@ -32,16 +25,17 @@ export class SettingsService {
         highOpportunityLeadFound: true,
       },
       integrations: {
-        smtpConfigured: true,
-        whatsappBusinessConnected: false,
+        zohoCatalystConnected: true,
+        stripeWebhookConfigured: true,
         n8nWebhookConfigured: true,
+        googleMapsConnected: Boolean(process.env.GOOGLE_MAPS_SERVER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY),
       },
     };
   }
 
   static async updateSettings(data: Record<string, any>, orgId: string) {
-    if (data.organizationName && mongoose.connection.readyState === 1) {
-      await Organization.findByIdAndUpdate(orgId, { name: data.organizationName });
+    if (data.organizationName) {
+      await OrganizationsRepository.update(orgId, { name: data.organizationName });
     }
     return this.getSettings(orgId);
   }

@@ -20,8 +20,8 @@ export function errorHandler(
     });
   }
 
-  // Handle Mongoose Validation Errors
-  if (err.name === "ValidationError") {
+  // Handle Database Validation Errors
+  if (err.name === "ValidationError" || err.name === "CatalystError") {
     return res.status(400).json({
       error: "Database validation failed",
       requestId: reqId,

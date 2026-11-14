@@ -2,11 +2,11 @@
   "name": "@agencyos/api",
   "version": "1.0.0",
   "description": "AgencyOS Enterprise Node.js & Express REST API Server (Zoho Cloud AppSail target)",
-  "main": "dist/server.js",
+  "main": "app.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
+    "build": "tsc && esbuild src/server.ts --bundle --platform=node --target=node20 --format=cjs --external:zcatalyst-sdk-node --outfile=app.js",
+    "start": "node app.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

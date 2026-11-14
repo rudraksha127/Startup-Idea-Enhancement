@@ -1,0 +1,317 @@
+{
+  "$schema": "https://catalyst.zoho.com/schemas/datastore/manifest.json",
+  "version": "1.0.0",
+  "platform": "Zoho Catalyst CloudScale Data Store",
+  "project": "AgencyOS",
+  "tables": [
+    {
+      "tableName": "Organizations",
+      "tableId": "orgs_01",
+      "description": "Multi-tenant agency workspaces and subscription state",
+      "columns": [
+        { "columnName": "orgId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "slug", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "plan", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Pro" },
+        { "columnName": "credits", "dataType": "BigInt", "isMandatory": true, "defaultValue": 250 },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Users",
+      "tableId": "users_02",
+      "description": "User credentials, multi-tenant organization association, and RBAC roles",
+      "columns": [
+        { "columnName": "userId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "email", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "passwordHash", "dataType": "VarChar", "maxLen": 255, "isMandatory": true },
+        { "columnName": "role", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "member" },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Leads",
+      "tableId": "leads_03",
+      "description": "Discovered business prospects, verification data, and opportunity scores",
+      "columns": [
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "businessName", "dataType": "VarChar", "maxLen": 255, "isMandatory": true },
+        { "columnName": "category", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "address", "dataType": "VarChar", "maxLen": 500, "isMandatory": false },
+        { "columnName": "city", "dataType": "VarChar", "maxLen": 100, "isMandatory": false },
+        { "columnName": "phone", "dataType": "VarChar", "maxLen": 32, "isMandatory": false },
+        { "columnName": "website", "dataType": "VarChar", "maxLen": 255, "isMandatory": false },
+        { "columnName": "rating", "dataType": "Double", "isMandatory": false, "defaultValue": 0.0 },
+        { "columnName": "reviewCount", "dataType": "BigInt", "isMandatory": false, "defaultValue": 0 },
+        { "columnName": "opportunityScore", "dataType": "Double", "isMandatory": false, "defaultValue": 0.0 },
+        { "columnName": "qualificationStatus", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "New" },
+        { "columnName": "source", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "defaultValue": "Google Maps" },
+        { "columnName": "sourceAttribution", "dataType": "VarChar", "maxLen": 255, "isMandatory": false },
+        { "columnName": "googlePlaceId", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "LeadAudits",
+      "tableId": "audits_04",
+      "description": "Lighthouse, SEO, mobile, and security audit metrics for leads",
+      "columns": [
+        { "columnName": "auditId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "performanceScore", "dataType": "BigInt", "isMandatory": true },
+        { "columnName": "seoScore", "dataType": "BigInt", "isMandatory": true },
+        { "columnName": "accessibilityScore", "dataType": "BigInt", "isMandatory": true },
+        { "columnName": "mobileScore", "dataType": "BigInt", "isMandatory": true },
+        { "columnName": "detectedTech", "dataType": "VarChar", "maxLen": 255, "isMandatory": false },
+        { "columnName": "issuesJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "LeadNotes",
+      "tableId": "notes_05",
+      "description": "Internal CRM notes and engagement logs for individual leads",
+      "columns": [
+        { "columnName": "noteId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "author", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "text", "dataType": "Text", "isMandatory": true },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Campaigns",
+      "tableId": "camps_06",
+      "description": "Cold email and WhatsApp outreach campaigns with approval gates",
+      "columns": [
+        { "columnName": "campaignId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "service", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "channel", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Email" },
+        { "columnName": "audience", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Draft" },
+        { "columnName": "sentCount", "dataType": "BigInt", "isMandatory": true, "defaultValue": 0 },
+        { "columnName": "openRate", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "replyRate", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "meetingCount", "dataType": "BigInt", "isMandatory": true, "defaultValue": 0 },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "OutreachMessages",
+      "tableId": "msgs_07",
+      "description": "Generated outreach copy, delivery state, and tracking metrics",
+      "columns": [
+        { "columnName": "messageId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "campaignId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "channel", "dataType": "VarChar", "maxLen": 32, "isMandatory": true },
+        { "columnName": "subject", "dataType": "VarChar", "maxLen": 255, "isMandatory": true },
+        { "columnName": "body", "dataType": "Text", "isMandatory": true },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Draft" },
+        { "columnName": "sentAt", "dataType": "DateTime", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Replies",
+      "tableId": "replies_08",
+      "description": "Inbound replies from prospects with AI intent classification",
+      "columns": [
+        { "columnName": "replyId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "sender", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "body", "dataType": "Text", "isMandatory": true },
+        { "columnName": "intent", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "sentiment", "dataType": "VarChar", "maxLen": 32, "isMandatory": true },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Unread" },
+        { "columnName": "receivedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Meetings",
+      "tableId": "meets_09",
+      "description": "Scheduled discovery calls and presentations with video links",
+      "columns": [
+        { "columnName": "meetingId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "title", "dataType": "VarChar", "maxLen": 255, "isMandatory": true },
+        { "columnName": "scheduledAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "durationMinutes", "dataType": "BigInt", "isMandatory": true, "defaultValue": 30 },
+        { "columnName": "meetLink", "dataType": "VarChar", "maxLen": 255, "isMandatory": false },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Scheduled" },
+        { "columnName": "attendeesJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Proposals",
+      "tableId": "props_10",
+      "description": "Generated scopes of work, pricing milestones, and deliverable terms",
+      "columns": [
+        { "columnName": "proposalId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "leadId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "title", "dataType": "VarChar", "maxLen": 255, "isMandatory": true },
+        { "columnName": "totalAmount", "dataType": "Double", "isMandatory": true },
+        { "columnName": "currency", "dataType": "VarChar", "maxLen": 10, "isMandatory": true, "defaultValue": "INR" },
+        { "columnName": "milestonesJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "deliverablesJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Draft" },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Clients",
+      "tableId": "clients_11",
+      "description": "Converted paying agency clients and account profiles",
+      "columns": [
+        { "columnName": "clientId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "domain", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "type", "dataType": "VarChar", "maxLen": 64, "isMandatory": false },
+        { "columnName": "location", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "phone", "dataType": "VarChar", "maxLen": 32, "isMandatory": false },
+        { "columnName": "email", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "contactPerson", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Active" },
+        { "columnName": "totalValue", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "projectsCount", "dataType": "BigInt", "isMandatory": true, "defaultValue": 0 },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Projects",
+      "tableId": "projects_12",
+      "description": "Active client delivery projects, budgets, and milestone deadlines",
+      "columns": [
+        { "columnName": "projectId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "clientId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "subtitle", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "type", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "defaultValue": "Website" },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Active" },
+        { "columnName": "budget", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "amountPaid", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "amountDue", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "progress", "dataType": "BigInt", "isMandatory": true, "defaultValue": 0 },
+        { "columnName": "deadline", "dataType": "VarChar", "maxLen": 64, "isMandatory": false },
+        { "columnName": "milestonesJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Tasks",
+      "tableId": "tasks_13",
+      "description": "Kanban project tasks with priority, status, and assignees",
+      "columns": [
+        { "columnName": "taskId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "projectId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "title", "dataType": "VarChar", "maxLen": 255, "isMandatory": true },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Todo" },
+        { "columnName": "priority", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Medium" },
+        { "columnName": "assignee", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "dueDate", "dataType": "DateTime", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Templates",
+      "tableId": "tpls_14",
+      "description": "Pre-built website architectures and proposal frameworks",
+      "columns": [
+        { "columnName": "templateId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "category", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "previewImage", "dataType": "VarChar", "maxLen": 255, "isMandatory": false },
+        { "columnName": "description", "dataType": "Text", "isMandatory": false },
+        { "columnName": "basePrice", "dataType": "Double", "isMandatory": true, "defaultValue": 0.0 },
+        { "columnName": "tagsJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "Invoices",
+      "tableId": "invs_15",
+      "description": "Client billing records, Stripe invoice bindings, and payment statuses",
+      "columns": [
+        { "columnName": "invoiceId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "clientId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "stripeInvoiceId", "dataType": "VarChar", "maxLen": 128, "isMandatory": false },
+        { "columnName": "amount", "dataType": "Double", "isMandatory": true },
+        { "columnName": "currency", "dataType": "VarChar", "maxLen": 10, "isMandatory": true, "defaultValue": "INR" },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "Draft" },
+        { "columnName": "dueDate", "dataType": "DateTime", "isMandatory": false },
+        { "columnName": "paidAt", "dataType": "DateTime", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "AgentConfigs",
+      "tableId": "agcfg_16",
+      "description": "Model and prompt configurations for the 13 canonical agents",
+      "columns": [
+        { "columnName": "configId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "agentId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "name", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "model", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "systemPrompt", "dataType": "Text", "isMandatory": true },
+        { "columnName": "temperature", "dataType": "Double", "isMandatory": true, "defaultValue": 0.2 },
+        { "columnName": "maxTokens", "dataType": "BigInt", "isMandatory": true, "defaultValue": 2048 },
+        { "columnName": "isEnabled", "dataType": "Boolean", "isMandatory": true, "defaultValue": true },
+        { "columnName": "updatedAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "AgentExecutions",
+      "tableId": "agex_17",
+      "description": "Execution records, latency, token spend, and outputs for agent runs",
+      "columns": [
+        { "columnName": "executionId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "agentId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "status", "dataType": "VarChar", "maxLen": 32, "isMandatory": true, "defaultValue": "RUNNING" },
+        { "columnName": "inputJson", "dataType": "Text", "isMandatory": true },
+        { "columnName": "outputJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "tokenCount", "dataType": "BigInt", "isMandatory": false, "defaultValue": 0 },
+        { "columnName": "latencyMs", "dataType": "BigInt", "isMandatory": false, "defaultValue": 0 },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    },
+    {
+      "tableName": "AuditLogs",
+      "tableId": "audits_18",
+      "description": "Immutable request, authorization, and administrative action logs",
+      "columns": [
+        { "columnName": "auditId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true, "isUnique": true },
+        { "columnName": "organizationId", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "userId", "dataType": "VarChar", "maxLen": 64, "isMandatory": false },
+        { "columnName": "action", "dataType": "VarChar", "maxLen": 64, "isMandatory": true },
+        { "columnName": "resource", "dataType": "VarChar", "maxLen": 128, "isMandatory": true },
+        { "columnName": "ip", "dataType": "VarChar", "maxLen": 64, "isMandatory": false },
+        { "columnName": "userAgent", "dataType": "VarChar", "maxLen": 255, "isMandatory": false },
+        { "columnName": "metadataJson", "dataType": "Text", "isMandatory": false },
+        { "columnName": "createdAt", "dataType": "DateTime", "isMandatory": true }
+      ]
+    }
+  ]
+}

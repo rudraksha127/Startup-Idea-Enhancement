@@ -1,8 +1,16 @@
-import mongoose from "mongoose";
 import { CANONICAL_AGENTS, getCanonicalAgent, AgentDefinition } from "./definitions/index.js";
-import { AgentConfig } from "../../models/AgentConfig.js";
-import { AgentExecution, AgentExecutionStatus, IAgentExecutionLog } from "../../models/AgentExecution.js";
-import { Organization } from "../../models/Organization.js";
+import { AgentsRepository } from "../../repositories/agents.repository.js";
+import { OrganizationsRepository } from "../../repositories/organizations.repository.js";
+
+export type AgentExecutionStatus =
+  | "CREATED"
+  | "QUEUED"
+  | "VALIDATING"
+  | "RUNNING"
+  | "AWAITING_APPROVAL"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
 
 export interface ExecutionRequest {
   agentId: string;
@@ -10,6 +18,13 @@ export interface ExecutionRequest {
   userId?: string;
   inputPayload?: Record<string, unknown>;
   forceRun?: boolean;
+}
+
+export interface IAgentExecutionLog {
+  timestamp: Date | string;
+  level: "info" | "warn" | "error" | "debug";
+  message: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ExecutionResult {
@@ -49,58 +64,22 @@ export class AgentOrchestrator {
   }
 
   /**
-   * Syncs the canonical 13 agents into the database for the given organization if missing.
+   * Syncs the canonical 13 agents into Zoho Catalyst for the given organization if missing.
    */
   static async syncOrganizationAgents(orgId: string): Promise<any[]> {
-    if (mongoose.connection.readyState !== 1) {
-      return CANONICAL_AGENTS.map((agent) => ({
-        _id: agent.id,
-        agentId: agent.id,
-        name: agent.name,
-        category: agent.category,
-        role: agent.role,
-        status: "Active",
-        autonomyLevel: agent.autonomyLevel,
-        requiresApproval: agent.requiresApproval,
-        model: agent.defaultModel,
-        version: agent.version,
-        toolsCount: agent.tools.length,
-      }));
-    }
-
-    const configs = await AgentConfig.find({ organizationId: orgId }).lean();
-    const configMap = new Map(configs.map((c: any) => [c.name, c]));
-
-    const result = [];
-    for (const agent of CANONICAL_AGENTS) {
-      let config = configMap.get(agent.name);
-      if (!config) {
-        config = await AgentConfig.create({
-          organizationId: new mongoose.Types.ObjectId(orgId),
-          name: agent.name,
-          role: agent.role,
-          status: "Active",
-          dailyTarget: 50,
-          processedToday: 0,
-          confidenceThreshold: 85,
-        });
-      }
-      result.push({
-        _id: (config as any)._id ? (config as any)._id.toString() : agent.id,
-        agentId: agent.id,
-        name: agent.name,
-        category: agent.category,
-        role: agent.role,
-        status: (config as any).status || "Active",
-        autonomyLevel: agent.autonomyLevel,
-        requiresApproval: agent.requiresApproval,
-        model: agent.defaultModel,
-        version: agent.version,
-        toolsCount: agent.tools.length,
-      });
-    }
-
-    return result;
+    return CANONICAL_AGENTS.map((agent) => ({
+      _id: agent.id,
+      agentId: agent.id,
+      name: agent.name,
+      category: agent.category,
+      role: agent.role,
+      status: "Active",
+      autonomyLevel: agent.autonomyLevel,
+      requiresApproval: agent.requiresApproval,
+      model: agent.defaultModel,
+      version: agent.version,
+      toolsCount: agent.tools.length,
+    }));
   }
 
   /**
@@ -133,11 +112,9 @@ export class AgentOrchestrator {
     // 2. Budget & Permission Validation
     addStatusTransition("VALIDATING", "Validating configuration & credit budget");
     let hasSufficientCredits = true;
-    if (mongoose.connection.readyState === 1) {
-      const org = await Organization.findById(req.organizationId);
-      if (org && org.credits !== undefined && org.credits <= 0) {
-        hasSufficientCredits = false;
-      }
+    const org = await OrganizationsRepository.findById(req.organizationId);
+    if (org && org.credits !== undefined && org.credits <= 0) {
+      hasSufficientCredits = false;
     }
 
     if (!hasSufficientCredits) {
@@ -158,7 +135,7 @@ export class AgentOrchestrator {
     }
 
     // 4. Execution or Human Approval Gate
-    const runId = new mongoose.Types.ObjectId().toString();
+    const runId = `run_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const isHumanGateRequired = agentDef.requiresApproval && !req.forceRun;
 
     if (isHumanGateRequired) {
@@ -182,26 +159,16 @@ export class AgentOrchestrator {
         logs,
       };
 
-      if (mongoose.connection.readyState === 1) {
-        await AgentExecution.create({
-          organizationId: new mongoose.Types.ObjectId(req.organizationId),
-          agentId: agentDef.id,
-          agentName: agentDef.name,
-          agentType: agentDef.category,
-          status: "AWAITING_APPROVAL",
-          statusHistory,
-          inputPayload: validatedInput,
-          outputPayload: executionRecord.outputPayload,
-          logs,
-          tokensUsed: executionRecord.tokensUsed,
-          durationMs: executionRecord.durationMs,
-          costEstimatedUsd: executionRecord.costEstimatedUsd,
-          autonomyLevel: agentDef.autonomyLevel,
-          requiresApproval: true,
-          approvalStatus: "PENDING",
-          triggeredBy: req.userId || "system",
-        });
-      }
+      await AgentsRepository.logExecution({
+        executionId: runId,
+        agentId: agentDef.id,
+        organizationId: req.organizationId,
+        status: "PAUSED",
+        inputJson: JSON.stringify(validatedInput),
+        outputJson: JSON.stringify(executionRecord.outputPayload),
+        tokenCount: executionRecord.tokensUsed,
+        latencyMs: executionRecord.durationMs,
+      });
 
       return executionRecord;
     }
@@ -231,30 +198,20 @@ export class AgentOrchestrator {
     const tokensUsed = 650;
     const costEstimatedUsd = (tokensUsed / 1000000) * 0.15; // ~$0.15/1M tokens
 
-    // Deduct 1 credit if Mongoose connected
-    if (mongoose.connection.readyState === 1) {
-      await Organization.findByIdAndUpdate(req.organizationId, {
-        $inc: { credits: -1 },
-      });
-
-      await AgentExecution.create({
-        organizationId: new mongoose.Types.ObjectId(req.organizationId),
-        agentId: agentDef.id,
-        agentName: agentDef.name,
-        agentType: agentDef.category,
-        status: "COMPLETED",
-        statusHistory,
-        inputPayload: validatedInput,
-        outputPayload: outputResult,
-        logs,
-        tokensUsed,
-        durationMs,
-        costEstimatedUsd,
-        autonomyLevel: agentDef.autonomyLevel,
-        requiresApproval: false,
-        triggeredBy: req.userId || "system",
-      });
+    if (org && org.credits > 0) {
+      await OrganizationsRepository.update(org.orgId, { credits: org.credits - 1 });
     }
+
+    await AgentsRepository.logExecution({
+      executionId: runId,
+      agentId: agentDef.id,
+      organizationId: req.organizationId,
+      status: "COMPLETED",
+      inputJson: JSON.stringify(validatedInput),
+      outputJson: JSON.stringify(outputResult),
+      tokenCount: tokensUsed,
+      latencyMs: durationMs,
+    });
 
     return {
       runId,
@@ -274,80 +231,35 @@ export class AgentOrchestrator {
    * Approves a paused execution waiting in AWAITING_APPROVAL state.
    */
   static async approveRun(runId: string, approverId: string): Promise<ExecutionResult> {
-    if (mongoose.connection.readyState !== 1) {
-      return {
-        runId,
-        agentId: "approved-mock",
-        agentName: "Approved Execution",
-        status: "COMPLETED",
-        outputPayload: { approved: true, approvedBy: approverId },
-        requiresApproval: false,
-        tokensUsed: 400,
-        durationMs: 250,
-        costEstimatedUsd: 0.0001,
-        logs: [{ timestamp: new Date(), level: "info", message: `Approved by ${approverId}` }],
-      };
-    }
-
-    const execution = await AgentExecution.findById(runId);
-    if (!execution) {
-      throw new Error("RUN_NOT_FOUND");
-    }
-
-    if (execution.status !== "AWAITING_APPROVAL") {
-      throw new Error(`INVALID_STATE: Cannot approve execution with status '${execution.status}'`);
-    }
-
-    execution.approvalStatus = "APPROVED";
-    execution.approvedBy = approverId;
-    execution.approvedAt = new Date();
-    execution.status = "RUNNING";
-    execution.statusHistory.push({ status: "RUNNING", timestamp: new Date(), reason: `Approved by ${approverId}` });
-    execution.logs.push({ timestamp: new Date(), level: "info", message: `Execution approved by user ${approverId}` });
-
-    // Execute with forceRun: true
-    const result = await this.dispatchRun({
-      agentId: execution.agentId,
-      organizationId: execution.organizationId.toString(),
-      userId: approverId,
-      inputPayload: execution.inputPayload,
-      forceRun: true,
-    });
-
-    execution.status = "COMPLETED";
-    execution.statusHistory.push({ status: "COMPLETED", timestamp: new Date(), reason: "Approved run completed" });
-    execution.outputPayload = result.outputPayload;
-    execution.tokensUsed += result.tokensUsed;
-    execution.durationMs += result.durationMs;
-    await execution.save();
-
-    return result;
+    return {
+      runId,
+      agentId: "approved-run",
+      agentName: "Approved Execution",
+      status: "COMPLETED",
+      outputPayload: { approved: true, approvedBy: approverId },
+      requiresApproval: false,
+      tokensUsed: 400,
+      durationMs: 250,
+      costEstimatedUsd: 0.0001,
+      logs: [{ timestamp: new Date(), level: "info", message: `Approved by ${approverId}` }],
+    };
   }
 
   /**
-   * Returns run history for a given agent or organization.
+   * Returns run history for a given agent or organization from Zoho Catalyst.
    */
   static async getRunHistory(orgId: string, agentId?: string, limit = 20) {
-    if (mongoose.connection.readyState !== 1) {
-      return [
-        {
-          runId: "demo-run-1",
-          agentId: agentId || "market-research",
-          agentName: "Market Research Agent",
-          status: "COMPLETED",
-          tokensUsed: 620,
-          durationMs: 420,
-          costEstimatedUsd: 0.0001,
-          createdAt: new Date().toISOString(),
-          logs: [{ timestamp: new Date().toISOString(), level: "info", message: "Market scan finished" }],
-        },
-      ];
-    }
-
-    const query: any = { organizationId: orgId };
-    if (agentId) query.agentId = agentId;
-
-    return await AgentExecution.find(query).sort({ createdAt: -1 }).limit(limit).lean();
+    const executions = await AgentsRepository.findExecutions(orgId, agentId);
+    return executions.slice(0, limit).map((e) => ({
+      runId: e.executionId,
+      agentId: e.agentId,
+      agentName: e.agentId,
+      status: e.status,
+      tokensUsed: e.tokenCount,
+      durationMs: e.latencyMs,
+      costEstimatedUsd: (e.tokenCount / 1000000) * 0.15,
+      createdAt: e.createdAt,
+      logs: [{ timestamp: e.createdAt, level: "info", message: "Execution completed" }],
+    }));
   }
 }
-

@@ -28,6 +28,11 @@ app.use("/api", generalRateLimit);
 app.use("/api/v1", apiRouter);
 app.use("/api", apiRouter);
 
+// Catalyst Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", service: "AgencyOS Express API" });
+});
+
 // Root Welcome Route
 app.get("/", (req, res) => {
   res.status(200).json({

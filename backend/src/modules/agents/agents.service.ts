@@ -1,10 +1,9 @@
-import mongoose from "mongoose";
-import { AgentConfig } from "../../models/AgentConfig.js";
 import { AgentOrchestrator, ExecutionResult } from "./agent-orchestrator.js";
+import { AgentsRepository } from "../../repositories/agents.repository.js";
 
 export class AgentsService {
   static async getAgents(orgId: string) {
-    return await AgentOrchestrator.syncOrganizationAgents(orgId);
+    return AgentOrchestrator.syncOrganizationAgents(orgId);
   }
 
   static async getAgentById(id: string, orgId: string) {
@@ -25,21 +24,10 @@ export class AgentsService {
         description: canonical.description,
       };
     }
-
-    if (mongoose.connection.readyState === 1) {
-      return await AgentConfig.findOne({ _id: id, organizationId: orgId }).lean();
-    }
     return null;
   }
 
   static async updateAgent(id: string, data: Record<string, any>, orgId: string) {
-    if (mongoose.connection.readyState === 1) {
-      return await AgentConfig.findOneAndUpdate(
-        { _id: id, organizationId: orgId },
-        data,
-        { new: true }
-      );
-    }
     return { _id: id, ...data };
   }
 
@@ -49,18 +37,8 @@ export class AgentsService {
     userId?: string,
     inputPayload?: Record<string, unknown>
   ): Promise<ExecutionResult> {
-    let resolvedAgentId = id;
-    if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(id)) {
-      const config = await AgentConfig.findById(id);
-      if (config) {
-        const all = AgentOrchestrator.getRegisteredAgents();
-        const match = all.find((a) => a.name.toLowerCase() === config.name.toLowerCase());
-        if (match) resolvedAgentId = match.id;
-      }
-    }
-
-    return await AgentOrchestrator.dispatchRun({
-      agentId: resolvedAgentId,
+    return AgentOrchestrator.dispatchRun({
+      agentId: id,
       organizationId: orgId,
       userId,
       inputPayload,
@@ -68,10 +46,14 @@ export class AgentsService {
   }
 
   static async approveRun(runId: string, approverId: string) {
-    return await AgentOrchestrator.approveRun(runId, approverId);
+    return AgentOrchestrator.approveRun(runId, approverId);
+  }
+
+  static async getHistory(orgId: string, agentId?: string) {
+    return AgentOrchestrator.getRunHistory(orgId, agentId);
   }
 
   static async getRunHistory(orgId: string, agentId?: string) {
-    return await AgentOrchestrator.getRunHistory(orgId, agentId);
+    return AgentOrchestrator.getRunHistory(orgId, agentId);
   }
 }

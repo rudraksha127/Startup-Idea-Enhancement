@@ -3,15 +3,15 @@
     {
       "name": "agencyos-api",
       "source": ".",
-      "build_path": "dist",
-      "command": "node dist/server.js",
-      "runtime": "nodejs20",
+      "build_path": "./",
+      "command": "node app.js",
+      "stack": "node20",
       "memory": 512,
       "env_variables": {
-        "PORT": "4000",
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "ZOHO_PROJECT_ID": "86053000000025003",
+        "ZOHO_ENVIRONMENT": "development"
       }
     }
   ]
 }
-

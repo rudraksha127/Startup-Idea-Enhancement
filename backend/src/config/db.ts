@@ -1,27 +1,19 @@
-import mongoose from "mongoose";
+import { catalystClient } from "../infrastructure/persistence/zoho-catalyst/catalyst.client.js";
 import { ENV } from "./env.js";
 
-let isConnected = false;
+let isInitialized = false;
 
-export async function connectDB(): Promise<typeof mongoose> {
-  if (isConnected && mongoose.connection.readyState === 1) {
-    return mongoose;
+export async function connectDB(): Promise<typeof catalystClient> {
+  if (isInitialized) {
+    return catalystClient;
   }
 
   try {
-    const opts: mongoose.ConnectOptions = {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    };
-
-    const conn = await mongoose.connect(ENV.MONGODB_URI, opts);
-    isConnected = true;
-    console.log(`[Database] MongoDB connected successfully to ${mongoose.connection.host}`);
-    return conn;
+    console.log(`[Database] Zoho Catalyst CloudScale Data Store initialized (Project: ${ENV.CATALYST_PROJECT_ID}, Env: ${ENV.CATALYST_ENVIRONMENT})`);
+    isInitialized = true;
+    return catalystClient;
   } catch (error) {
-    console.error("[Database] Failed to connect to MongoDB:", error);
+    console.error("[Database] Failed to initialize Zoho Catalyst Data Store:", error);
     throw error;
   }
 }
-
