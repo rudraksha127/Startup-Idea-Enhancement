@@ -1,5 +1,5 @@
 {
-  "name": "agencyos",
+  "name": "startup-idea-enhancement",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,9 @@
     "dev:api": "tsx watch backend/src/server.ts",
     "build": "next build frontend",
     "build:frontend": "next build frontend",
+    "build:worker": "opennextjs-cloudflare build",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "build:api": "tsc -p backend/tsconfig.json",
     "start": "next start frontend",
     "lint": "next lint frontend",
@@ -45,9 +48,11 @@
     "react-dom": "^19.0.0",
     "recharts": "^2.15.0",
     "tailwind-merge": "^2.5.5",
+    "zcatalyst-sdk-node": "^3.4.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.17",
     "@playwright/test": "^1.49.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.1.0",
@@ -71,6 +76,7 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "wrangler": "^4.162.0"
   }
 }
