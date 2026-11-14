@@ -18,5 +18,10 @@
   ],
   "observability": {
     "enabled": true
+  },
+  "vars": {
+    "NEXT_PUBLIC_API_URL": "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1",
+    "NEXT_PUBLIC_APP_URL": "https://startup-idea-enhancement.luckyudiya.workers.dev",
+    "NODE_ENV": "production"
   }
 }
