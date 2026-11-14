@@ -6,7 +6,15 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: [],
-    exclude: ["node_modules", "prototype", "tests/e2e/**"],
+    include: ["tests/**/*.test.{ts,tsx}"],
+    exclude: [
+      "**/node_modules/**",
+      "node_modules/**",
+      "backend/node_modules/**",
+      "prototype/**",
+      "tests/e2e/**",
+      "tests/browser/**",
+    ],
   },
   esbuild: {
     jsx: "automatic",
