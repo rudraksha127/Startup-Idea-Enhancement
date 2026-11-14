@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.github
+.vscode
+dist
+coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env*.local
+*.tsbuildinfo
+test-results

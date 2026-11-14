@@ -2,19 +2,15 @@ services:
   agencyos-web:
     build:
       context: ..
-      dockerfile: infra/docker/Dockerfile
+      dockerfile: Dockerfile
     container_name: agencyos-web
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://mongo:27017/agencyos
-      - JWT_SECRET=change-this-to-a-very-secure-32-byte-hex-secret
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_URL=http://agencyos-api:4000
-    depends_on:
-      - mongo
+      - NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
     networks:
       - agencyos-network
 
@@ -29,30 +25,13 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - MONGODB_URI=mongodb://mongo:27017/agencyos
       - JWT_SECRET=change-this-to-a-very-secure-32-byte-hex-secret
-      - CORS_ORIGIN=http://localhost:3000
-    depends_on:
-      - mongo
-    networks:
-      - agencyos-network
-
-  mongo:
-    image: mongo:7.0
-    container_name: agencyos-mongo
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+      - ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CATALYST_PROJECT_ID=agencyos-prod
+      - CATALYST_ENVIRONMENT=production
     networks:
       - agencyos-network
 
 networks:
   agencyos-network:
     driver: bridge
-
-volumes:
-  mongo-data:
-    driver: local
-
