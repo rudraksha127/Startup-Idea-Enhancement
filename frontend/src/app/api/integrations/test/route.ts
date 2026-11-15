@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (provider === "google-maps") {
-      const key = apiKey || process.env.GOOGLE_MAPS_SERVER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
+      const key = apiKey || process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
       const valid = Boolean(key && key.length > 15 && !key.includes("placeholder"));
       return NextResponse.json({
         success: true,

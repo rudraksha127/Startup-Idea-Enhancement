@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || "";
-  const browserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || "";
+  const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY || "";
+  const browserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   const hasServerKey = Boolean(serverKey && serverKey.length > 10 && !serverKey.includes("placeholder"));
   const hasBrowserKey = Boolean(browserKey && browserKey.length > 10 && !browserKey.includes("placeholder"));

@@ -10,28 +10,28 @@ interface LandingHeroProps {
 
 export function LandingHero({ onOpenDemo }: LandingHeroProps) {
   return (
-    <section id="product" className="relative overflow-hidden pt-10 pb-16 lg:py-20 bg-[#F8F6F0]">
+    <section id="product" className="relative overflow-hidden pt-10 pb-16 lg:py-20 bg-[#F8F6F0] dark:bg-[#0b0f0e] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left copy */}
           <div className="lg:col-span-7 z-10">
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE8E1] text-[12px] font-semibold text-[#171918] mb-6 shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE8E1] dark:bg-[#1a2420] border border-transparent dark:border-[#232f2a] text-[12px] font-semibold text-[#171918] dark:text-[#e2e8f0] mb-6 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-[#25835B] shadow-[0_0_0_3px_rgba(37,131,91,0.2)]" />
               <span>AI-Powered Business Growth</span>
             </div>
 
             {/* Headline */}
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-[54px] tracking-tight text-[#171918] leading-[1.08] font-bold mb-6">
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-[54px] tracking-tight text-[#171918] dark:text-white leading-[1.08] font-bold mb-6">
               <span>Find Clients.</span>
               <br />
               <span>Close Projects.</span>
               <br />
-              <span className="text-[#151B1A] font-normal italic">You Build. We Handle the Rest.</span>
+              <span className="text-[#151B1A] dark:text-emerald-400 font-normal italic">You Build. We Handle the Rest.</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-base sm:text-lg text-[#68717D] max-w-xl leading-relaxed mb-8">
+            <p className="text-base sm:text-lg text-[#68717D] dark:text-[#94a3b8] max-w-xl leading-relaxed mb-8">
               An autonomous AI agency operating system that finds businesses, analyzes their online presence, reaches out, converts them into clients and prepares complete project handoffs for development.
             </p>
 
@@ -39,16 +39,16 @@ export function LandingHero({ onOpenDemo }: LandingHeroProps) {
             <div className="flex flex-wrap items-center gap-4 mb-10">
               <Link
                 href="/dashboard"
-                className="h-12 px-7 inline-flex items-center justify-center gap-2 rounded-lg bg-[#151B1A] hover:bg-[#222a29] text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5"
+                className="h-12 px-7 inline-flex items-center justify-center gap-2 rounded-lg bg-[#151B1A] hover:bg-[#222a29] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5"
               >
                 <span>Get Started Free</span>
                 <ArrowRight size={16} />
               </Link>
               <button
                 onClick={onOpenDemo}
-                className="h-12 px-6 inline-flex items-center justify-center gap-2.5 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-sm font-semibold text-[#171918] shadow-2xs transition-all hover:-translate-y-0.5"
+                className="h-12 px-6 inline-flex items-center justify-center gap-2.5 rounded-lg border border-[#E7E7E2] dark:border-[#22302b] bg-white dark:bg-[#151d1a] hover:bg-gray-50 dark:hover:bg-[#1c2723] text-sm font-semibold text-[#171918] dark:text-white shadow-2xs transition-all hover:-translate-y-0.5"
               >
-                <span className="w-5 h-5 rounded-full bg-[#151B1A] text-white flex items-center justify-center text-[10px] pl-0.5">
+                <span className="w-5 h-5 rounded-full bg-[#151B1A] dark:bg-white text-white dark:text-[#151B1A] flex items-center justify-center text-[10px] pl-0.5">
                   <Play size={10} fill="currentColor" />
                 </span>
                 <span>Watch Demo</span>
@@ -56,34 +56,34 @@ export function LandingHero({ onOpenDemo }: LandingHeroProps) {
             </div>
 
             {/* 3 Benefits */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6 border-t border-[#E7E7E2]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6 border-t border-[#E7E7E2] dark:border-[#22302b]">
               <div className="flex items-start gap-3">
-                <span className="w-7 h-7 rounded-full bg-[#EAE8E1] text-[#151B1A] flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-7 h-7 rounded-full bg-[#EAE8E1] dark:bg-[#1a2420] text-[#151B1A] dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                   <Search size={14} />
                 </span>
                 <div>
-                  <h4 className="text-xs font-bold text-[#171918]">No Manual Outreach</h4>
-                  <p className="text-[11px] text-[#68717D]">AI finds &amp; contacts leads</p>
+                  <h4 className="text-xs font-bold text-[#171918] dark:text-white">No Manual Outreach</h4>
+                  <p className="text-[11px] text-[#68717D] dark:text-[#9aa29e]">AI finds &amp; contacts leads</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <span className="w-7 h-7 rounded-full bg-[#EAE8E1] text-[#151B1A] flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-7 h-7 rounded-full bg-[#EAE8E1] dark:bg-[#1a2420] text-[#151B1A] dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                   <CheckCircle size={14} />
                 </span>
                 <div>
-                  <h4 className="text-xs font-bold text-[#171918]">Real Opportunities</h4>
-                  <p className="text-[11px] text-[#68717D]">Not just random leads</p>
+                  <h4 className="text-xs font-bold text-[#171918] dark:text-white">Real Opportunities</h4>
+                  <p className="text-[11px] text-[#68717D] dark:text-[#9aa29e]">Not just random leads</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <span className="w-7 h-7 rounded-full bg-[#EAE8E1] text-[#151B1A] flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-7 h-7 rounded-full bg-[#EAE8E1] dark:bg-[#1a2420] text-[#151B1A] dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                   <FileText size={14} />
                 </span>
                 <div>
-                  <h4 className="text-xs font-bold text-[#171918]">Dev-Ready Handoffs</h4>
-                  <p className="text-[11px] text-[#68717D]">Complete project briefs</p>
+                  <h4 className="text-xs font-bold text-[#171918] dark:text-white">Dev-Ready Handoffs</h4>
+                  <p className="text-[11px] text-[#68717D] dark:text-[#9aa29e]">Complete project briefs</p>
                 </div>
               </div>
             </div>
@@ -93,7 +93,7 @@ export function LandingHero({ onOpenDemo }: LandingHeroProps) {
           <div className="lg:col-span-5 relative">
             <div className="relative">
               {/* Laptop mock frame */}
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-black/10 bg-white">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#151d1a]">
                 <Image
                   src="/assets/hero-laptop.png"
                   alt="AgencyOS Operations Dashboard on laptop"
@@ -105,56 +105,56 @@ export function LandingHero({ onOpenDemo }: LandingHeroProps) {
               </div>
 
               {/* Floating Badge 1: 2,847 Businesses Found (Top-left) */}
-              <div className="hidden sm:flex absolute -top-4 -left-6 bg-white/95 backdrop-blur border border-[#E7E7E2] rounded-xl p-3 shadow-lg items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-                <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 text-[#3568E8] flex items-center justify-center shrink-0">
+              <div className="hidden sm:flex absolute -top-4 -left-6 bg-white/95 dark:bg-[#151d1a]/95 backdrop-blur border border-[#E7E7E2] dark:border-[#22302b] rounded-xl p-3 shadow-lg items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900 text-[#3568E8] dark:text-blue-400 flex items-center justify-center shrink-0">
                   <Users size={16} />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold text-[#171918]">2,847</span>
-                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                    <span className="text-base font-bold text-[#171918] dark:text-white">2,847</span>
+                    <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
                       ↑ 12%
                     </span>
                   </div>
-                  <div className="text-[10px] text-[#68717D] font-medium">Businesses Found</div>
+                  <div className="text-[10px] text-[#68717D] dark:text-[#9aa29e] font-medium">Businesses Found</div>
                 </div>
               </div>
 
               {/* Floating Badge 2: 892 Leads Contacted (Top-right) */}
-              <div className="hidden sm:flex absolute -top-3 -right-5 bg-white/95 backdrop-blur border border-[#E7E7E2] rounded-xl p-3 shadow-lg items-center gap-3 animate-in fade-in slide-in-from-bottom-3">
-                <div className="w-9 h-9 rounded-lg bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+              <div className="hidden sm:flex absolute -top-3 -right-5 bg-white/95 dark:bg-[#151d1a]/95 backdrop-blur border border-[#E7E7E2] dark:border-[#22302b] rounded-xl p-3 shadow-lg items-center gap-3 animate-in fade-in slide-in-from-bottom-3">
+                <div className="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
                   <Send size={16} />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold text-[#171918]">892</span>
-                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                    <span className="text-base font-bold text-[#171918] dark:text-white">892</span>
+                    <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
                       ↑ 16%
                     </span>
                   </div>
-                  <div className="text-[10px] text-[#68717D] font-medium">Leads Contacted</div>
+                  <div className="text-[10px] text-[#68717D] dark:text-[#9aa29e] font-medium">Leads Contacted</div>
                 </div>
               </div>
 
               {/* Floating Badge 3: 38 Active Clients (Bottom-right) */}
-              <div className="hidden sm:flex absolute -bottom-5 -right-4 bg-white/95 backdrop-blur border border-[#E7E7E2] rounded-xl p-3 shadow-lg items-center gap-3 animate-in fade-in slide-in-from-bottom-4">
-                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 text-[#25835B] flex items-center justify-center shrink-0">
+              <div className="hidden sm:flex absolute -bottom-5 -right-4 bg-white/95 dark:bg-[#151d1a]/95 backdrop-blur border border-[#E7E7E2] dark:border-[#22302b] rounded-xl p-3 shadow-lg items-center gap-3 animate-in fade-in slide-in-from-bottom-4">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900 text-[#25835B] dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <Briefcase size={16} />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold text-[#171918]">38</span>
-                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                    <span className="text-base font-bold text-[#171918] dark:text-white">38</span>
+                    <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
                       ↑ 18%
                     </span>
                   </div>
-                  <div className="text-[10px] text-[#68717D] font-medium">Active Clients</div>
+                  <div className="text-[10px] text-[#68717D] dark:text-[#9aa29e] font-medium">Active Clients</div>
                 </div>
               </div>
             </div>
 
             {/* Handwritten scribble annotation - positioned on background to the left of image */}
-            <div className="hidden lg:block absolute -bottom-6 -left-48 xl:-left-52 bg-transparent text-[#151B1A] font-handwriting text-2xl rotate-[-5deg] select-none pointer-events-none z-10">
+            <div className="hidden lg:block absolute -bottom-6 -left-48 xl:-left-52 bg-transparent text-[#151B1A] dark:text-emerald-300 font-handwriting text-2xl rotate-[-5deg] select-none pointer-events-none z-10">
               <span className="whitespace-nowrap">Turn Opportunities</span>
               <br />
               <span className="pl-3 whitespace-nowrap">into Real Clients</span>

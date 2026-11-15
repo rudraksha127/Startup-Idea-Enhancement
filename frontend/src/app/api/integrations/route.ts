@@ -24,8 +24,8 @@ export async function GET() {
   const openaiKey = process.env.OPENAI_API_KEY;
   const hasOpenai = Boolean(openaiKey && openaiKey.length > 10 && !openaiKey.includes("placeholder"));
 
-  const mapsServerKey = process.env.GOOGLE_MAPS_SERVER_KEY;
-  const mapsBrowserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
+  const mapsServerKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
+  const mapsBrowserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const hasMaps = Boolean(
     (mapsServerKey && mapsServerKey.length > 10 && !mapsServerKey.includes("placeholder")) ||
     (mapsBrowserKey && mapsBrowserKey.length > 10 && !mapsBrowserKey.includes("placeholder"))

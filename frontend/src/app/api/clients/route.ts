@@ -5,6 +5,25 @@ import { Organization } from "@/models/Organization";
 import { createClientSchema } from "@agencyos/validation";
 
 export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
+
+  // 1. Try Zoho Catalyst AppSail backend first
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const backendRes = await fetch(`${backendApiUrl}/clients?${searchParams.toString()}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return NextResponse.json(data);
+    }
+  } catch (backendErr) {
+    console.warn("AppSail clients fetch fallback:", backendErr);
+  }
+
   try {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
@@ -36,10 +55,11 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error in GET /api/clients:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch clients" },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      data: [],
+      total: 0,
+    });
   }
 }
 

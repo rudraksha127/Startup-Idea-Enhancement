@@ -32,12 +32,15 @@ const VERIFIED_DIRECTORY_FALLBACK: PlaceResult[] = [
 ];
 
 export class MapsService {
+  // In-memory bounded TTL cache for place searches (adheres to Google Maps caching policies)
+  private static searchCache: Map<string, { data: { places: PlaceResult[]; source: string; total: number }; expiresAt: number }> = new Map();
+
   /**
    * Verifies Google Maps Platform configuration and credential status.
    */
   static getStatus() {
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || "";
-    const browserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || "";
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY || "";
+    const browserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
     const hasServerKey = Boolean(serverKey && serverKey.length > 10 && !serverKey.includes("placeholder"));
     const hasBrowserKey = Boolean(browserKey && browserKey.length > 10 && !browserKey.includes("placeholder"));
@@ -46,7 +49,7 @@ export class MapsService {
       configured: hasServerKey || hasBrowserKey,
       hasServerKey,
       hasBrowserKey,
-      status: hasServerKey ? "CONNECTED" : "CREDENTIAL_REQUIRED",
+      status: (hasServerKey || hasBrowserKey) ? "CONNECTED" : "CREDENTIAL_REQUIRED",
       provider: "Google Maps Platform",
       apisRequired: [
         "Maps JavaScript API",
@@ -68,10 +71,26 @@ export class MapsService {
     city?: string;
     radiusMeters?: number;
   }): Promise<{ places: PlaceResult[]; source: string; total: number }> {
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY;
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
     const query = params.query || "";
     const category = params.category || "";
     const city = params.city || "Indore";
+
+    const cacheKey = `${query}:${category}:${city}`.toLowerCase();
+    const cached = MapsService.searchCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
+    // Helper to store in bounded cache
+    const saveToCache = (data: { places: PlaceResult[]; source: string; total: number }) => {
+      if (MapsService.searchCache.size >= 200) {
+        const firstKey = MapsService.searchCache.keys().next().value;
+        if (firstKey) MapsService.searchCache.delete(firstKey);
+      }
+      MapsService.searchCache.set(cacheKey, { data, expiresAt: Date.now() + 15 * 60 * 1000 });
+      return data;
+    };
 
     // 1. Live Google Places API (New) integration when server key is present
     if (serverKey && serverKey.length > 10 && !serverKey.includes("placeholder")) {
@@ -111,11 +130,11 @@ export class MapsService {
               location: p.location ? { lat: p.location.latitude, lng: p.location.longitude } : undefined,
             }));
 
-            return {
+            return saveToCache({
               places,
               source: "Google Places API (New)",
               total: places.length,
-            };
+            });
           }
         }
       } catch (apiErr) {
@@ -140,18 +159,18 @@ export class MapsService {
       );
     }
 
-    return {
+    return saveToCache({
       places: filtered,
       source: "Verified Business Registry (Google Maps Key Pending)",
       total: filtered.length,
-    };
+    });
   }
 
   /**
    * Autocomplete suggestions for search input.
    */
   static async autocomplete(input: string) {
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY;
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
     if (serverKey && serverKey.length > 10 && !serverKey.includes("placeholder") && input.length >= 2) {
       try {
         const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {

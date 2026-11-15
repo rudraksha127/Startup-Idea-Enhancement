@@ -51,26 +51,27 @@ interface ClientRecord {
   tags: string[];
 }
 
-const CLIENT_RECORDS: ClientRecord[] = [
-  { id: "1", name: "The Urban Kitchen", domain: "theurbankitchen.in", type: "Restaurant", location: "Indore, MP", projectsCount: 2, totalValue: "₹75,000", status: "Active", lastActivity: "2 hours ago", iconBg: "bg-orange-50 text-orange-600", phone: "+91 98765 43210", email: "rahul@theurbankitchen.in", contactPerson: "Rahul Sharma", rating: 4.4, reviews: 1234, clientSince: "12 Mar 2024", description: "A modern multi-cuisine restaurant in Indore offering a unique dining experience with a focus on local flavors and modern presentation.", tags: ["restaurant", "food & beverage", "indore", "high-potential"] },
-  { id: "2", name: "Spice Junction", domain: "spicejunction.in", type: "Café", location: "Indore, MP", projectsCount: 1, totalValue: "₹45,000", status: "Active", lastActivity: "1 day ago", iconBg: "bg-purple-50 text-purple-600", phone: "+91 98260 11223", email: "contact@spicejunction.in", contactPerson: "Priya Mehta", rating: 4.6, reviews: 892, clientSince: "10 Mar 2024", description: "Artisanal specialty coffee roastery and European bakery popular among young professionals.", tags: ["cafe", "beverage", "indore"] },
-  { id: "3", name: "Dental Care+", domain: "dentalcareplus.in", type: "Dental Clinic", location: "Indore, MP", projectsCount: 2, totalValue: "₹90,000", status: "Onboarding", lastActivity: "3 hours ago", iconBg: "bg-cyan-50 text-cyan-600", phone: "+91 98261 44556", email: "drkapoor@dentalcareplus.in", contactPerson: "Dr. Sameer Kapoor", rating: 4.8, reviews: 921, clientSince: "5 Mar 2024", description: "Modern multi-chair dental implant and cosmetic surgery clinic with digital x-ray diagnostics.", tags: ["healthcare", "dental", "clinic"] },
-  { id: "4", name: "FitLife Gym", domain: "fitlifegym.in", type: "Fitness Center", location: "Indore, MP", projectsCount: 1, totalValue: "₹60,000", status: "Active", lastActivity: "1 day ago", iconBg: "bg-emerald-50 text-emerald-600", phone: "+91 98111 22334", email: "trainer@fitlifegym.in", contactPerson: "Amit Verma", rating: 4.3, reviews: 764, clientSince: "1 Mar 2024", description: "High-intensity functional training studio and CrossFit community box.", tags: ["fitness", "gym", "crossfit"] },
-  { id: "5", name: "Hotel Grand Plaza", domain: "grandplaza.in", type: "Hotel", location: "Indore, MP", projectsCount: 3, totalValue: "₹1,80,000", status: "Active", lastActivity: "5 hours ago", iconBg: "bg-blue-50 text-blue-600", phone: "+91 98990 12345", email: "manager@grandplaza.in", contactPerson: "Karan Malhotra", rating: 4.2, reviews: 512, clientSince: "15 Feb 2024", description: "4-star business hotel with banquet hall facilities and rooftop dining.", tags: ["hotel", "hospitality", "luxury"] },
-  { id: "6", name: "Fashion Hub", domain: "fashionhub.in", type: "Retail Store", location: "Indore, MP", projectsCount: 1, totalValue: "₹50,000", status: "Completed", lastActivity: "3 days ago", iconBg: "bg-pink-50 text-pink-600", phone: "+91 98765 00112", email: "support@fashionhub.in", contactPerson: "Neha Gupta", rating: 4.1, reviews: 986, clientSince: "10 Feb 2024", description: "Contemporary ethnic wear boutique for weddings and festive apparel.", tags: ["retail", "fashion", "ecommerce"] },
-  { id: "7", name: "Auto Garage Pro", domain: "autogaragepro.in", type: "Automotive", location: "Indore, MP", projectsCount: 1, totalValue: "₹40,000", status: "Active", lastActivity: "1 day ago", iconBg: "bg-indigo-50 text-indigo-600", phone: "+91 98100 88990", email: "service@autogaragepro.in", contactPerson: "Deepak Sharma", rating: 4.5, reviews: 498, clientSince: "20 Feb 2024", description: "Certified multi-brand car servicing, computerized wheel alignment, and detailing.", tags: ["automotive", "garage", "local"] },
-  { id: "8", name: "Bright Minds Academy", domain: "brightminds.in", type: "Education", location: "Indore, MP", projectsCount: 2, totalValue: "₹85,000", status: "Active", lastActivity: "2 days ago", iconBg: "bg-amber-50 text-amber-600", phone: "+91 98262 33445", email: "info@brightminds.in", contactPerson: "Simran Kaur", rating: 4.6, reviews: 512, clientSince: "18 Feb 2024", description: "CBSE & ICSE foundation coaching institute for competitive engineering entrance.", tags: ["education", "coaching", "academy"] },
-];
-
 export default function ClientsPage() {
-  const [clientsList, setClientsList] = useState<ClientRecord[]>(CLIENT_RECORDS);
-  const [selectedClient, setSelectedClient] = useState<ClientRecord>(CLIENT_RECORDS[0]);
-  const [activeTab, setActiveTab] = useState("All Clients (48)");
+  const [clientsList, setClientsList] = useState<ClientRecord[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
+  const [activeTab, setActiveTab] = useState("All");
   const [detailTab, setDetailTab] = useState("Overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const totalCount = clientsList.length;
+  const activeCount = clientsList.filter((c) => c.status === "Active").length;
+  const onboardingCount = clientsList.filter((c) => c.status === "Onboarding").length;
+  const completedCount = clientsList.filter((c) => c.status === "Completed").length;
+
+  const tabs = [
+    { id: "All", label: `All Clients (${totalCount})` },
+    { id: "Active", label: `Active (${activeCount})` },
+    { id: "Onboarding", label: `Onboarding (${onboardingCount})` },
+    { id: "Completed", label: `Completed (${completedCount})` },
+  ];
 
   // New Client Form State
   const [newBusinessName, setNewBusinessName] = useState("");
@@ -93,34 +94,33 @@ export default function ClientsPage() {
         const res = await fetch("/api/clients");
         if (res.ok) {
           const json = await res.json();
-          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-            const mapped: ClientRecord[] = json.data.map((c: any) => ({
-              id: c._id || c.id,
-              name: c.businessName,
-              domain: c.website ? c.website.replace(/^https?:\/\//, "") : `${c.businessName.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
-              type: "Local Business",
-              location: c.address || "Indore, MP",
-              projectsCount: 1,
-              totalValue: `₹${(c.monthlyRetainer || 35000).toLocaleString("en-IN")}`,
-              status: c.status === "Onboarding" ? "Onboarding" : c.status === "Past" ? "Completed" : "Active",
-              lastActivity: "Recently added",
+          const list = json.clients || (json.success && Array.isArray(json.data) ? json.data : []);
+          if (Array.isArray(list) && list.length > 0) {
+            const mapped: ClientRecord[] = list.map((c: any) => ({
+              id: c.clientId || c._id || c.id,
+              name: c.name || c.businessName || "Unnamed Partner",
+              domain: c.domain || (c.website ? c.website.replace(/^https?:\/\//, "") : ""),
+              type: c.type || "Local Business",
+              location: c.location || c.address || "Indore, MP",
+              projectsCount: c.projectsCount || 1,
+              totalValue: typeof c.totalValue === "number" ? `₹${c.totalValue.toLocaleString("en-IN")}` : (c.totalValue || "₹0"),
+              status: c.status === "Onboarding" ? "Onboarding" : c.status === "Completed" ? "Completed" : "Active",
+              lastActivity: "Active",
               iconBg: "bg-blue-50 text-blue-600",
               phone: c.phone || "+91 98000 00000",
               email: c.email || "contact@client.in",
               contactPerson: c.contactPerson || "Manager",
-              rating: 4.5,
-              reviews: 120,
+              rating: c.rating || 4.5,
+              reviews: c.reviews || 10,
               clientSince: c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
-              description: `${c.businessName} partner account under plan: ${c.plan || "Performance Funnel"}.`,
+              description: c.description || `${c.name || c.businessName} partner account.`,
               tags: ["active-client", "verified"],
             }));
-
-            setClientsList((prev) => {
-              const prevIds = new Set(mapped.map((m) => m.id));
-              const combined = [...mapped, ...prev.filter((p) => !prevIds.has(p.id))];
-              if (mapped.length > 0) setSelectedClient(mapped[0]);
-              return combined;
-            });
+            setClientsList(mapped);
+            setSelectedClient(mapped[0]);
+          } else {
+            setClientsList([]);
+            setSelectedClient(null);
           }
         }
       } catch (err) {
@@ -289,9 +289,9 @@ export default function ClientsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">48</span>
+                <span className="text-xl font-bold text-[#171918]">{totalCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 20%
+                  {totalCount > 0 ? "↑ 20%" : "Active"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Total Clients</div>
@@ -311,9 +311,9 @@ export default function ClientsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">32</span>
+                <span className="text-xl font-bold text-[#171918]">{activeCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 15%
+                  {activeCount > 0 ? "↑ 15%" : "Active"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Active Clients</div>
@@ -333,9 +333,9 @@ export default function ClientsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">18</span>
+                <span className="text-xl font-bold text-[#171918]">{completedCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 28%
+                  {completedCount > 0 ? "↑ 28%" : "Completed"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Completed Projects</div>
@@ -355,9 +355,9 @@ export default function ClientsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">6</span>
+                <span className="text-xl font-bold text-[#171918]">{onboardingCount}</span>
                 <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1 py-0.2 rounded">
-                  ↓ 0%
+                  {onboardingCount > 0 ? "In Flow" : "0%"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Onboarding</div>
@@ -377,9 +377,9 @@ export default function ClientsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">₹4.8L</span>
+                <span className="text-xl font-bold text-[#171918]">{totalCount > 0 ? "₹4.8L" : "₹0"}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 42%
+                  {totalCount > 0 ? "↑ 42%" : "Live"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Total Revenue</div>
@@ -400,17 +400,17 @@ export default function ClientsPage() {
           {/* Tabs & Controls */}
           <div className="p-4 border-b border-gray-100 space-y-3">
             <div className="flex items-center gap-1 border-b border-gray-100 text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
-              {["All Clients (48)", "Active (32)", "Onboarding (6)", "Projects (18)", "Inactive (4)"].map((tab) => (
+              {tabs.map((tab) => (
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
                   className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-                    activeTab === tab
+                    activeTab === tab.id
                       ? "bg-[#171918] text-white font-bold"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  {tab}
+                  {tab.label}
                 </button>
               ))}
             </div>
@@ -457,9 +457,20 @@ export default function ClientsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[11px]">
-                {filteredClients.map((c) => {
-                  const isSelected = selectedClient.id === c.id;
-                  return (
+                {filteredClients.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center text-gray-500">
+                      <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                      <p className="font-semibold text-gray-700">No clients onboarded yet</p>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        Convert qualified leads or click &quot;Add Client&quot; to onboard your first partner.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredClients.map((c) => {
+                    const isSelected = selectedClient?.id === c.id;
+                    return (
                     <tr
                       key={c.id}
                       onClick={() => setSelectedClient(c)}
@@ -498,13 +509,13 @@ export default function ClientsPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>
 
           <div className="p-3 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-gray-500">
-            <span>Showing 1 to 8 of 48 clients</span>
+            <span>Showing {clientsList.length > 0 ? 1 : 0} to {filteredClients.length} of {clientsList.length} clients</span>
             <div className="flex items-center gap-1">
               <button className="px-2 py-0.5 rounded border bg-white">‹</button>
               <button className="px-2 py-0.5 rounded bg-[#171918] text-white font-bold">1</button>
@@ -517,26 +528,38 @@ export default function ClientsPage() {
 
         {/* Right Column (4 cols): Selected Client Overview Panel */}
         <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-4 shadow-xs text-xs">
-          {/* Header */}
-          <div className="flex items-start justify-between pb-3 border-b border-gray-100">
-            <div className="flex items-center gap-2.5">
-              <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 border border-orange-200">
-                🍽️
-              </span>
-              <div>
-                <h3 className="font-bold text-base text-[#171918]">{selectedClient.name}</h3>
-                <div className="text-[11px] text-gray-500">{selectedClient.type} • {selectedClient.domain}</div>
+          {!selectedClient ? (
+            <div className="py-24 px-4 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mx-auto">
+                <Users size={24} />
               </div>
+              <h3 className="text-sm font-bold text-gray-900">No Client Selected</h3>
+              <p className="text-xs text-gray-500 max-w-[220px] mx-auto">
+                Select a client from the table to view their projects, retainer billing, and communications.
+              </p>
             </div>
-            <div className="flex items-center gap-1">
-              <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
-                <Star size={14} className="text-amber-400 fill-amber-400" />
-              </button>
-              <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
-                <MoreHorizontal size={14} />
-              </button>
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 border border-orange-200">
+                    🍽️
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-base text-[#171918]">{selectedClient.name}</h3>
+                    <div className="text-[11px] text-gray-500">{selectedClient.type} • {selectedClient.domain}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                    <Star size={14} className="text-amber-400 fill-amber-400" />
+                  </button>
+                  <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                    <MoreHorizontal size={14} />
+                  </button>
+                </div>
+              </div>
 
           {/* Tabs */}
           <div className="flex items-center gap-1 border-b border-gray-100 text-[11px] font-semibold pb-1 overflow-x-auto scrollbar-none">
@@ -696,6 +719,8 @@ export default function ClientsPage() {
               </button>
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
 

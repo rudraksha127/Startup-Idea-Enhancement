@@ -39352,32 +39352,7 @@ var LeadsService = class {
     const page = Math.max(1, params.page || 1);
     const limit = Math.max(1, Math.min(100, params.limit || 10));
     const offset = (page - 1) * limit;
-    let allLeadsResult = await LeadsRepository.findByOrg(params.orgId, { limit: 1e3 });
-    if (allLeadsResult.total === 0) {
-      await LeadsRepository.create({
-        leadId: `lead_init_${params.orgId}`,
-        organizationId: params.orgId,
-        businessName: "Royal Spice Indian Kitchen",
-        category: "Restaurant",
-        address: "42 MG Road, Indiranagar, Bengaluru, Karnataka",
-        city: "Bengaluru",
-        phone: "+91 80 4123 4567",
-        website: "https://royalspice-bangalore.in",
-        rating: 4.2,
-        reviewCount: 184,
-        opportunityScore: 78,
-        qualificationStatus: "Qualified",
-        source: "Google Maps Platform API"
-      });
-      allLeadsResult = await LeadsRepository.findByOrg(params.orgId, { limit: 1e3 });
-    }
-    const { leads, total } = await LeadsRepository.findByOrg(params.orgId, {
-      search: params.search,
-      category: params.category && params.category !== "All" ? params.category : void 0,
-      status: params.status && params.status !== "All" ? params.status : void 0,
-      limit,
-      offset
-    });
+    const allLeadsResult = await LeadsRepository.findByOrg(params.orgId, { limit: 1e4 });
     const allLeads = allLeadsResult.leads;
     const counts = {
       All: allLeads.length,
@@ -39394,6 +39369,23 @@ var LeadsService = class {
       Archived: allLeads.filter((l) => l.qualificationStatus === "Disqualified").length
       // legacy alias
     };
+    let filtered = allLeads;
+    if (params.status && params.status !== "All") {
+      filtered = filtered.filter((l) => l.qualificationStatus === params.status);
+    }
+    if (params.category && params.category !== "All") {
+      const cat = params.category.toLowerCase();
+      filtered = filtered.filter((l) => l.category && l.category.toLowerCase() === cat);
+    }
+    if (params.search) {
+      const q = params.search.toLowerCase();
+      filtered = filtered.filter(
+        (l) => l.businessName && l.businessName.toLowerCase().includes(q) || l.city && l.city.toLowerCase().includes(q) || l.address && l.address.toLowerCase().includes(q)
+      );
+    }
+    filtered.sort((a, b) => (b.opportunityScore || 0) - (a.opportunityScore || 0));
+    const total = filtered.length;
+    const leads = filtered.slice(offset, offset + limit);
     return {
       leads,
       total,
@@ -41090,10 +41082,12 @@ var InvoicesRepository = class {
 // src/modules/dashboard/dashboard.service.ts
 var DashboardService = class {
   static async getMetrics(orgId) {
-    const leadsRes = await LeadsRepository.findByOrg(orgId, { limit: 1e3 });
+    const [leadsRes, projects, invoices] = await Promise.all([
+      LeadsRepository.findByOrg(orgId, { limit: 1e3 }),
+      ProjectsRepository.findByOrg(orgId),
+      InvoicesRepository.findByOrg(orgId)
+    ]);
     const leads = leadsRes.leads;
-    const projects = await ProjectsRepository.findByOrg(orgId);
-    const invoices = await InvoicesRepository.findByOrg(orgId);
     const totalLeads = leads.length;
     const contactedLeads = leads.filter((l) => l.qualificationStatus === "Contacted").length;
     const activeProjects = projects.filter((p) => p.status === "Active").length;
@@ -41326,20 +41320,22 @@ var VERIFIED_DIRECTORY_FALLBACK = [
   { id: "dir-9", name: "Hotel Grand Plaza", rating: 4.4, reviews: 512, category: "Hotel", distance: "2.5 km", address: "Aerocity, New Delhi", phone: "+91 98990 12345", website: "https://grandplaza.example", img: "/assets/templates/hotel.jpg", opportunityScore: 9.1, hours: "Open 24 Hours", priceRange: "\u20B9\u20B9\u20B9\u20B9 (Luxury)", source: "Local Verified Registry", location: { lat: 28.5529, lng: 77.1219 } },
   { id: "dir-10", name: "Apex Coding Academy", rating: 4.9, reviews: 510, category: "Education", distance: "0.6 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 22331", website: "https://apexcoding.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 9, hours: "Open \u2022 Closes 7:00 PM", priceRange: "\u20B9\u20B9\u20B9 (Upscale)", source: "Local Verified Registry", location: { lat: 22.7562, lng: 75.8974 } }
 ];
-var MapsService = class {
+var MapsService = class _MapsService {
+  // In-memory bounded TTL cache for place searches (adheres to Google Maps caching policies)
+  static searchCache = /* @__PURE__ */ new Map();
   /**
    * Verifies Google Maps Platform configuration and credential status.
    */
   static getStatus() {
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || "";
-    const browserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || "";
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY || "";
+    const browserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
     const hasServerKey = Boolean(serverKey && serverKey.length > 10 && !serverKey.includes("placeholder"));
     const hasBrowserKey = Boolean(browserKey && browserKey.length > 10 && !browserKey.includes("placeholder"));
     return {
       configured: hasServerKey || hasBrowserKey,
       hasServerKey,
       hasBrowserKey,
-      status: hasServerKey ? "CONNECTED" : "CREDENTIAL_REQUIRED",
+      status: hasServerKey || hasBrowserKey ? "CONNECTED" : "CREDENTIAL_REQUIRED",
       provider: "Google Maps Platform",
       apisRequired: [
         "Maps JavaScript API",
@@ -41355,10 +41351,23 @@ var MapsService = class {
    * Searches for places using Google Places API (New) or fallback verified directory.
    */
   static async searchPlaces(params) {
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY;
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
     const query = params.query || "";
     const category = params.category || "";
     const city = params.city || "Indore";
+    const cacheKey = `${query}:${category}:${city}`.toLowerCase();
+    const cached = _MapsService.searchCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+    const saveToCache = (data) => {
+      if (_MapsService.searchCache.size >= 200) {
+        const firstKey = _MapsService.searchCache.keys().next().value;
+        if (firstKey) _MapsService.searchCache.delete(firstKey);
+      }
+      _MapsService.searchCache.set(cacheKey, { data, expiresAt: Date.now() + 15 * 60 * 1e3 });
+      return data;
+    };
     if (serverKey && serverKey.length > 10 && !serverKey.includes("placeholder")) {
       try {
         const textQuery = [query, category, city].filter(Boolean).join(" ");
@@ -41395,11 +41404,11 @@ var MapsService = class {
               source: "Google Places API (New)",
               location: p.location ? { lat: p.location.latitude, lng: p.location.longitude } : void 0
             }));
-            return {
+            return saveToCache({
               places,
               source: "Google Places API (New)",
               total: places.length
-            };
+            });
           }
         }
       } catch (apiErr) {
@@ -41418,17 +41427,17 @@ var MapsService = class {
         (p) => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
       );
     }
-    return {
+    return saveToCache({
       places: filtered,
       source: "Verified Business Registry (Google Maps Key Pending)",
       total: filtered.length
-    };
+    });
   }
   /**
    * Autocomplete suggestions for search input.
    */
   static async autocomplete(input) {
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY;
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
     if (serverKey && serverKey.length > 10 && !serverKey.includes("placeholder") && input.length >= 2) {
       try {
         const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {

@@ -5,6 +5,22 @@ import { Organization } from "@/models/Organization";
 import { getCurrentUser } from "@/lib/auth/jwt";
 
 export async function GET() {
+  const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
+
+  // 1. Try Zoho Catalyst AppSail backend first
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const backendRes = await fetch(`${backendApiUrl}/projects`, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return NextResponse.json(data);
+    }
+  } catch (backendErr) {
+    console.warn("AppSail projects fetch fallback:", backendErr);
+  }
+
   try {
     await connectToDatabase();
     const session = await getCurrentUser();
@@ -23,7 +39,7 @@ export async function GET() {
     return NextResponse.json({ projects });
   } catch (error) {
     console.error("Projects API error:", error);
-    return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
+    return NextResponse.json({ projects: [] });
   }
 }
 

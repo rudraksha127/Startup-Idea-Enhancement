@@ -9,6 +9,8 @@ interface LeadFiltersSidebarProps {
   status: string;
   onStatusChange: (status: string) => void;
   onReset: () => void;
+  counts?: Record<string, number>;
+  totalLeads?: number;
 }
 
 export function LeadFiltersSidebar({
@@ -17,37 +19,41 @@ export function LeadFiltersSidebar({
   status,
   onStatusChange,
   onReset,
+  counts,
+  totalLeads = 0,
 }: LeadFiltersSidebarProps) {
   const [locationSearch, setLocationSearch] = useState("");
   const [selectedList, setSelectedList] = useState("High Potential");
 
+  const isZero = totalLeads === 0;
+
   const categories = [
-    { name: "Restaurant", count: 324 },
-    { name: "Beauty", count: 218 },
-    { name: "Healthcare", count: 186 },
-    { name: "Fitness", count: 172 },
-    { name: "Hotel", count: 145 },
+    { name: "Restaurant", count: isZero ? 0 : 324 },
+    { name: "Beauty", count: isZero ? 0 : 218 },
+    { name: "Healthcare", count: isZero ? 0 : 186 },
+    { name: "Fitness", count: isZero ? 0 : 172 },
+    { name: "Hotel", count: isZero ? 0 : 145 },
   ];
 
   const ratings = [
-    { label: "4.5 and above", count: 412 },
-    { label: "4.0 – 4.5", count: 876 },
-    { label: "3.5 – 4.0", count: 689 },
-    { label: "Below 3.5", count: 114 },
+    { label: "4.5 and above", count: isZero ? 0 : 412 },
+    { label: "4.0 – 4.5", count: isZero ? 0 : 876 },
+    { label: "3.5 – 4.0", count: isZero ? 0 : 689 },
+    { label: "Below 3.5", count: isZero ? 0 : 114 },
   ];
 
   const statuses = [
-    { name: "New", count: 680 },
-    { name: "Contacted", count: 892 },
-    { name: "Replied", count: 142 },
-    { name: "Interested", count: 68 },
-    { name: "Converted", count: 38 },
+    { name: "New", count: counts?.New ?? (isZero ? 0 : 680) },
+    { name: "Contacted", count: counts?.Contacted ?? (isZero ? 0 : 892) },
+    { name: "Replied", count: counts?.Replied ?? (isZero ? 0 : 142) },
+    { name: "Interested", count: counts?.Interested ?? (isZero ? 0 : 68) },
+    { name: "Converted", count: counts?.Converted ?? (isZero ? 0 : 38) },
   ];
 
   const savedLists = [
-    { name: "High Potential", count: 128 },
-    { name: "Need Website", count: 286 },
-    { name: "Follow Up This Week", count: 54 },
+    { name: "High Potential", count: isZero ? 0 : 128 },
+    { name: "Need Website", count: isZero ? 0 : 286 },
+    { name: "Follow Up This Week", count: isZero ? 0 : 54 },
   ];
 
   return (

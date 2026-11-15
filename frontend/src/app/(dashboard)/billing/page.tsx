@@ -17,6 +17,7 @@ import {
   Layers,
   ArrowRight,
   TrendingDown,
+  Receipt,
   X,
   Loader2,
 } from "lucide-react";
@@ -99,10 +100,25 @@ const SERVICE_REVENUE = [
 
 export default function BillingPage() {
   const [timeframe, setTimeframe] = useState("Monthly");
-  const [invoicesList, setInvoicesList] = useState(RECENT_INVOICES);
+  const [invoicesList, setInvoicesList] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const totalBilled = invoicesList.reduce((acc, inv) => {
+    const num = parseInt(inv.amount?.toString().replace(/[^0-9]/g, "") || "0", 10);
+    return acc + num;
+  }, 0);
+  const totalPaid = invoicesList.filter((inv) => inv.status === "Paid").reduce((acc, inv) => {
+    const num = parseInt(inv.amount?.toString().replace(/[^0-9]/g, "") || "0", 10);
+    return acc + num;
+  }, 0);
+  const totalOutstanding = invoicesList.filter((inv) => inv.status === "Pending" || inv.status === "Overdue").reduce((acc, inv) => {
+    const num = parseInt(inv.amount?.toString().replace(/[^0-9]/g, "") || "0", 10);
+    return acc + num;
+  }, 0);
+  const totalInvoices = invoicesList.length;
+  const paidInvoicesCount = invoicesList.filter((inv) => inv.status === "Paid").length;
 
   // New Invoice Form
   const [newClient, setNewClient] = useState("Spice Villa Restaurant");
@@ -124,15 +140,17 @@ export default function BillingPage() {
           const data = await res.json();
           if (data.invoices && data.invoices.length > 0) {
             const mapped = data.invoices.map((inv: any) => ({
-              id: inv.invoiceNumber || inv._id,
-              client: inv.clientName,
-              project: inv.projectTitle,
-              amount: `₹${Number(inv.amount).toLocaleString("en-IN")}`,
-              status: inv.status,
+              id: inv.invoiceNumber || inv.invoiceId || inv._id,
+              client: inv.clientName || "Client",
+              project: inv.projectTitle || "Agency Services",
+              amount: typeof inv.amount === "number" ? `₹${inv.amount.toLocaleString("en-IN")}` : inv.amount,
+              status: inv.status || "Pending",
               issueDate: inv.createdAt ? new Date(inv.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
-              dueDate: inv.dueDate,
+              dueDate: inv.dueDate ? (inv.dueDate.includes("T") ? new Date(inv.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : inv.dueDate) : "30 days",
             }));
             setInvoicesList(mapped);
+          } else {
+            setInvoicesList([]);
           }
         }
       } catch (err) {
@@ -272,9 +290,9 @@ export default function BillingPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-[#171918]">₹12,80,000</span>
+                <span className="text-lg font-bold text-[#171918]">{totalInvoices > 0 ? `₹${totalBilled.toLocaleString("en-IN")}` : "₹0"}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 52%
+                  {totalInvoices > 0 ? "↑ 52%" : "Active"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Total Billed</div>
@@ -294,9 +312,9 @@ export default function BillingPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-[#171918]">₹10,40,000</span>
+                <span className="text-lg font-bold text-[#171918]">{totalInvoices > 0 ? `₹${totalPaid.toLocaleString("en-IN")}` : "₹0"}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 38%
+                  {totalInvoices > 0 ? "↑ 38%" : "Settled"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Total Paid</div>
@@ -316,9 +334,9 @@ export default function BillingPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-[#171918]">₹2,40,000</span>
+                <span className="text-lg font-bold text-[#171918]">{totalInvoices > 0 ? `₹${totalOutstanding.toLocaleString("en-IN")}` : "₹0"}</span>
                 <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1 py-0.2 rounded border border-rose-200">
-                  ↓ 12%
+                  {totalOutstanding > 0 ? "Pending" : "None"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Outstanding</div>
@@ -338,9 +356,9 @@ export default function BillingPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">28</span>
+                <span className="text-xl font-bold text-[#171918]">{totalInvoices}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 27%
+                  Active
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Total Invoices</div>
@@ -360,9 +378,9 @@ export default function BillingPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">24</span>
+                <span className="text-xl font-bold text-[#171918]">{paidInvoicesCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 33%
+                  Paid
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Active Clients</div>
@@ -498,7 +516,18 @@ export default function BillingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[11px]">
-                {invoicesList.map((inv, idx) => (
+                {invoicesList.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-gray-500">
+                      <Receipt className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                      <p className="font-semibold text-gray-700">No invoices generated yet</p>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        Create an invoice or trigger Stripe Checkout to generate payment links for clients.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  invoicesList.map((inv, idx) => (
                   <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-2.5 px-3 text-gray-400 font-mono text-[10px]">{idx + 1}</td>
                     <td className="py-2.5 px-2.5">
@@ -520,7 +549,7 @@ export default function BillingPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

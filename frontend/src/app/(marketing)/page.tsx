@@ -13,7 +13,7 @@ export default function MarketingLandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f8f6f0] flex flex-col font-sans selection:bg-[#0d251f] selection:text-white">
+    <div className="min-h-screen bg-[#f8f6f0] dark:bg-[#0b0f0e] flex flex-col font-sans selection:bg-[#0d251f] selection:text-white transition-colors">
       <LandingHeader />
       <main className="flex-1">
         <LandingHero onOpenDemo={() => setDemoOpen(true)} />

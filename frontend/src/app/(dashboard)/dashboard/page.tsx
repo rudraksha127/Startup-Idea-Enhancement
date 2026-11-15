@@ -1,15 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { MetricCards } from "@/features/dashboard/components/metric-cards";
-import { LeadsGrowthChart } from "@/features/dashboard/components/leads-growth-chart";
-import { LeadSourcesChart } from "@/features/dashboard/components/lead-sources-chart";
 import { AIAgentsCard } from "@/features/dashboard/components/ai-agents-card";
 import { RecentActivity } from "@/features/dashboard/components/recent-activity";
-import { RevenueOverview } from "@/features/dashboard/components/revenue-overview";
 import { WebsiteBuilderCard } from "@/features/dashboard/components/website-builder-card";
 import { RecentLeadsCard } from "@/features/dashboard/components/recent-leads-card";
 import { ClientsPipelineCard } from "@/features/dashboard/components/clients-pipeline-card";
+
+// Dynamic code-splitting for heavy recharts visualization components
+const LeadsGrowthChart = dynamic(
+  () => import("@/features/dashboard/components/leads-growth-chart").then((m) => m.LeadsGrowthChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[340px] w-full rounded-2xl bg-[#F8FAFC] dark:bg-[#121816] animate-pulse border border-[#E2E8F0] dark:border-[#22302B] flex items-center justify-center text-xs text-slate-400">
+        Loading chart...
+      </div>
+    ),
+  }
+);
+
+const LeadSourcesChart = dynamic(
+  () => import("@/features/dashboard/components/lead-sources-chart").then((m) => m.LeadSourcesChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[340px] w-full rounded-2xl bg-[#F8FAFC] dark:bg-[#121816] animate-pulse border border-[#E2E8F0] dark:border-[#22302B] flex items-center justify-center text-xs text-slate-400">
+        Loading sources...
+      </div>
+    ),
+  }
+);
+
+const RevenueOverview = dynamic(
+  () => import("@/features/dashboard/components/revenue-overview").then((m) => m.RevenueOverview),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[220px] w-full rounded-2xl bg-[#F8FAFC] dark:bg-[#121816] animate-pulse border border-[#E2E8F0] dark:border-[#22302B] flex items-center justify-center text-xs text-slate-400">
+        Loading revenue...
+      </div>
+    ),
+  }
+);
 
 export default function DashboardPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

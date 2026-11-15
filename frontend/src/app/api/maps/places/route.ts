@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const { query, category, city } = body;
-    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY;
+    const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
 
     if (serverKey && serverKey.length > 10 && !serverKey.includes("placeholder")) {
       try {

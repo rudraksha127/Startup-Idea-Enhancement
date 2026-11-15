@@ -20,37 +20,11 @@ export class LeadsService {
     const limit = Math.max(1, Math.min(100, params.limit || 10));
     const offset = (page - 1) * limit;
 
-    // Compute status counts across this org
-    let allLeadsResult = await LeadsRepository.findByOrg(params.orgId, { limit: 1000 });
-    if (allLeadsResult.total === 0) {
-      await LeadsRepository.create({
-        leadId: `lead_init_${params.orgId}`,
-        organizationId: params.orgId,
-        businessName: "Royal Spice Indian Kitchen",
-        category: "Restaurant",
-        address: "42 MG Road, Indiranagar, Bengaluru, Karnataka",
-        city: "Bengaluru",
-        phone: "+91 80 4123 4567",
-        website: "https://royalspice-bangalore.in",
-        rating: 4.2,
-        reviewCount: 184,
-        opportunityScore: 78,
-        qualificationStatus: "Qualified",
-        source: "Google Maps Platform API",
-      });
-      allLeadsResult = await LeadsRepository.findByOrg(params.orgId, { limit: 1000 });
-    }
-
-    const { leads, total } = await LeadsRepository.findByOrg(params.orgId, {
-      search: params.search,
-      category: params.category && params.category !== "All" ? params.category : undefined,
-      status: params.status && params.status !== "All" ? params.status : undefined,
-      limit,
-      offset,
-    });
-
+    // Single-pass query: Fetch all leads for this organization once
+    const allLeadsResult = await LeadsRepository.findByOrg(params.orgId, { limit: 10000 });
     const allLeads = allLeadsResult.leads;
 
+    // Compute status counts directly from the unified dataset (0 duplicate DB queries)
     const counts = {
       All: allLeads.length,
       New: allLeads.filter((l) => l.qualificationStatus === "New").length,
@@ -63,6 +37,29 @@ export class LeadsService {
       Replied: allLeads.filter((l) => l.qualificationStatus === "Contacted").length, // legacy alias
       Archived: allLeads.filter((l) => l.qualificationStatus === "Disqualified").length, // legacy alias
     };
+
+    // Filter in-memory for active request parameters
+    let filtered = allLeads;
+    if (params.status && params.status !== "All") {
+      filtered = filtered.filter((l) => l.qualificationStatus === params.status);
+    }
+    if (params.category && params.category !== "All") {
+      const cat = params.category.toLowerCase();
+      filtered = filtered.filter((l) => l.category && l.category.toLowerCase() === cat);
+    }
+    if (params.search) {
+      const q = params.search.toLowerCase();
+      filtered = filtered.filter((l) =>
+        (l.businessName && l.businessName.toLowerCase().includes(q)) ||
+        (l.city && l.city.toLowerCase().includes(q)) ||
+        (l.address && l.address.toLowerCase().includes(q))
+      );
+    }
+
+    filtered.sort((a, b) => (b.opportunityScore || 0) - (a.opportunityScore || 0));
+
+    const total = filtered.length;
+    const leads = filtered.slice(offset, offset + limit);
 
     return {
       leads,

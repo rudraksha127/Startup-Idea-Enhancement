@@ -67,3 +67,4 @@ AgencyOS is an AI-powered SaaS operating system designed to run high-volume agen
 * **Why Chosen:** Zero-runtime utility classes, dark/light theme support via `next-themes`, and custom agency design tokens (`paper`, `ink`, `agency-green`, `agency-accent`) matching the luxury editorial agency aesthetic.
 * **Trade-Offs & Limitations:** Long class attribute strings; mitigated by reusable UI components (`frontend/src/components/ui/`).
 * **Connection to AgencyOS:** Consistent pixel-perfect UI across all 11 dashboard features.
+

@@ -170,6 +170,18 @@ body {
 }
 
 /* Header & background tones */
+.dark .bg-\[\#F8F6F0\],
+.dark .bg-\[\#f8f6f0\],
+.dark [class*="bg-[#F8F6F0]"],
+.dark [class*="bg-[#f8f6f0]"],
+.dark .bg-\[\#F3F1EB\],
+.dark .bg-\[\#f3f1eb\],
+.dark [class*="bg-[#F3F1EB]"],
+.dark [class*="bg-[#f3f1eb]"],
+.dark .bg-\[\#EAE8E1\],
+.dark .bg-\[\#eae8e1\],
+.dark [class*="bg-[#EAE8E1]"],
+.dark [class*="bg-[#eae8e1]"],
 .dark .bg-\[\#F7F6F2\],
 .dark .bg-\[\#f7f6f2\],
 .dark [class*="bg-[#F7F6F2]"],
@@ -181,7 +193,7 @@ body {
 .dark .bg-\[\#fafaf8\],
 .dark .bg-\[\#FAF8F5\],
 .dark .bg-gray-50:not([data-keep-light="true"]) {
-  background-color: #111715 !important;
+  background-color: #0b0f0e !important;
 }
 
 .dark .bg-gray-100:not([data-keep-light="true"]):not(aside .bg-gray-100) {
@@ -190,7 +202,10 @@ body {
 
 /* Typography */
 .dark .text-\[\#171918\]:not(aside .text-\[\#171918\]),
+.dark .text-\[\#151B1A\]:not(aside .text-\[\#151B1A\]),
+.dark .text-\[\#151b1a\]:not(aside .text-\[\#151b1a\]),
 .dark .text-\[\#101413\],
+.dark .text-\[\#111614\],
 .dark .text-gray-900:not(aside .text-gray-900) {
   color: #f7f9f8 !important;
 }
@@ -276,6 +291,10 @@ html:not(.dark) body {
   color: #0f172a !important;
 }
 
+html:not(.dark) .bg-\[\#F8F6F0\],
+html:not(.dark) .bg-\[\#f8f6f0\],
+html:not(.dark) [class*="bg-[#F8F6F0]"],
+html:not(.dark) [class*="bg-[#f8f6f0]"],
 html:not(.dark) .bg-\[\#F7F6F2\],
 html:not(.dark) .bg-\[\#f7f6f2\],
 html:not(.dark) [class*="bg-[#F7F6F2]"],

@@ -9,7 +9,7 @@
 /playwright-report
 /blob-report
 
-# Next.js build output
+# Next.js & Cloudflare build output
 /.next/
 frontend/.next/
 /out/
@@ -17,12 +17,37 @@ frontend/.next/
 /dist
 dist/
 apps/api/dist/
+.open-next/
+.wrangler/
+frontend/.open-next/
+frontend/.wrangler/
+**/.open-next/
+**/.wrangler/
 
 # Environment variables
 .env
 .env.*
 .env*.local
 !.env.example
+!frontend/.env.example
+!backend/.env.example
+!frontend/.env.production.example
+!backend/.env.production.example
+
+# Testing
+/coverage
+/test-results
+/playwright-report
+/blob-report
+
+# IDE & Editor
+.vscode/
+.idea/
+
+# TypeScript cache & OS Files
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
 
 # Logs
 npm-debug.log*

@@ -48,21 +48,6 @@ interface BusinessResult {
   location?: { lat: number; lng: number };
 }
 
-const INITIAL_BUSINESS_RESULTS: BusinessResult[] = [
-  { id: "1", name: "The Urban Kitchen", rating: 4.4, reviews: 1234, category: "Restaurant", distance: "0.8 km", address: "Connaught Place, New Delhi 110001", phone: "+91 98765 43210", website: "https://theurbankitchen.in", img: "/assets/urban-kitchen.jpg", opportunityScore: 8.5, hours: "Open • Closes 11:00 PM", priceRange: "₹₹ (Moderate)", source: "Google Maps Verified", location: { lat: 28.6304, lng: 77.2177 } },
-  { id: "2", name: "Spice Junction", rating: 4.6, reviews: 892, category: "Restaurant", distance: "1.2 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 11223", website: "https://spicejunction.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.2, hours: "Open • Closes 10:30 PM", priceRange: "₹₹ (Moderate)", source: "Google Maps Verified", location: { lat: 22.7533, lng: 75.8937 } },
-  { id: "3", name: "Flavors of India", rating: 4.3, reviews: 764, category: "Restaurant", distance: "1.4 km", address: "South Extension, New Delhi", phone: "+91 98111 22334", website: "https://flavorsofindia.example", img: "/assets/urban-kitchen.jpg", opportunityScore: 7.9, hours: "Open • Closes 11:30 PM", priceRange: "₹₹₹ (Upscale)", source: "Google Maps Verified", location: { lat: 28.5714, lng: 77.2215 } },
-  { id: "4", name: "Tandoori Nights", rating: 4.1, reviews: 986, category: "Restaurant", distance: "1.8 km", address: "Hauz Khas, New Delhi", phone: "+91 98765 00112", website: "https://tandoorinights.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.7, hours: "Open • Closes 12:00 AM", priceRange: "₹₹ (Moderate)", source: "Google Maps Verified", location: { lat: 28.5494, lng: 77.2001 } },
-  { id: "5", name: "Café Central", rating: 4.5, reviews: 632, category: "Cafe", distance: "2.1 km", address: "Palasia, Indore, MP", phone: "+91 98261 44556", website: "https://cafecentral.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 7.8, hours: "Open • Closes 9:00 PM", priceRange: "₹ (Budget)", source: "Google Maps Verified", location: { lat: 22.7244, lng: 75.8839 } },
-  { id: "6", name: "The Food Factory", rating: 4.2, reviews: 421, category: "Restaurant", distance: "2.3 km", address: "Karol Bagh, New Delhi", phone: "+91 98100 88990", website: "https://thefoodfactory.example", img: "/assets/urban-kitchen.jpg", opportunityScore: 8.4, hours: "Open • Closes 11:00 PM", priceRange: "₹₹ (Moderate)", source: "Google Maps Verified", location: { lat: 28.6514, lng: 77.1907 } },
-  { id: "7", name: "Hotel Grand Plaza", rating: 4.4, reviews: 512, category: "Hotel", distance: "2.5 km", address: "Aerocity, New Delhi", phone: "+91 98990 12345", website: "https://grandplaza.example", img: "/assets/templates/hotel.jpg", opportunityScore: 9.1, hours: "Open 24 Hours", priceRange: "₹₹₹₹ (Luxury)", source: "Google Maps Verified", location: { lat: 28.5529, lng: 77.1219 } },
-  { id: "8", name: "Luxe Glow Salon & Spa", rating: 4.7, reviews: 340, category: "Salon", distance: "1.1 km", address: "Saket Nagar, Indore, MP", phone: "+91 98260 45678", website: "", img: "/assets/templates/salon.jpg", opportunityScore: 9.3, hours: "Open • Closes 8:30 PM", priceRange: "₹₹ (Moderate)", source: "Local Registry", location: { lat: 22.7196, lng: 75.8977 } },
-  { id: "9", name: "Iron & Pulse Fitness Club", rating: 4.8, reviews: 450, category: "Gym", distance: "1.9 km", address: "AB Road, Indore, MP", phone: "+91 98260 99887", website: "", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.9, hours: "Open • Closes 10:00 PM", priceRange: "₹₹ (Moderate)", source: "Local Registry", location: { lat: 22.7445, lng: 75.8912 } },
-  { id: "10", name: "City Care Specialty Clinic", rating: 4.6, reviews: 620, category: "Clinic", distance: "2.8 km", address: "Old Palasia, Indore, MP", phone: "+91 98260 77889", website: "https://citycare.example", img: "/assets/templates/clinic.jpg", opportunityScore: 8.6, hours: "Open • Closes 8:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Registry", location: { lat: 22.7291, lng: 75.8885 } },
-  { id: "11", name: "Urban Elegance Boutique", rating: 4.3, reviews: 180, category: "Retail", distance: "3.2 km", address: "Treasure Island Mall, Indore, MP", phone: "+91 98260 33445", website: "", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.4, hours: "Open • Closes 9:30 PM", priceRange: "₹₹ (Moderate)", source: "Local Registry", location: { lat: 22.7233, lng: 75.8778 } },
-  { id: "12", name: "Apex Coding Academy", rating: 4.9, reviews: 510, category: "Education", distance: "0.6 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 22331", website: "https://apexcoding.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 9.0, hours: "Open • Closes 7:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Registry", location: { lat: 22.7562, lng: 75.8974 } },
-];
-
 const CATEGORY_PILLS = [
   { name: "Restaurant", icon: "🍽️" },
   { name: "Cafe", icon: "☕" },
@@ -78,8 +63,8 @@ const CATEGORY_PILLS = [
 ];
 
 export default function MapExplorerPage() {
-  const [businesses, setBusinesses] = useState<BusinessResult[]>(INITIAL_BUSINESS_RESULTS);
-  const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult>(INITIAL_BUSINESS_RESULTS[0]);
+  const [businesses, setBusinesses] = useState<BusinessResult[]>([]);
+  const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Indore, Madhya Pradesh");
   const [activeCategoryPill, setActiveCategoryPill] = useState("Restaurant");
@@ -134,6 +119,9 @@ export default function MapExplorerPage() {
           if (data.places && data.places.length > 0) {
             setBusinesses(data.places);
             setSelectedBusiness(data.places[0]);
+          } else {
+            setBusinesses([]);
+            setSelectedBusiness(null);
           }
         }
       } catch (err) {
@@ -211,12 +199,12 @@ export default function MapExplorerPage() {
           </div>
 
           <button
-            onClick={() => handleAddLead(selectedBusiness)}
-            disabled={addingLead || Boolean(savedLeadMap[selectedBusiness.id])}
+            onClick={() => selectedBusiness && handleAddLead(selectedBusiness)}
+            disabled={addingLead || !selectedBusiness || Boolean(selectedBusiness && savedLeadMap[selectedBusiness.id])}
             className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
           >
             {addingLead ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
-            <span>{savedLeadMap[selectedBusiness.id] ? "Saved to Leads" : "Save as Lead"}</span>
+            <span>{selectedBusiness && savedLeadMap[selectedBusiness.id] ? "Saved to Leads" : "Save as Lead"}</span>
           </button>
         </div>
       </div>
@@ -284,10 +272,19 @@ export default function MapExplorerPage() {
           </div>
 
           <div className="space-y-2.5 max-h-[620px] overflow-y-auto pr-1">
-            {businesses.map((biz) => {
-              const isSelected = selectedBusiness.id === biz.id;
-              const isSaved = Boolean(savedLeadMap[biz.id]);
-              return (
+            {businesses.length === 0 ? (
+              <div className="py-12 px-2 text-center">
+                <Compass className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-xs font-semibold text-gray-700">No businesses found</p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Try searching for a different keyword or category.
+                </p>
+              </div>
+            ) : (
+              businesses.map((biz) => {
+                const isSelected = selectedBusiness?.id === biz.id;
+                const isSaved = Boolean(savedLeadMap[biz.id]);
+                return (
                 <div
                   key={biz.id}
                   onClick={() => setSelectedBusiness(biz)}
@@ -331,7 +328,7 @@ export default function MapExplorerPage() {
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
 
           <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
@@ -375,31 +372,29 @@ export default function MapExplorerPage() {
               mapMode === "satellite" ? "bg-[#1E293B]" : "bg-[#E8EDE5]"
             }`}
           >
-            {/* Street Grid pattern */}
-            <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke={mapMode === "satellite" ? "#334155" : "#D3DDD0"} strokeWidth="1.5" />
-                  <path d="M 0 30 L 60 30" fill="none" stroke={mapMode === "satellite" ? "#1E293B" : "#DDE5DB"} strokeWidth="0.8" />
-                  <path d="M 30 0 L 30 60" fill="none" stroke={mapMode === "satellite" ? "#1E293B" : "#DDE5DB"} strokeWidth="0.8" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
+            {/* Live Interactive Google Map View */}
+            <iframe
+              title="Google Map Live View"
+              className="absolute inset-0 w-full h-full border-0 opacity-85"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                selectedBusiness
+                  ? `${selectedBusiness.name}, ${selectedBusiness.address}`
+                  : `${selectedCity} ${activeCategoryPill === "All" ? "" : activeCategoryPill}`
+              )}&t=${mapMode === "satellite" ? "k" : "m"}&z=${13 + zoomLevel}&output=embed`}
+              loading="lazy"
+            />
 
-            {/* City Watermark */}
-            <div className="text-center pointer-events-none select-none">
-              <div className={`text-4xl font-bold tracking-wider font-serif ${mapMode === "satellite" ? "text-slate-600/40" : "text-gray-400/40"}`}>
-                {selectedCity.split(",")[0]}
-              </div>
-              <div className={`text-2xl font-bold ${mapMode === "satellite" ? "text-slate-700/30" : "text-gray-400/30"}`}>
-                Live Geo-Layer
-              </div>
+            {/* Subtle Gradient Overlay for Pin Legibility */}
+            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+
+            {/* City Watermark Tag */}
+            <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-800 dark:text-gray-200 shadow-xs z-10 pointer-events-none">
+              📍 {selectedBusiness ? selectedBusiness.name : selectedCity}
             </div>
 
             {/* Coordinate Pins for Results */}
             {businesses.slice(0, 10).map((biz, idx) => {
-              const isSelected = selectedBusiness.id === biz.id;
+              const isSelected = selectedBusiness?.id === biz.id;
               // Deterministic spread across canvas based on index
               const leftPercent = 20 + ((idx * 37) % 65);
               const topPercent = 20 + ((idx * 43) % 60);
@@ -460,81 +455,95 @@ export default function MapExplorerPage() {
         </div>
 
         {/* Right Column: Business Detail Panel */}
-        <div className="xl:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-5 shadow-xs space-y-4">
-          <div className="relative h-44 rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-            <Image
-              src={selectedBusiness.img || "/assets/urban-kitchen.jpg"}
-              alt={selectedBusiness.name}
-              fill
-              className="object-cover"
-            />
-            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 text-xs font-bold text-gray-800 shadow-md flex items-center gap-1">
-              <Star size={12} className="text-amber-500 fill-amber-500" />
-              <span>{selectedBusiness.rating}</span>
-              <span className="text-gray-400 font-normal">({selectedBusiness.reviews})</span>
-            </div>
-            <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-[#171918]/90 text-white text-[10px] font-bold">
-              {selectedBusiness.priceRange}
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-[#171918]">{selectedBusiness.name}</h2>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
-                Opp Score: {selectedBusiness.opportunityScore}/10
-              </span>
-            </div>
-            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
-              <MapPin size={12} className="text-gray-400 shrink-0" />
-              <span>{selectedBusiness.address}</span>
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="p-2.5 bg-gray-50 rounded-lg">
-              <div className="text-[10px] text-gray-400 uppercase font-semibold">Hours</div>
-              <div className="font-semibold text-gray-800">{selectedBusiness.hours}</div>
-            </div>
-            <div className="p-2.5 bg-gray-50 rounded-lg">
-              <div className="text-[10px] text-gray-400 uppercase font-semibold">Phone</div>
-              <div className="font-semibold text-gray-800">{selectedBusiness.phone || "Not listed"}</div>
-            </div>
-          </div>
-
-          {selectedBusiness.website && (
-            <div className="p-2.5 bg-gray-50 rounded-lg text-xs flex items-center justify-between">
-              <div className="truncate text-blue-600 font-medium">
-                {selectedBusiness.website}
+        <div className="xl:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-5 shadow-xs">
+          {!selectedBusiness ? (
+            <div className="py-24 px-4 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mx-auto">
+                <Compass size={24} />
               </div>
-              <a
-                href={selectedBusiness.website}
-                target="_blank"
-                rel="noreferrer"
-                className="text-gray-400 hover:text-black shrink-0"
-              >
-                <ExternalLink size={13} />
-              </a>
+              <h3 className="text-sm font-bold text-gray-900">No Business Selected</h3>
+              <p className="text-xs text-gray-500 max-w-[240px] mx-auto">
+                Select a business from the list or map to inspect website opportunities and add to your pipeline.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="relative h-44 rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                <Image
+                  src={selectedBusiness.img || "/assets/urban-kitchen.jpg"}
+                  alt={selectedBusiness.name}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 text-xs font-bold text-gray-800 shadow-md flex items-center gap-1">
+                  <Star size={12} className="text-amber-500 fill-amber-500" />
+                  <span>{selectedBusiness.rating}</span>
+                  <span className="text-gray-400 font-normal">({selectedBusiness.reviews})</span>
+                </div>
+                <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-[#171918]/90 text-white text-[10px] font-bold">
+                  {selectedBusiness.priceRange}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-[#171918]">{selectedBusiness.name}</h2>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
+                    Opp Score: {selectedBusiness.opportunityScore}/10
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                  <MapPin size={12} className="text-gray-400 shrink-0" />
+                  <span>{selectedBusiness.address}</span>
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 bg-gray-50 rounded-lg">
+                  <div className="text-[10px] text-gray-400 uppercase font-semibold">Hours</div>
+                  <div className="font-semibold text-gray-800">{selectedBusiness.hours}</div>
+                </div>
+                <div className="p-2.5 bg-gray-50 rounded-lg">
+                  <div className="text-[10px] text-gray-400 uppercase font-semibold">Phone</div>
+                  <div className="font-semibold text-gray-800">{selectedBusiness.phone || "Not listed"}</div>
+                </div>
+              </div>
+
+              {selectedBusiness.website && (
+                <div className="p-2.5 bg-gray-50 rounded-lg text-xs flex items-center justify-between">
+                  <div className="truncate text-blue-600 font-medium">
+                    {selectedBusiness.website}
+                  </div>
+                  <a
+                    href={selectedBusiness.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-gray-400 hover:text-black shrink-0"
+                  >
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
+                <button
+                  onClick={() => handleAddLead(selectedBusiness)}
+                  disabled={addingLead || Boolean(savedLeadMap[selectedBusiness.id])}
+                  className="flex-1 h-9 rounded-lg bg-[#171918] hover:bg-black text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
+                >
+                  {addingLead ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
+                  <span>{savedLeadMap[selectedBusiness.id] ? "Saved in Leads" : "Add to Leads"}</span>
+                </button>
+
+                <Link
+                  href="/leads"
+                  className="h-9 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center justify-center"
+                >
+                  View Leads
+                </Link>
+              </div>
             </div>
           )}
-
-          <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
-            <button
-              onClick={() => handleAddLead(selectedBusiness)}
-              disabled={addingLead || Boolean(savedLeadMap[selectedBusiness.id])}
-              className="flex-1 h-9 rounded-lg bg-[#171918] hover:bg-black text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
-            >
-              {addingLead ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
-              <span>{savedLeadMap[selectedBusiness.id] ? "Saved in Leads" : "Add to Leads"}</span>
-            </button>
-
-            <Link
-              href="/leads"
-              className="h-9 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center justify-center"
-            >
-              View Leads
-            </Link>
-          </div>
         </div>
       </div>
     </div>

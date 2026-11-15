@@ -136,3 +136,4 @@ A typical operational day in an agency powered by AgencyOS follows this workflow
 5. **05:00 PM — Revenue & Analytics Review:**
    * Stripe webhooks reconcile 2 milestone invoice payments (\$3,500 total).
    * Team performance and lead-to-client pipeline velocity reviewed on `/analytics`.
+

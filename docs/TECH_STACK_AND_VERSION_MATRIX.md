@@ -46,3 +46,4 @@ AgencyOS adheres to the **Latest Stable Technology Policy**:
 2. **Lockfile Enforcement:** All deployments require `npm ci` rather than `npm install` to ensure bit-for-bit reproducibility.
 3. **No Phantom Dependencies:** All shared utilities must be declared in root `package.json` or within `packages/*`.
 4. **Single Source of Truth:** `package-lock.json` at root is the sole authoritative lockfile for the repository.
+

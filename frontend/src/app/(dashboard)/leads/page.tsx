@@ -7,7 +7,6 @@ import { AddLeadModal } from "@/features/leads/components/add-lead-modal";
 import { ImportCSVModal } from "@/features/leads/components/import-csv-modal";
 import { LeadFiltersSidebar } from "@/features/leads/components/lead-filters-sidebar";
 import { LeadDetailAuditPanel } from "@/features/leads/components/lead-detail-audit-panel";
-import { DEFAULT_LEADS } from "@/lib/data/default-leads";
 import {
   Plus,
   Upload,
@@ -24,21 +23,23 @@ import {
   MessageCircle,
   Handshake,
   Check,
+  Bot,
+  Compass,
 } from "lucide-react";
 
 export default function LeadsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [leads, setLeads] = useState<any[]>(() => DEFAULT_LEADS.slice(0, 10));
+  const [leads, setLeads] = useState<any[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({
-    All: 2847,
-    New: 120,
-    Contacted: 892,
-    Replied: 142,
-    Interested: 68,
-    Converted: 38,
-    Archived: 96,
+    All: 0,
+    New: 0,
+    Contacted: 0,
+    Replied: 0,
+    Interested: 0,
+    Converted: 0,
+    Archived: 0,
   });
-  const [total, setTotal] = useState(DEFAULT_LEADS.length);
+  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -84,51 +85,25 @@ export default function LeadsPage() {
       const res = await fetch(`/api/leads?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.leads && data.leads.length > 0) {
-          setLeads(data.leads);
-          setCounts(data.counts || {});
-          setTotal(data.total ?? data.pagination?.total ?? data.leads.length);
-        } else if (status === "All" && category === "All" && !search) {
-          // If DB is fresh, display default leads
-          setLeads(DEFAULT_LEADS.slice((page - 1) * 10, page * 10));
-          setTotal(DEFAULT_LEADS.length);
-        } else {
-          setLeads([]);
-          if (typeof data.total === "number") setTotal(data.total);
-        }
+        setLeads(data.leads || []);
+        setCounts(data.counts || {
+          All: 0,
+          New: 0,
+          Contacted: 0,
+          Replied: 0,
+          Interested: 0,
+          Converted: 0,
+          Archived: 0,
+        });
+        setTotal(typeof data.total === "number" ? data.total : (data.leads ? data.leads.length : 0));
       } else {
-        // Fallback filter
-        let filtered = [...DEFAULT_LEADS];
-        if (status !== "All") filtered = filtered.filter((l) => l.status === status);
-        if (category !== "All") filtered = filtered.filter((l) => l.category === category);
-        if (search) {
-          const q = search.toLowerCase();
-          filtered = filtered.filter(
-            (l) =>
-              l.businessName.toLowerCase().includes(q) ||
-              l.category.toLowerCase().includes(q) ||
-              (l.location && l.location.toLowerCase().includes(q))
-          );
-        }
-        setLeads(filtered.slice((page - 1) * 10, page * 10));
-        setTotal(filtered.length);
+        setLeads([]);
+        setTotal(0);
       }
     } catch (err) {
       console.error("Failed to fetch leads:", err);
-      let filtered = [...DEFAULT_LEADS];
-      if (status !== "All") filtered = filtered.filter((l) => l.status === status);
-      if (category !== "All") filtered = filtered.filter((l) => l.category === category);
-      if (search) {
-        const q = search.toLowerCase();
-        filtered = filtered.filter(
-          (l) =>
-            l.businessName.toLowerCase().includes(q) ||
-            l.category.toLowerCase().includes(q) ||
-            (l.location && l.location.toLowerCase().includes(q))
-        );
-      }
-      setLeads(filtered.slice((page - 1) * 10, page * 10));
-      setTotal(filtered.length);
+      setLeads([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -434,24 +409,30 @@ export default function LeadsPage() {
               <tbody className="divide-y divide-gray-100">
                 {leads.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-gray-500">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                          <Search size={18} />
+                    <td colSpan={9} className="py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                          <Compass size={22} />
                         </div>
-                        <p className="font-semibold text-gray-700">No leads found</p>
-                        <p className="text-[11px] text-gray-400">Try adjusting your filters or search keywords</p>
-                        <button
-                          onClick={() => {
-                            setStatus("All");
-                            setCategory("All");
-                            setSearch("");
-                            setPage(1);
-                          }}
-                          className="mt-2 text-xs font-semibold text-[#3568E8] hover:underline"
-                        >
-                          Reset all filters
-                        </button>
+                        <p className="font-bold text-gray-800 text-sm">No leads in database yet</p>
+                        <p className="text-xs text-gray-500 text-center">
+                          Your system is completely clean. Run the Prospect Discovery Agent to discover local businesses, or add a lead manually.
+                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <Link
+                            href="/ai-agents"
+                            className="px-3.5 py-1.5 rounded-lg bg-[#111614] hover:bg-black text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+                          >
+                            <Bot size={13} />
+                            <span>Launch AI Discovery Agent</span>
+                          </Link>
+                          <button
+                            onClick={() => setAddModalOpen(true)}
+                            className="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors"
+                          >
+                            Add Lead Manually
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -621,6 +602,8 @@ export default function LeadsPage() {
               setStatus(s);
               setPage(1);
             }}
+            counts={counts}
+            totalLeads={total}
             onReset={() => {
               setCategory("All");
               setStatus("All");

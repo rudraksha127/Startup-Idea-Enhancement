@@ -40,29 +40,29 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f6f0] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f8f6f0] dark:bg-[#0b0f0e] flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-[#101413]">
-          <span className="w-9 h-9 rounded-full bg-[#111614] text-white flex items-center justify-center font-bold text-sm shadow-inner">
+        <Link href="/" className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tight text-[#101413] dark:text-white">
+          <span className="w-9 h-9 rounded-full bg-[#111614] dark:bg-white text-white dark:text-[#111614] flex items-center justify-center font-bold text-sm shadow-inner">
             A
           </span>
           <span>AgencyOS</span>
         </Link>
-        <h2 className="mt-4 font-serif text-3xl font-bold tracking-tight text-[#101413]">
+        <h2 className="mt-4 font-serif text-3xl font-bold tracking-tight text-[#101413] dark:text-white">
           Create your workspace
         </h2>
-        <p className="mt-2 text-xs text-[#555956]">
+        <p className="mt-2 text-xs text-[#555956] dark:text-[#9aa29e]">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-[#0da66c] hover:underline">
+          <Link href="/login" className="font-semibold text-[#0da66c] dark:text-emerald-400 hover:underline">
             Sign in
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-card border border-[#161f1b]/10 sm:rounded-2xl sm:px-10">
+        <div className="bg-white dark:bg-[#151d1a] py-8 px-6 shadow-card border border-[#161f1b]/10 dark:border-[#22302b] sm:rounded-2xl sm:px-10">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
               <AlertCircle size={15} />
               <span>{error}</span>
             </div>
@@ -70,7 +70,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#101413] mb-1">
+              <label className="block text-xs font-semibold text-[#101413] dark:text-gray-200 mb-1">
                 Your full name
               </label>
               <div className="relative">
@@ -82,14 +82,14 @@ export default function RegisterPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-[#2b3833] bg-white dark:bg-[#111715] text-[#101413] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] dark:focus:ring-emerald-500 focus:border-transparent"
                   placeholder="Rudraksh"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#101413] mb-1">
+              <label className="block text-xs font-semibold text-[#101413] dark:text-gray-200 mb-1">
                 Agency / Workspace name
               </label>
               <div className="relative">
@@ -101,14 +101,14 @@ export default function RegisterPage() {
                   required
                   value={organizationName}
                   onChange={(e) => setOrganizationName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-[#2b3833] bg-white dark:bg-[#111715] text-[#101413] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] dark:focus:ring-emerald-500 focus:border-transparent"
                   placeholder="Apex Digital Studio"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#101413] mb-1">
+              <label className="block text-xs font-semibold text-[#101413] dark:text-gray-200 mb-1">
                 Work email address
               </label>
               <div className="relative">
@@ -120,14 +120,14 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-[#2b3833] bg-white dark:bg-[#111715] text-[#101413] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] dark:focus:ring-emerald-500 focus:border-transparent"
                   placeholder="rudraksh@apexdigital.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#101413] mb-1">
+              <label className="block text-xs font-semibold text-[#101413] dark:text-gray-200 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-[#2b3833] bg-white dark:bg-[#111715] text-[#101413] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0d251f] dark:focus:ring-emerald-500 focus:border-transparent"
                   placeholder="At least 6 characters"
                 />
               </div>
@@ -150,7 +150,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-lg bg-[#101513] hover:bg-[#1a2c27] text-white text-xs font-bold shadow transition-all disabled:opacity-50"
+                className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-lg bg-[#101513] hover:bg-[#1a2c27] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-xs font-bold shadow transition-all disabled:opacity-50"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : "Start Workspace Free"}
                 {!loading && <ArrowRight size={14} />}

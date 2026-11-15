@@ -4,10 +4,13 @@ import { InvoicesRepository } from "../../repositories/invoices.repository.js";
 
 export class DashboardService {
   static async getMetrics(orgId: string) {
-    const leadsRes = await LeadsRepository.findByOrg(orgId, { limit: 1000 });
+    // Parallelize all 3 repository queries to eliminate sequential I/O latency
+    const [leadsRes, projects, invoices] = await Promise.all([
+      LeadsRepository.findByOrg(orgId, { limit: 1000 }),
+      ProjectsRepository.findByOrg(orgId),
+      InvoicesRepository.findByOrg(orgId),
+    ]);
     const leads = leadsRes.leads;
-    const projects = await ProjectsRepository.findByOrg(orgId);
-    const invoices = await InvoicesRepository.findByOrg(orgId);
 
     const totalLeads = leads.length;
     const contactedLeads = leads.filter((l) => l.qualificationStatus === "Contacted").length;

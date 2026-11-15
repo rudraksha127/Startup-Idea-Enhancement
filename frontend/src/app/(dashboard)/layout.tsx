@@ -11,14 +11,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [leadCount, setLeadCount] = useState(28);
+  const [leadCount, setLeadCount] = useState(0);
 
   useEffect(() => {
     // Fetch live lead count from API
     fetch("/api/leads?limit=1")
       .then((res) => res.json())
       .then((data) => {
-        if (data?.counts?.All) {
+        if (data?.counts?.All !== undefined) {
           setLeadCount(data.counts.All);
         }
       })

@@ -30,7 +30,7 @@ interface AppSidebarProps {
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/leads", label: "Leads", icon: Users, badge: 28 },
+  { href: "/leads", label: "Leads", icon: Users, showBadge: true },
   { href: "/map-explorer", label: "Map Explorer", icon: Compass },
   { href: "/ai-agents", label: "AI Agents", icon: Bot },
   { href: "/outreach", label: "Outreach", icon: Send },
@@ -42,7 +42,7 @@ const NAV_ITEMS = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSidebarProps) {
+export function AppSidebar({ leadCount = 0, isOpen = false, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -102,13 +102,13 @@ export function AppSidebar({ leadCount = 28, isOpen = false, onClose }: AppSideb
               >
                 <Icon size={16} className={isActive ? "text-[#171918]" : "text-[#9AA29E]"} />
                 <span className="flex-1">{item.label}</span>
-                {item.badge !== undefined && (
+                {Boolean(item.showBadge && leadCount > 0) && (
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       isActive ? "bg-[#171918] text-white" : "bg-[#232B29] text-gray-300"
                     }`}
                   >
-                    {leadCount || item.badge}
+                    {leadCount}
                   </span>
                 )}
               </Link>

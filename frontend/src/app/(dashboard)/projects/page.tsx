@@ -47,307 +47,25 @@ interface ProjectItem {
   milestones: { title: string; status: "Completed" | "In Progress" | "Pending"; date: string }[];
 }
 
-const PROJECTS_DATA: ProjectItem[] = [
-  {
-    id: "1",
-    name: "Website Development",
-    subtitle: "Restaurant Website",
-    client: "The Urban Kitchen",
-    clientAvatar: "U",
-    clientAvatarBg: "bg-amber-100 text-amber-700",
-    type: "Website",
-    typeBadgeBg: "bg-blue-50 text-blue-700",
-    progress: 75,
-    team: [
-      { name: "Alex", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" },
-      { name: "John", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80" },
-    ],
-    extraTeamCount: 2,
-    deadline: "25 Mar 2024",
-    status: "Active",
-    budget: 75000,
-    amountPaid: 45000,
-    amountDue: 30000,
-    startDate: "1 Mar 2024",
-    domain: "theurbankitchen.in",
-    description: "A modern multi-cuisine restaurant website with online menu, table reservation, and location integration.",
-    tags: ["restaurant", "website", "booking", "responsive"],
-    milestones: [
-      { title: "Design Approval", status: "Completed", date: "5 Mar 2024" },
-      { title: "Frontend Development", status: "Completed", date: "12 Mar 2024" },
-      { title: "Backend Development", status: "In Progress", date: "18 Mar 2024" },
-      { title: "Testing & QA", status: "Pending", date: "22 Mar 2024" },
-      { title: "Go Live", status: "Pending", date: "25 Mar 2024" },
-    ],
-  },
-  {
-    id: "2",
-    name: "SEO & Content Marketing",
-    subtitle: "Monthly SEO Package",
-    client: "Spice Junction",
-    clientAvatar: "S",
-    clientAvatarBg: "bg-purple-100 text-purple-700",
-    type: "SEO",
-    typeBadgeBg: "bg-purple-50 text-purple-700",
-    progress: 40,
-    team: [
-      { name: "Sarah", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80" },
-    ],
-    extraTeamCount: 1,
-    deadline: "30 Mar 2024",
-    status: "Active",
-    budget: 35000,
-    amountPaid: 20000,
-    amountDue: 15000,
-    startDate: "5 Mar 2024",
-    domain: "spicejunction.in",
-    description: "Comprehensive local SEO, keyword optimization and blog content strategy for footfall expansion.",
-    tags: ["seo", "content", "marketing", "google-ranking"],
-    milestones: [
-      { title: "Keyword Audit", status: "Completed", date: "7 Mar 2024" },
-      { title: "On-Page Optimization", status: "In Progress", date: "16 Mar 2024" },
-      { title: "Backlink Outreach", status: "Pending", date: "24 Mar 2024" },
-      { title: "Monthly Report", status: "Pending", date: "30 Mar 2024" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Google Business Setup",
-    subtitle: "GMB Optimization",
-    client: "Dental Care+",
-    clientAvatar: "D",
-    clientAvatarBg: "bg-cyan-100 text-cyan-700",
-    type: "Local SEO",
-    typeBadgeBg: "bg-cyan-50 text-cyan-700",
-    progress: 90,
-    team: [
-      { name: "John", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80" },
-    ],
-    deadline: "20 Mar 2024",
-    status: "Completed",
-    budget: 25000,
-    amountPaid: 25000,
-    amountDue: 0,
-    startDate: "2 Mar 2024",
-    domain: "dentalcareplus.in",
-    description: "Google Maps verification, local citation syndication and appointment link integration.",
-    tags: ["local-seo", "gmb", "healthcare", "verified"],
-    milestones: [
-      { title: "Profile Verification", status: "Completed", date: "4 Mar 2024" },
-      { title: "Photo & Video Upload", status: "Completed", date: "8 Mar 2024" },
-      { title: "Review Campaign", status: "Completed", date: "15 Mar 2024" },
-    ],
-  },
-  {
-    id: "4",
-    name: "Social Media Management",
-    subtitle: "Instagram & Facebook",
-    client: "FitLife Gym",
-    clientAvatar: "F",
-    clientAvatarBg: "bg-emerald-100 text-emerald-700",
-    type: "Social Media",
-    typeBadgeBg: "bg-pink-50 text-pink-700",
-    progress: 60,
-    team: [
-      { name: "Emma", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&auto=format&fit=crop&q=80" },
-      { name: "Alex", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" },
-    ],
-    extraTeamCount: 2,
-    deadline: "28 Mar 2024",
-    status: "Active",
-    budget: 45000,
-    amountPaid: 30000,
-    amountDue: 15000,
-    startDate: "3 Mar 2024",
-    domain: "fitlifegym.in",
-    description: "Reels production, weekly fitness schedules and direct-message automated trial passes.",
-    tags: ["social", "fitness", "reels", "lead-gen"],
-    milestones: [
-      { title: "Content Calendar Approval", status: "Completed", date: "6 Mar 2024" },
-      { title: "12 Reels Produced", status: "In Progress", date: "18 Mar 2024" },
-      { title: "Paid Boost Campaign", status: "Pending", date: "25 Mar 2024" },
-    ],
-  },
-  {
-    id: "5",
-    name: "E-commerce Store",
-    subtitle: "Online Store Development",
-    client: "Fashion Hub",
-    clientAvatar: "F",
-    clientAvatarBg: "bg-amber-100 text-amber-700",
-    type: "E-commerce",
-    typeBadgeBg: "bg-amber-50 text-amber-700",
-    progress: 30,
-    team: [
-      { name: "John", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80" },
-    ],
-    deadline: "15 Apr 2024",
-    status: "On Hold",
-    budget: 95000,
-    amountPaid: 35000,
-    amountDue: 60000,
-    startDate: "10 Mar 2024",
-    domain: "fashionhub.in",
-    description: "Next.js storefront with Razorpay checkout, product filters and inventory webhook syncing.",
-    tags: ["ecommerce", "nextjs", "retail", "fashion"],
-    milestones: [
-      { title: "UI Mockups", status: "Completed", date: "12 Mar 2024" },
-      { title: "Product Catalog Import", status: "In Progress", date: "25 Mar 2024" },
-      { title: "Payment Gateway", status: "Pending", date: "5 Apr 2024" },
-    ],
-  },
-  {
-    id: "6",
-    name: "Booking System",
-    subtitle: "Hotel Booking Website",
-    client: "Hotel Grand Plaza",
-    clientAvatar: "H",
-    clientAvatarBg: "bg-blue-100 text-blue-700",
-    type: "Website",
-    typeBadgeBg: "bg-blue-50 text-blue-700",
-    progress: 85,
-    team: [
-      { name: "Sarah", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80" },
-    ],
-    extraTeamCount: 1,
-    deadline: "22 Mar 2024",
-    status: "Active",
-    budget: 120000,
-    amountPaid: 80000,
-    amountDue: 40000,
-    startDate: "15 Feb 2024",
-    domain: "grandplaza.in",
-    description: "Direct room reservation portal bypassing OTAs, multi-currency display and live calendar sync.",
-    tags: ["hotel", "booking", "hospitality", "nextjs"],
-    milestones: [
-      { title: "Architecture Design", status: "Completed", date: "20 Feb 2024" },
-      { title: "Room Catalog & Rates", status: "Completed", date: "28 Feb 2024" },
-      { title: "iCal Sync Engine", status: "Completed", date: "10 Mar 2024" },
-      { title: "Final QA & Launch", status: "In Progress", date: "22 Mar 2024" },
-    ],
-  },
-  {
-    id: "7",
-    name: "Branding & Design",
-    subtitle: "Logo & Brand Kit",
-    client: "Auto Garage Pro",
-    clientAvatar: "A",
-    clientAvatarBg: "bg-indigo-100 text-indigo-700",
-    type: "Branding",
-    typeBadgeBg: "bg-indigo-50 text-indigo-700",
-    progress: 50,
-    team: [
-      { name: "Emma", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&auto=format&fit=crop&q=80" },
-    ],
-    deadline: "10 Apr 2024",
-    status: "Active",
-    budget: 30000,
-    amountPaid: 15000,
-    amountDue: 15000,
-    startDate: "12 Mar 2024",
-    domain: "autogaragepro.in",
-    description: "Vector logo identity, signage templates, typography guidelines and uniform mockups.",
-    tags: ["branding", "design", "automotive", "logo"],
-    milestones: [
-      { title: "Concept Sketches", status: "Completed", date: "14 Mar 2024" },
-      { title: "Vector Iterations", status: "In Progress", date: "25 Mar 2024" },
-      { title: "Final Asset Kit", status: "Pending", date: "10 Apr 2024" },
-    ],
-  },
-  {
-    id: "8",
-    name: "Website Redesign",
-    subtitle: "Modern UI/UX Update",
-    client: "Bright Minds Academy",
-    clientAvatar: "B",
-    clientAvatarBg: "bg-sky-100 text-sky-700",
-    type: "Website",
-    typeBadgeBg: "bg-blue-50 text-blue-700",
-    progress: 20,
-    team: [
-      { name: "Alex", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" },
-    ],
-    extraTeamCount: 2,
-    deadline: "5 Apr 2024",
-    status: "Active",
-    budget: 55000,
-    amountPaid: 20000,
-    amountDue: 35000,
-    startDate: "14 Mar 2024",
-    domain: "brightminds.in",
-    description: "Accessible responsive education portal with course syllabus downloads and admission inquiry forms.",
-    tags: ["education", "redesign", "portal", "forms"],
-    milestones: [
-      { title: "Information Architecture", status: "Completed", date: "15 Mar 2024" },
-      { title: "Figma Component System", status: "In Progress", date: "24 Mar 2024" },
-      { title: "Next.js Build", status: "Pending", date: "5 Apr 2024" },
-    ],
-  },
-  {
-    id: "9",
-    name: "Content Writing",
-    subtitle: "Blog & Landing Pages",
-    client: "Healing Hands Clinic",
-    clientAvatar: "H",
-    clientAvatarBg: "bg-rose-100 text-rose-700",
-    type: "Content",
-    typeBadgeBg: "bg-purple-50 text-purple-700",
-    progress: 100,
-    team: [
-      { name: "Sarah", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80" },
-    ],
-    deadline: "12 Mar 2024",
-    status: "Completed",
-    budget: 20000,
-    amountPaid: 20000,
-    amountDue: 0,
-    startDate: "1 Mar 2024",
-    domain: "healinghands.in",
-    description: "Doctor bios, treatment service descriptions and 10 patient health education articles.",
-    tags: ["healthcare", "content", "medical", "seo"],
-    milestones: [
-      { title: "Doctor Interview Transcripts", status: "Completed", date: "3 Mar 2024" },
-      { title: "Draft Copy Review", status: "Completed", date: "8 Mar 2024" },
-      { title: "Final Proofing & Delivery", status: "Completed", date: "12 Mar 2024" },
-    ],
-  },
-  {
-    id: "10",
-    name: "Performance Marketing",
-    subtitle: "Google Ads Campaign",
-    client: "Café Central",
-    clientAvatar: "C",
-    clientAvatarBg: "bg-orange-100 text-orange-700",
-    type: "Ads",
-    typeBadgeBg: "bg-amber-50 text-amber-700",
-    progress: 45,
-    team: [
-      { name: "Emma", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&auto=format&fit=crop&q=80" },
-    ],
-    deadline: "18 Apr 2024",
-    status: "Active",
-    budget: 35000,
-    amountPaid: 15000,
-    amountDue: 20000,
-    startDate: "10 Mar 2024",
-    domain: "cafecentral.in",
-    description: "High-intent local keyword bid strategy targeting weekend brunch and dessert delivery.",
-    tags: ["ads", "marketing", "google-ads", "local-ppc"],
-    milestones: [
-      { title: "Ad Copy & Keyword Setup", status: "Completed", date: "12 Mar 2024" },
-      { title: "Negative Keyword Tuning", status: "In Progress", date: "22 Mar 2024" },
-      { title: "ROAS Optimization", status: "Pending", date: "18 Apr 2024" },
-    ],
-  },
-];
-
 export default function ProjectsPage() {
-  const [projectsList, setProjectsList] = useState<ProjectItem[]>(PROJECTS_DATA);
-  const [selectedProject, setSelectedProject] = useState<ProjectItem>(PROJECTS_DATA[0]);
-  const [activeTab, setActiveTab] = useState("All Projects (18)");
+  const [projectsList, setProjectsList] = useState<ProjectItem[]>([]);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [activeTab, setActiveTab] = useState("All");
   const [detailTab, setDetailTab] = useState("Overview");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const totalCount = projectsList.length;
+  const activeCount = projectsList.filter((p) => p.status === "Active").length;
+  const completedCount = projectsList.filter((p) => p.status === "Completed").length;
+  const onHoldCount = projectsList.filter((p) => p.status === "On Hold").length;
+
+  const projectTabs = [
+    { id: "All", label: `All Projects (${totalCount})` },
+    { id: "Active", label: `Active (${activeCount})` },
+    { id: "Completed", label: `Completed (${completedCount})` },
+    { id: "On Hold", label: `On Hold (${onHoldCount})` },
+  ];
 
   // Fetch real projects from DB
   useEffect(() => {
@@ -356,42 +74,41 @@ export default function ProjectsPage() {
         const res = await fetch("/api/projects");
         if (res.ok) {
           const json = await res.json();
-          if (Array.isArray(json.projects) && json.projects.length > 0) {
-            const mapped: ProjectItem[] = json.projects.map((p: any) => ({
-              id: p._id || p.id,
-              name: p.title,
-              subtitle: p.scope ? p.scope.slice(0, 30) + "..." : "Custom Client Scope",
-              client: p.clientName,
-              clientAvatar: (p.clientName || "C").charAt(0).toUpperCase(),
+          const list = json.projects || [];
+          if (Array.isArray(list) && list.length > 0) {
+            const mapped: ProjectItem[] = list.map((p: any) => ({
+              id: p.projectId || p._id || p.id,
+              name: p.name || p.title || "Custom Project",
+              subtitle: p.subtitle || (p.scope ? p.scope.slice(0, 30) + "..." : "Agency Web Application"),
+              client: p.clientName || p.client || "Client Partner",
+              clientAvatar: (p.clientName || p.name || "P").charAt(0).toUpperCase(),
               clientAvatarBg: "bg-emerald-100 text-emerald-700",
-              type: "Full-Stack Dev",
+              type: p.type || "Full-Stack Dev",
               typeBadgeBg: "bg-blue-50 text-blue-700",
-              progress: p.status === "Delivered" ? 100 : p.status === "Review" ? 85 : p.status === "In Progress" ? 50 : 25,
+              progress: p.progress ?? (p.status === "Completed" ? 100 : 40),
               team: [
                 { name: "Dev Lead", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" },
               ],
               deadline: p.deadline || "30 days",
-              status: p.status === "Delivered" ? "Completed" : "Active",
-              budget: p.budget || 45000,
-              amountPaid: Math.round((p.budget || 45000) * 0.5),
-              amountDue: Math.round((p.budget || 45000) * 0.5),
+              status: p.status === "Completed" ? "Completed" : "Active",
+              budget: p.budget || 50000,
+              amountPaid: p.amountPaid || 0,
+              amountDue: p.amountDue || p.budget || 50000,
               startDate: p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
               domain: `${(p.clientName || "project").toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
-              description: p.scope || "Client custom delivery scope.",
-              tags: p.features || ["nextjs", "web"],
+              description: p.description || p.subtitle || "Custom delivery deliverable.",
+              tags: p.tags || ["web", "nextjs", "deployment"],
               milestones: (p.tasks || []).map((t: any) => ({
                 title: t.title,
                 status: t.completed ? "Completed" : "In Progress",
                 date: "Pending",
               })),
             }));
-
-            setProjectsList((prev) => {
-              const prevIds = new Set(mapped.map((m) => m.id));
-              const combined = [...mapped, ...prev.filter((p) => !prevIds.has(p.id))];
-              if (mapped.length > 0) setSelectedProject(mapped[0]);
-              return combined;
-            });
+            setProjectsList(mapped);
+            setSelectedProject(mapped[0]);
+          } else {
+            setProjectsList([]);
+            setSelectedProject(null);
           }
         }
       } catch (err) {
@@ -493,9 +210,9 @@ export default function ProjectsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">18</span>
+                <span className="text-xl font-bold text-[#171918]">{totalCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 20%
+                  {totalCount > 0 ? "↑ 20%" : "Active"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Total Projects</div>
@@ -515,9 +232,9 @@ export default function ProjectsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">12</span>
+                <span className="text-xl font-bold text-[#171918]">{activeCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 33%
+                  {activeCount > 0 ? "↑ 33%" : "Active"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Active Projects</div>
@@ -537,9 +254,9 @@ export default function ProjectsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">4</span>
+                <span className="text-xl font-bold text-[#171918]">{completedCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  ↑ 100%
+                  {completedCount > 0 ? "↑ 100%" : "Done"}
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Completed</div>
@@ -559,9 +276,9 @@ export default function ProjectsPage() {
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">2</span>
+                <span className="text-xl font-bold text-[#171918]">{onHoldCount}</span>
                 <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1 py-0.2 rounded">
-                  ↓ 0%
+                  0%
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">On Hold</div>
@@ -583,7 +300,7 @@ export default function ProjectsPage() {
               <div className="flex items-center gap-1.5">
                 <span className="text-xl font-bold text-[#171918]">0</span>
                 <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1 py-0.2 rounded border border-rose-200">
-                  ↓ 100%
+                  0
                 </span>
               </div>
               <div className="text-[11px] text-[#68717D]">Cancelled</div>
@@ -604,17 +321,17 @@ export default function ProjectsPage() {
           {/* Tabs & Controls */}
           <div className="p-4 border-b border-gray-100 space-y-3">
             <div className="flex items-center gap-1 border-b border-gray-100 text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
-              {["All Projects (18)", "Active (12)", "Completed (4)", "On Hold (2)", "Cancelled (0)"].map((tab) => (
+              {projectTabs.map((tab) => (
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
                   className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-                    activeTab === tab
+                    activeTab === tab.id
                       ? "bg-[#171918] text-white font-bold"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  {tab}
+                  {tab.label}
                 </button>
               ))}
             </div>
@@ -661,9 +378,20 @@ export default function ProjectsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[11px]">
-                {filteredProjects.map((p) => {
-                  const isSelected = selectedProject.id === p.id;
-                  return (
+                {filteredProjects.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center text-gray-500">
+                      <FolderGit2 className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                      <p className="font-semibold text-gray-700">No active projects</p>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        Click &quot;New Project&quot; or apply an industry template to start building.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProjects.map((p) => {
+                    const isSelected = selectedProject?.id === p.id;
+                    return (
                     <tr
                       key={p.id}
                       onClick={() => setSelectedProject(p)}
@@ -727,13 +455,13 @@ export default function ProjectsPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>
 
           <div className="p-3 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-gray-500">
-            <span>Showing 1 to 10 of 18 projects</span>
+            <span>Showing {projectsList.length > 0 ? 1 : 0} to {filteredProjects.length} of {projectsList.length} projects</span>
             <div className="flex items-center gap-1">
               <button className="px-2 py-0.5 rounded border bg-white">‹</button>
               <button className="px-2 py-0.5 rounded bg-[#171918] text-white font-bold">1</button>
@@ -745,28 +473,40 @@ export default function ProjectsPage() {
 
         {/* Right Column (4 cols): Selected Project Detail Panel */}
         <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-4 shadow-xs text-xs">
-          {/* Header */}
-          <div className="flex items-start justify-between pb-3 border-b border-gray-100">
-            <div className="flex items-center gap-2.5">
-              <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 border border-orange-200">
-                🍽️
-              </span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-base text-[#171918]">{selectedProject.client}</h3>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
-                  </span>
-                </div>
-                <div className="text-[11px] text-gray-500">
-                  {selectedProject.name} • {selectedProject.domain}
-                </div>
+          {!selectedProject ? (
+            <div className="py-24 px-4 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mx-auto">
+                <FolderGit2 size={24} />
               </div>
+              <h3 className="text-sm font-bold text-gray-900">No Project Selected</h3>
+              <p className="text-xs text-gray-500 max-w-[220px] mx-auto">
+                Select a project from the table to view delivery milestones, tasks, and budgets.
+              </p>
             </div>
-            <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
-              <MoreHorizontal size={14} />
-            </button>
-          </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 border border-orange-200">
+                    🍽️
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-base text-[#171918]">{selectedProject.client}</h3>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-gray-500">
+                      {selectedProject.name} • {selectedProject.domain}
+                    </div>
+                  </div>
+                </div>
+                <button className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                  <MoreHorizontal size={14} />
+                </button>
+              </div>
 
           {/* Tabs */}
           <div className="flex items-center gap-1 border-b border-gray-100 text-[11px] font-semibold pb-1 overflow-x-auto scrollbar-none">
@@ -867,6 +607,8 @@ export default function ProjectsPage() {
               ))}
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
 

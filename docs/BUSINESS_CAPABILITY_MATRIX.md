@@ -93,3 +93,4 @@ The AgencyOS Business Capability Matrix maps the full spectrum of agency capabil
 * **Partially Supported:** 0
 * **Blocked by Integration:** 0 (mock fallbacks provided for offline testing; ready for production keys)
 * **Automated Unit & Contract Test Coverage:** 100% of capabilities verified by 72 passing automated tests.
+

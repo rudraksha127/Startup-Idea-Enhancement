@@ -5,6 +5,31 @@ import { Organization } from "@/models/Organization";
 import { getCurrentUser } from "@/lib/auth/jwt";
 
 export async function GET() {
+  const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
+
+  // 1. Try Zoho Catalyst AppSail backend first
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const backendRes = await fetch(`${backendApiUrl}/dashboard/activities`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      if (data && Array.isArray(data.activities)) {
+        return NextResponse.json(data, {
+          headers: {
+            "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
+          },
+        });
+      }
+    }
+  } catch (backendErr) {
+    console.warn("Backend activities fetch fallback to local DB:", backendErr);
+  }
+
   try {
     await connectToDatabase();
     const session = await getCurrentUser();

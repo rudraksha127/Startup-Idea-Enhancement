@@ -23,10 +23,21 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
     return cached.conn;
   }
 
+  // Fast-fail in production edge runtime when local MongoDB URI is used
+  if (
+    process.env.NODE_ENV === "production" &&
+    (!process.env.MONGODB_URI || process.env.MONGODB_URI.includes("127.0.0.1") || process.env.MONGODB_URI.includes("localhost"))
+  ) {
+    throw new Error("Local MongoDB is not available in production edge environment");
+  }
+
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10,
+      serverSelectionTimeoutMS: 2000,
+      connectTimeoutMS: 2000,
+      socketTimeoutMS: 5000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {

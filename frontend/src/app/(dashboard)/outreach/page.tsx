@@ -85,9 +85,9 @@ const PERFORMANCE_DATA = [
 
 export default function OutreachPage() {
   const [viewMode, setViewMode] = useState<"campaigns" | "sequence" | "inbox">("campaigns");
-  const [activeFilterTab, setActiveFilterTab] = useState("All Campaigns (12)");
+  const [activeFilterTab, setActiveFilterTab] = useState("All");
   const [activeTemplateTab, setActiveTemplateTab] = useState("Initial Email");
-  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>(CAMPAIGNS);
+  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -120,7 +120,7 @@ export default function OutreachPage() {
           if (json.success && Array.isArray(json.data) && json.data.length > 0) {
             // Map DB campaigns to CampaignItem format
             const mapped: CampaignItem[] = json.data.map((c: any) => ({
-              id: c._id || c.id,
+              id: c._id || c.id || c.ROWID,
               name: c.name,
               service: c.templateSubject ? `Subject: ${c.templateSubject.slice(0, 20)}...` : "Outreach Campaign",
               type: c.channel === "Email" ? "Cold Email" : c.channel === "WhatsApp" ? "WhatsApp" : "Multi-channel",
@@ -133,15 +133,16 @@ export default function OutreachPage() {
               status: c.status || "Active",
               createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recently",
             }));
-            // Merge DB campaigns with default campaigns
-            setCampaignsList((prev) => {
-              const prevIds = new Set(mapped.map((m) => m.id));
-              return [...mapped, ...prev.filter((p) => !prevIds.has(p.id))];
-            });
+            setCampaignsList(mapped);
+          } else {
+            setCampaignsList([]);
           }
+        } else {
+          setCampaignsList([]);
         }
       } catch (err) {
         console.error("Failed to load campaigns:", err);
+        setCampaignsList([]);
       }
     }
     async function loadInbox() {
@@ -347,6 +348,12 @@ export default function OutreachPage() {
   };
 
   // Filtered campaigns
+  const totalActive = campaignsList.filter((c) => c.status === "Active").length;
+  const totalSent = campaignsList.reduce((acc, c) => acc + (typeof c.sent === "number" ? c.sent : 0), 0);
+  const totalReplies = campaignsList.reduce((acc, c) => acc + (c.replies && c.replies !== "0%" ? 1 : 0), 0);
+  const totalMeetings = campaignsList.reduce((acc, c) => acc + (typeof c.meetings === "number" ? c.meetings : 0), 0);
+  const overallReplyRate = totalSent > 0 ? `${((totalReplies / totalSent) * 100).toFixed(1)}%` : "0.0%";
+
   const filteredCampaigns = campaignsList.filter((c) => {
     // Filter tab
     if (activeFilterTab.startsWith("Active") && c.status !== "Active") return false;
@@ -392,7 +399,7 @@ export default function OutreachPage() {
                 : "bg-white border border-[#E7E7E2] text-gray-600 hover:text-black"
             }`}
           >
-            Campaigns (12)
+            Campaigns ({campaignsList.length})
           </button>
           <button
             onClick={() => setViewMode("sequence")}
@@ -412,7 +419,7 @@ export default function OutreachPage() {
                 : "bg-white border border-[#E7E7E2] text-gray-600 hover:text-black"
             }`}
           >
-            Inbox &amp; Replies (892)
+            Inbox &amp; Replies ({inboxConversations.length})
           </button>
         </div>
 
@@ -467,10 +474,7 @@ export default function OutreachPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-bold text-[#171918]">12</span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                      ↑ 20%
-                    </span>
+                    <span className="text-xl font-bold text-[#171918]">{totalActive}</span>
                   </div>
                   <div className="text-[11px] text-[#68717D]">Active Campaigns</div>
                 </div>
@@ -489,10 +493,7 @@ export default function OutreachPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-bold text-[#171918]">2,847</span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                      ↑ 32%
-                    </span>
+                    <span className="text-xl font-bold text-[#171918]">{totalSent.toLocaleString()}</span>
                   </div>
                   <div className="text-[11px] text-[#68717D]">Emails Sent</div>
                 </div>
@@ -511,10 +512,7 @@ export default function OutreachPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-bold text-[#171918]">892</span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                      ↑ 18%
-                    </span>
+                    <span className="text-xl font-bold text-[#171918]">{totalReplies.toLocaleString()}</span>
                   </div>
                   <div className="text-[11px] text-[#68717D]">Replies Received</div>
                 </div>
@@ -533,10 +531,7 @@ export default function OutreachPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-bold text-[#171918]">142</span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                      ↑ 28%
-                    </span>
+                    <span className="text-xl font-bold text-[#171918]">{totalMeetings.toLocaleString()}</span>
                   </div>
                   <div className="text-[11px] text-[#68717D]">Meetings Booked</div>
                 </div>
@@ -555,10 +550,7 @@ export default function OutreachPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-bold text-[#171918]">4.9%</span>
-                    <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1 py-0.2 rounded border border-rose-200">
-                      ↓ 1.2%
-                    </span>
+                    <span className="text-xl font-bold text-[#171918]">{overallReplyRate}</span>
                   </div>
                   <div className="text-[11px] text-[#68717D]">Overall Reply Rate</div>
                 </div>
@@ -579,17 +571,23 @@ export default function OutreachPage() {
                 {/* Tabs & Controls */}
                 <div className="p-4 border-b border-gray-100 space-y-3">
                   <div className="flex items-center gap-1 border-b border-gray-100 text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
-                    {["All Campaigns (12)", "Active (6)", "Paused (2)", "Drafts (3)", "Completed (1)"].map((tab) => (
+                    {[
+                      { label: `All Campaigns (${campaignsList.length})`, key: "All" },
+                      { label: `Active (${campaignsList.filter((c) => c.status === "Active").length})`, key: "Active" },
+                      { label: `Paused (${campaignsList.filter((c) => c.status === "Paused").length})`, key: "Paused" },
+                      { label: `Drafts (${campaignsList.filter((c) => c.status === "Draft").length})`, key: "Draft" },
+                      { label: `Completed (${campaignsList.filter((c) => c.status === "Completed").length})`, key: "Completed" },
+                    ].map((tab) => (
                       <button
-                        key={tab}
-                        onClick={() => setActiveFilterTab(tab)}
+                        key={tab.key}
+                        onClick={() => setActiveFilterTab(tab.key)}
                         className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
-                          activeFilterTab === tab
+                          activeFilterTab.startsWith(tab.key)
                             ? "bg-[#171918] text-white font-bold"
                             : "text-gray-600 hover:bg-gray-100"
                         }`}
                       >
-                        {tab}
+                        {tab.label}
                       </button>
                     ))}
                   </div>
@@ -638,55 +636,73 @@ export default function OutreachPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-[11px]">
-                      {filteredCampaigns.map((c) => (
-                        <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="py-2.5 px-3"><input type="checkbox" className="rounded border-gray-300" /></td>
-                          <td className="py-2.5 px-2.5">
-                            <div className="font-bold text-[#171918]">{c.name}</div>
-                            <div className="text-[10px] text-gray-400">{c.service}</div>
-                          </td>
-                          <td className="py-2.5 px-2">
-                            <span className={`px-1.5 py-0.5 rounded font-medium text-[10px] ${c.typeBadgeBg}`}>
-                              {c.type}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-2 text-gray-600">{c.audience}</td>
-                          <td className="py-2.5 px-2 font-semibold text-[#171918]">{c.sent}</td>
-                          <td className="py-2.5 px-2 text-gray-600">{c.opens}</td>
-                          <td className="py-2.5 px-2 text-gray-600">{c.replies}</td>
-                          <td className="py-2.5 px-2 font-bold text-emerald-700">{c.meetings}</td>
-                          <td className="py-2.5 px-2">
+                      {filteredCampaigns.length === 0 ? (
+                        <tr>
+                          <td colSpan={11} className="py-12 text-center text-gray-500">
+                            <Send className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                            <p className="font-semibold text-gray-700">No campaigns launched yet</p>
+                            <p className="text-[11px] text-gray-400 mt-1 max-w-xs mx-auto">
+                              Launch an autonomous outreach campaign to connect with qualified leads via Email or WhatsApp.
+                            </p>
                             <button
-                              onClick={() => handleToggleCampaignStatus(c)}
-                              title="Click to toggle status"
-                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors hover:opacity-80 ${getStatusBadge(c.status)}`}
+                              onClick={() => setIsNewModalOpen(true)}
+                              className="mt-3 px-3 py-1.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors"
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-current" /> {c.status}
-                            </button>
-                          </td>
-                          <td className="py-2.5 px-2 text-gray-400">{c.createdAt}</td>
-                          <td className="py-2.5 px-2 text-right">
-                            <button
-                              onClick={() => handleToggleCampaignStatus(c)}
-                              className="p-1 rounded text-gray-400 hover:text-black"
-                              title={c.status === "Active" ? "Pause Campaign" : "Activate Campaign"}
-                            >
-                              <MoreHorizontal size={13} />
+                              <Plus size={13} />
+                              <span>Create First Campaign</span>
                             </button>
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredCampaigns.map((c) => (
+                          <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="py-2.5 px-3"><input type="checkbox" className="rounded border-gray-300" /></td>
+                            <td className="py-2.5 px-2.5">
+                              <div className="font-bold text-[#171918]">{c.name}</div>
+                              <div className="text-[10px] text-gray-400">{c.service}</div>
+                            </td>
+                            <td className="py-2.5 px-2">
+                              <span className={`px-1.5 py-0.5 rounded font-medium text-[10px] ${c.typeBadgeBg}`}>
+                                {c.type}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-2 text-gray-600">{c.audience}</td>
+                            <td className="py-2.5 px-2 font-semibold text-[#171918]">{c.sent}</td>
+                            <td className="py-2.5 px-2 text-gray-600">{c.opens}</td>
+                            <td className="py-2.5 px-2 text-gray-600">{c.replies}</td>
+                            <td className="py-2.5 px-2 font-bold text-emerald-700">{c.meetings}</td>
+                            <td className="py-2.5 px-2">
+                              <button
+                                onClick={() => handleToggleCampaignStatus(c)}
+                                title="Click to toggle status"
+                                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors hover:opacity-80 ${getStatusBadge(c.status)}`}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-current" /> {c.status}
+                              </button>
+                            </td>
+                            <td className="py-2.5 px-2 text-gray-400">{c.createdAt}</td>
+                            <td className="py-2.5 px-2 text-right">
+                              <button
+                                onClick={() => handleToggleCampaignStatus(c)}
+                                className="p-1 rounded text-gray-400 hover:text-black"
+                                title={c.status === "Active" ? "Pause Campaign" : "Activate Campaign"}
+                              >
+                                <MoreHorizontal size={13} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
 
                 <div className="p-3 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-gray-500">
-                  <span>Showing 1 to 10 of 12 campaigns</span>
+                  <span>Showing {filteredCampaigns.length === 0 ? 0 : 1} to {filteredCampaigns.length} of {campaignsList.length} campaigns</span>
                   <div className="flex items-center gap-1">
-                    <button className="px-2 py-0.5 rounded border bg-white">‹</button>
+                    <button className="px-2 py-0.5 rounded border bg-white disabled:opacity-40" disabled>‹</button>
                     <button className="px-2 py-0.5 rounded bg-[#171918] text-white font-bold">1</button>
-                    <button className="px-2 py-0.5 rounded hover:bg-gray-100">2</button>
-                    <button className="px-2 py-0.5 rounded border bg-white">›</button>
+                    <button className="px-2 py-0.5 rounded border bg-white disabled:opacity-40" disabled>›</button>
                   </div>
                 </div>
               </div>

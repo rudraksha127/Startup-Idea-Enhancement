@@ -8,7 +8,7 @@ export async function GET() {
     { provider: "MongoDB Atlas", status: isDbConnected ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
     { provider: "Google Gemini API", status: process.env.GEMINI_API_KEY ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
     { provider: "OpenAI API", status: process.env.OPENAI_API_KEY ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
-    { provider: "Google Maps Platform", status: process.env.GOOGLE_MAPS_SERVER_KEY ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
+    { provider: "Google Maps Platform", status: (process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
     { provider: "Resend", status: process.env.RESEND_API_KEY ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
     { provider: "Razorpay / Stripe", status: (process.env.RAZORPAY_KEY_ID || process.env.STRIPE_SECRET_KEY) ? "CONNECTED" : "CREDENTIAL_REQUIRED" },
     { provider: "n8n Automation", status: "CONNECTED" },

@@ -18,6 +18,23 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
 
+    // 1. Try Zoho Catalyst AppSail backend first
+    const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const backendRes = await fetch(`${backendApiUrl}/billing/invoices?${searchParams.toString()}`, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data && Array.isArray(data.invoices)) {
+          return NextResponse.json(data);
+        }
+      }
+    } catch (backendErr) {
+      console.warn("AppSail billing fetch fallback:", backendErr);
+    }
+
     try {
       await connectToDatabase();
       if (mongoose.connection.readyState === 1) {

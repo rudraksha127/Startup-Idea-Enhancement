@@ -35,16 +35,16 @@ const FEATURES = [
 
 export function LandingFeatures() {
   return (
-    <section id="solutions" className="py-20 bg-[#F8F6F0]">
+    <section id="solutions" className="py-20 bg-[#F8F6F0] dark:bg-[#0b0f0e] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE8E1] text-xs font-bold text-[#171918] mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE8E1] dark:bg-[#1a2420] border border-transparent dark:border-[#232f2a] text-xs font-bold text-[#171918] dark:text-[#e2e8f0] mb-3">
             Build • Automate • Grow
           </div>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#171918]">
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#171918] dark:text-white">
             Discover real opportunities with AI research
           </h2>
-          <p className="text-sm sm:text-base text-[#68717D] mt-3">
+          <p className="text-sm sm:text-base text-[#68717D] dark:text-[#94a3b8] mt-3">
             Everything you need to automate client acquisition and deliver world-class digital products.
           </p>
         </div>
@@ -55,13 +55,13 @@ export function LandingFeatures() {
             return (
               <div
                 key={feat.title}
-                className="p-6 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs hover:shadow-xs hover:-translate-y-1 transition-all duration-200"
+                className="p-6 rounded-xl bg-white dark:bg-[#151d1a] border border-[#E7E7E2] dark:border-[#22302b] shadow-2xs hover:shadow-xs hover:-translate-y-1 transition-all duration-200"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#F3F1EB] text-[#151B1A] flex items-center justify-center mb-4 border border-[#E7E7E2]">
+                <div className="w-10 h-10 rounded-xl bg-[#F3F1EB] dark:bg-[#1a2420] text-[#151B1A] dark:text-emerald-400 flex items-center justify-center mb-4 border border-[#E7E7E2] dark:border-[#22302b]">
                   <Icon size={20} />
                 </div>
-                <h3 className="text-base font-bold text-[#171918] mb-2">{feat.title}</h3>
-                <p className="text-xs sm:text-sm text-[#68717D] leading-relaxed">{feat.description}</p>
+                <h3 className="text-base font-bold text-[#171918] dark:text-white mb-2">{feat.title}</h3>
+                <p className="text-xs sm:text-sm text-[#68717D] dark:text-[#94a3b8] leading-relaxed">{feat.description}</p>
               </div>
             );
           })}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -26,6 +27,7 @@ export function LandingHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
           <Link
             href="/login"
             className="h-9 px-4 inline-flex items-center justify-center rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-[#171918] shadow-2xs transition-all hover:-translate-y-0.5"

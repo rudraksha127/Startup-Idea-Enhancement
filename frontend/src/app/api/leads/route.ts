@@ -5,7 +5,6 @@ import { Organization } from "@/models/Organization";
 import { getCurrentUser } from "@/lib/auth/jwt";
 import { createLeadSchema } from "@/lib/validations/lead";
 import { FilterQuery } from "mongoose";
-import { DEFAULT_LEADS } from "@/lib/data/default-leads";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -18,6 +17,46 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const limit = Math.max(1, Math.min(100, parseInt(searchParams.get("limit") || "10", 10)));
 
+  // 1. Try Zoho Catalyst AppSail backend first with 4s timeout
+  const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const backendRes = await fetch(`${backendApiUrl}/leads?${searchParams.toString()}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      if (data && Array.isArray(data.leads)) {
+        return NextResponse.json({
+          leads: data.leads,
+          total: data.total || data.leads.length,
+          page,
+          limit,
+          totalPages: Math.ceil((data.total || data.leads.length) / limit) || (data.total > 0 ? 1 : 0),
+          counts: data.counts || {
+            All: data.leads.length,
+            New: data.leads.filter((l: any) => l.status === "New" || l.qualificationStatus === "New").length,
+            Contacted: data.leads.filter((l: any) => l.status === "Contacted" || l.qualificationStatus === "Contacted").length,
+            Interested: data.leads.filter((l: any) => l.status === "Interested" || l.qualificationStatus === "Interested").length,
+            Replied: data.leads.filter((l: any) => l.status === "Replied" || l.qualificationStatus === "Replied").length,
+            Converted: data.leads.filter((l: any) => l.status === "Converted" || l.qualificationStatus === "Converted").length,
+            Archived: data.leads.filter((l: any) => l.status === "Archived" || l.qualificationStatus === "Archived").length,
+          },
+        }, {
+          headers: {
+            "Cache-Control": "private, max-age=5, stale-while-revalidate=29",
+          },
+        });
+      }
+    }
+  } catch (backendErr) {
+    console.warn("Backend leads fetch fallback to local DB:", backendErr);
+  }
+
+  // 2. Try MongoDB if available
   try {
     await connectToDatabase();
     const session = await getCurrentUser();
@@ -25,43 +64,24 @@ export async function GET(req: NextRequest) {
     let orgId = session?.organizationId;
     if (!orgId) {
       let defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      if (!defaultOrg) {
-        defaultOrg = await Organization.create({
-          name: "AgencyOS Workspace",
-          slug: "agencyos-demo",
-          plan: "Pro",
-          credits: 250,
-        });
-      }
-      orgId = defaultOrg._id.toString();
+      if (defaultOrg) orgId = defaultOrg._id.toString();
     }
 
-    // Ensure the organization has leads in the database; if count is 0, auto-seed DEFAULT_LEADS!
-    const existingCount = await Lead.countDocuments({ organizationId: orgId });
-    if (existingCount === 0) {
-      await Lead.insertMany(
-        DEFAULT_LEADS.map((leadData) => ({
-          ...leadData,
-          organizationId: orgId,
-        }))
-      );
+    if (!orgId) {
+      return NextResponse.json({
+        leads: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+        counts: { All: 0, New: 0, Contacted: 0, Interested: 0, Replied: 0, Converted: 0, Archived: 0 },
+      });
     }
 
-    // Build query filter
     const query: FilterQuery<typeof Lead> = { organizationId: orgId };
-
-    if (status && status !== "All") {
-      query.status = status;
-    }
-
-    if (category && category !== "All") {
-      query.category = category;
-    }
-
-    if (location && location !== "All") {
-      query.location = { $regex: location, $options: "i" };
-    }
-
+    if (status && status !== "All") query.status = status;
+    if (category && category !== "All") query.category = category;
+    if (location && location !== "All") query.location = { $regex: location, $options: "i" };
     if (search) {
       query.$or = [
         { businessName: { $regex: search, $options: "i" } },
@@ -72,7 +92,6 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    // Status counts for tabs
     const [
       totalMatching,
       leads,
@@ -99,61 +118,38 @@ export async function GET(req: NextRequest) {
       Lead.countDocuments({ organizationId: orgId, status: "Archived" }),
     ]);
 
-    const counts = {
-      All: allCount,
-      New: newCount,
-      Contacted: contactedCount,
-      Interested: interestedCount,
-      Replied: repliedCount,
-      Converted: convertedCount,
-      Archived: archivedCount,
-    };
-
     return NextResponse.json({
       leads,
       total: totalMatching,
       page,
       limit,
-      totalPages: Math.ceil(totalMatching / limit),
-      counts,
+      totalPages: Math.ceil(totalMatching / limit) || (totalMatching > 0 ? 1 : 0),
+      counts: {
+        All: allCount,
+        New: newCount,
+        Contacted: contactedCount,
+        Interested: interestedCount,
+        Replied: repliedCount,
+        Converted: convertedCount,
+        Archived: archivedCount,
+      },
     });
-  } catch (error) {
-    console.error("Leads listing fallback (DB offline or error):", error);
-    // Graceful offline fallback: filter DEFAULT_LEADS
-    let filtered = [...DEFAULT_LEADS];
-    if (status && status !== "All") {
-      filtered = filtered.filter((l) => l.status === status);
-    }
-    if (category && category !== "All") {
-      filtered = filtered.filter((l) => l.category === category);
-    }
-    if (search) {
-      const q = search.toLowerCase();
-      filtered = filtered.filter(
-        (l) =>
-          l.businessName.toLowerCase().includes(q) ||
-          l.category.toLowerCase().includes(q) ||
-          (l.location && l.location.toLowerCase().includes(q))
-      );
-    }
-
-    const totalMatching = filtered.length;
-    const paginated = filtered.slice((page - 1) * limit, page * limit);
-
+  } catch {
+    // 3. Pristine Clean Pipeline
     return NextResponse.json({
-      leads: paginated,
-      total: totalMatching,
+      leads: [],
+      total: 0,
       page,
       limit,
-      totalPages: Math.ceil(totalMatching / limit),
+      totalPages: 0,
       counts: {
-        All: DEFAULT_LEADS.length,
-        New: DEFAULT_LEADS.filter((l) => l.status === "New").length,
-        Contacted: DEFAULT_LEADS.filter((l) => l.status === "Contacted").length,
-        Interested: DEFAULT_LEADS.filter((l) => l.status === "Interested").length,
-        Replied: DEFAULT_LEADS.filter((l) => l.status === "Replied").length,
-        Converted: DEFAULT_LEADS.filter((l) => l.status === "Converted").length,
-        Archived: DEFAULT_LEADS.filter((l) => l.status === "Archived").length,
+        All: 0,
+        New: 0,
+        Contacted: 0,
+        Interested: 0,
+        Replied: 0,
+        Converted: 0,
+        Archived: 0,
       },
     });
   }
@@ -161,23 +157,39 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const body = await req.json();
+    const result = createLeadSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ error: "Validation failed", details: result.error.format() }, { status: 400 });
+    }
+
+    // 1. Try forwarding to Zoho Catalyst AppSail backend
+    const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
+    try {
+      const backendRes = await fetch(`${backendApiUrl}/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result.data),
+      });
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        return NextResponse.json(data, { status: 201 });
+      }
+    } catch (backendErr) {
+      console.warn("Backend lead creation failed, falling back to local DB:", backendErr);
+    }
+
     await connectToDatabase();
     const session = await getCurrentUser();
 
     let orgId = session?.organizationId;
     if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
+      let defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
+      if (defaultOrg) orgId = defaultOrg._id.toString();
     }
 
     if (!orgId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const result = createLeadSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json({ error: "Validation failed", details: result.error.format() }, { status: 400 });
     }
 
     const slug =
@@ -217,9 +229,9 @@ export async function POST(req: NextRequest) {
         ],
       },
       aiInsights: {
-        summary: `Promising opportunity in ${result.data.location}. High potential to increase organic customer capture.`,
-        strengths: ["Strong local presence"],
-        weaknesses: ["Under-optimized digital presence"],
+        summary: `Opportunity in ${result.data.location}. High potential to increase organic customer capture.`,
+        strengths: ["Local presence"],
+        weaknesses: ["Digital presence opportunity"],
         pitchAngle: "Offer conversion-focused responsive website upgrade.",
       },
     });
