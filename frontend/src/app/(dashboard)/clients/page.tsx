@@ -252,21 +252,21 @@ export default function ClientsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
             Clients
           </h1>
-          <p className="text-xs text-[#68717D] mt-0.5">
+          <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
             Manage your clients, projects, communication and revenue in one place.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs">
+          <button className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs">
             Import Clients
           </button>
           <button
             onClick={handleExportCSV}
-            className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1"
+            className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1"
           >
             <span>Export CSV</span> <Download size={12} className="text-gray-400" />
           </button>
@@ -282,19 +282,19 @@ export default function ClientsPage() {
 
       {/* 5 KPI Cards Across */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
               <Users size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{totalCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{totalCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {totalCount > 0 ? "↑ 20%" : "Active"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Total Clients</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Clients</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -304,19 +304,19 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
               <Building2 size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{activeCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{activeCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {activeCount > 0 ? "↑ 15%" : "Active"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Active Clients</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Active Clients</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -326,19 +326,19 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
               <CheckCircle2 size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{completedCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{completedCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {completedCount > 0 ? "↑ 28%" : "Completed"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Completed Projects</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Completed Projects</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -348,19 +348,19 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
               <Clock size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{onboardingCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{onboardingCount}</span>
                 <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1 py-0.2 rounded">
                   {onboardingCount > 0 ? "In Flow" : "0%"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Onboarding</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Onboarding</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -370,19 +370,19 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-100 font-bold text-sm">
               ₹
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{totalCount > 0 ? "₹4.8L" : "₹0"}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{totalCount > 0 ? "₹4.8L" : "₹0"}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {totalCount > 0 ? "↑ 42%" : "Live"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Total Revenue</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Revenue</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -396,10 +396,10 @@ export default function ClientsPage() {
       {/* Main Grid: Left Clients Table + Right Selected Client Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left Column (8 cols): Clients Table */}
-        <div className="lg:col-span-8 bg-white rounded-xl border border-[#E7E7E2] shadow-xs overflow-hidden">
+        <div className="lg:col-span-8 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] shadow-xs overflow-hidden">
           {/* Tabs & Controls */}
-          <div className="p-4 border-b border-gray-100 space-y-3">
-            <div className="flex items-center gap-1 border-b border-gray-100 text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
+          <div className="p-4 border-b border-gray-100 dark:border-[#22302B] space-y-3">
+            <div className="flex items-center gap-1 border-b border-gray-100 dark:border-[#22302B] text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -423,15 +423,15 @@ export default function ClientsPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search clients..."
-                  className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none"
+                  className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="h-7 px-2.5 rounded-lg border border-gray-200 bg-white font-semibold text-gray-700 shadow-2xs">
+                <button className="h-7 px-2.5 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] font-semibold text-gray-700 shadow-2xs">
                   Filter
                 </button>
-                <select className="h-7 px-2 rounded-lg border border-gray-200 bg-white font-semibold text-gray-700 focus:outline-none shadow-2xs">
+                <select className="h-7 px-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] font-semibold text-gray-700 focus:outline-none shadow-2xs">
                   <option>Sort: Last Updated ⌄</option>
                   <option>Sort: Highest Value</option>
                   <option>Sort: Most Projects</option>
@@ -443,7 +443,7 @@ export default function ClientsPage() {
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF9F6] border-b border-[#E7E7E2] text-[#68717D] text-[11px]">
+              <thead className="bg-[#FAF9F6] dark:bg-[#121816] border-b border-[#E7E7E2] dark:border-[#22302B] text-[#68717D] dark:text-[#9AA29E] text-[11px]">
                 <tr>
                   <th className="py-2.5 px-3 w-8"><input type="checkbox" className="rounded border-gray-300" /></th>
                   <th className="py-2.5 px-2.5 font-semibold">Client Name</th>
@@ -487,15 +487,15 @@ export default function ClientsPage() {
                             {c.name.charAt(0)}
                           </span>
                           <div>
-                            <div className="font-bold text-[#171918]">{c.name}</div>
+                            <div className="font-bold text-[#171918] dark:text-white">{c.name}</div>
                             <div className="text-[10px] text-gray-400">{c.domain}</div>
                           </div>
                         </div>
                       </td>
                       <td className="py-2.5 px-2 text-gray-600">{c.type}</td>
                       <td className="py-2.5 px-2 text-gray-600">{c.location}</td>
-                      <td className="py-2.5 px-2 text-center font-semibold text-[#171918]">{c.projectsCount}</td>
-                      <td className="py-2.5 px-2 font-bold text-[#171918]">{c.totalValue}</td>
+                      <td className="py-2.5 px-2 text-center font-semibold text-[#171918] dark:text-white">{c.projectsCount}</td>
+                      <td className="py-2.5 px-2 font-bold text-[#171918] dark:text-white">{c.totalValue}</td>
                       <td className="py-2.5 px-2">
                         <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${getStatusBadge(c.status)}`}>
                           <span className="w-1.5 h-1.5 rounded-full bg-current" /> {c.status}
@@ -514,20 +514,20 @@ export default function ClientsPage() {
             </table>
           </div>
 
-          <div className="p-3 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-gray-500">
+          <div className="p-3 border-t border-[#E7E7E2] dark:border-[#22302B] flex items-center justify-between text-xs text-gray-500">
             <span>Showing {clientsList.length > 0 ? 1 : 0} to {filteredClients.length} of {clientsList.length} clients</span>
             <div className="flex items-center gap-1">
-              <button className="px-2 py-0.5 rounded border bg-white">‹</button>
+              <button className="px-2 py-0.5 rounded border bg-white dark:bg-[#151D1A]">‹</button>
               <button className="px-2 py-0.5 rounded bg-[#171918] text-white font-bold">1</button>
               <button className="px-2 py-0.5 rounded hover:bg-gray-100">2</button>
               <button className="px-2 py-0.5 rounded hover:bg-gray-100">3</button>
-              <button className="px-2 py-0.5 rounded border bg-white">›</button>
+              <button className="px-2 py-0.5 rounded border bg-white dark:bg-[#151D1A]">›</button>
             </div>
           </div>
         </div>
 
         {/* Right Column (4 cols): Selected Client Overview Panel */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-4 shadow-xs text-xs">
+        <div className="lg:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 space-y-4 shadow-xs text-xs">
           {!selectedClient ? (
             <div className="py-24 px-4 text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mx-auto">
@@ -541,13 +541,13 @@ export default function ClientsPage() {
           ) : (
             <>
               {/* Header */}
-              <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-start justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
                 <div className="flex items-center gap-2.5">
                   <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 border border-orange-200">
                     🍽️
                   </span>
                   <div>
-                    <h3 className="font-bold text-base text-[#171918]">{selectedClient.name}</h3>
+                    <h3 className="font-bold text-base text-[#171918] dark:text-white">{selectedClient.name}</h3>
                     <div className="text-[11px] text-gray-500">{selectedClient.type} • {selectedClient.domain}</div>
                   </div>
                 </div>
@@ -562,7 +562,7 @@ export default function ClientsPage() {
               </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-1 border-b border-gray-100 text-[11px] font-semibold pb-1 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1 border-b border-gray-100 dark:border-[#22302B] text-[11px] font-semibold pb-1 overflow-x-auto scrollbar-none">
             {["Overview", "Projects", "Communication", "Files", "Billing"].map((tab) => (
               <button
                 key={tab}
@@ -599,42 +599,42 @@ export default function ClientsPage() {
 
           {/* 6 Mini Stat Cards in 2x3 Grid */}
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
-              <span className="font-bold text-sm text-[#171918] block">{selectedClient.projectsCount}</span>
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
+              <span className="font-bold text-sm text-[#171918] dark:text-white block">{selectedClient.projectsCount}</span>
               <span className="text-[9px] text-gray-400">Total Projects</span>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
-              <span className="font-bold text-sm text-[#171918] block">{selectedClient.totalValue}</span>
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
+              <span className="font-bold text-sm text-[#171918] dark:text-white block">{selectedClient.totalValue}</span>
               <span className="text-[9px] text-gray-400">Total Revenue</span>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <span className="font-bold text-xs text-emerald-700 block">{selectedClient.status}</span>
               <span className="text-[9px] text-gray-400">Client Status</span>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <span className="font-bold text-xs text-amber-600 block">★ {selectedClient.rating}</span>
               <span className="text-[9px] text-gray-400">Google Rating</span>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
-              <span className="font-bold text-xs text-[#171918] block">{selectedClient.clientSince}</span>
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
+              <span className="font-bold text-xs text-[#171918] dark:text-white block">{selectedClient.clientSince}</span>
               <span className="text-[9px] text-gray-400">Client Since</span>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
-              <span className="font-bold text-xs text-[#171918] block truncate">{selectedClient.contactPerson}</span>
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
+              <span className="font-bold text-xs text-[#171918] dark:text-white block truncate">{selectedClient.contactPerson}</span>
               <span className="text-[9px] text-gray-400">Primary Contact</span>
             </div>
           </div>
 
           {/* Recent Projects */}
-          <div className="space-y-2 pt-2 border-t border-gray-100">
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-[#171918]">Recent Projects</span>
+              <span className="font-bold text-xs text-[#171918] dark:text-white">Recent Projects</span>
               <span className="text-[10px] text-gray-400 hover:text-black cursor-pointer">View All →</span>
             </div>
             <div className="space-y-1.5 text-[11px]">
-              <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100 flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-[#171918]">Website Development</div>
+                  <div className="font-semibold text-[#171918] dark:text-white">Website Development</div>
                   <div className="text-[10px] text-gray-400">Complete website redesign with booking system</div>
                 </div>
                 <div className="text-right">
@@ -642,9 +642,9 @@ export default function ClientsPage() {
                   <div className="text-[9px] text-gray-400">12 Mar 2024</div>
                 </div>
               </div>
-              <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100 flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-[#171918]">SEO &amp; Content Marketing</div>
+                  <div className="font-semibold text-[#171918] dark:text-white">SEO &amp; Content Marketing</div>
                   <div className="text-[10px] text-gray-400">Monthly SEO and content package</div>
                 </div>
                 <div className="text-right">
@@ -656,9 +656,9 @@ export default function ClientsPage() {
           </div>
 
           {/* Recent Activity */}
-          <div className="space-y-2 pt-2 border-t border-gray-100">
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-[#171918]">Recent Activity</span>
+              <span className="font-bold text-xs text-[#171918] dark:text-white">Recent Activity</span>
               <span className="text-[10px] text-gray-400 hover:text-black cursor-pointer">View All →</span>
             </div>
             <div className="space-y-1.5 text-[11px]">
@@ -678,42 +678,42 @@ export default function ClientsPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="pt-2 border-t border-gray-100 space-y-2">
-            <span className="font-bold text-xs text-[#171918]">Quick Actions</span>
+          <div className="pt-2 border-t border-gray-100 dark:border-[#22302B] space-y-2">
+            <span className="font-bold text-xs text-[#171918] dark:text-white">Quick Actions</span>
             <div className="grid grid-cols-3 gap-1.5 text-[10px]">
               <Link
                 href={`/outreach?lead=${encodeURIComponent(selectedClient.name)}`}
-                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+                className="p-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
               >
                 <Mail size={11} /> Send Email
               </Link>
               <a
                 href={`tel:${selectedClient.phone}`}
-                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+                className="p-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
               >
                 <Phone size={11} /> Call Client
               </a>
               <Link
                 href={`/projects?client=${encodeURIComponent(selectedClient.name)}`}
-                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+                className="p-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
               >
                 <Plus size={11} /> Create Project
               </Link>
               <Link
                 href="/billing"
-                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+                className="p-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
               >
                 <Receipt size={11} /> View Invoices
               </Link>
               <button
                 onClick={() => showToast(`Note appended for ${selectedClient.name}`)}
-                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+                className="p-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
               >
                 <FileText size={11} /> Add Note
               </button>
               <button
                 onClick={() => showToast(`Shareable client portal link copied for ${selectedClient.name}`)}
-                className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
+                className="p-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center justify-center gap-1 font-semibold text-gray-700 shadow-2xs"
               >
                 <Share2 size={11} /> Share Portal
               </button>
@@ -735,13 +735,13 @@ export default function ClientsPage() {
       {/* Add Client Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
               <div className="flex items-center gap-2">
                 <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                   <Users size={14} />
                 </span>
-                <h3 className="font-bold text-base text-[#171918]">Add New Client</h3>
+                <h3 className="font-bold text-base text-[#171918] dark:text-white">Add New Client</h3>
               </div>
               <button
                 onClick={() => setIsAddModalOpen(false)}
@@ -760,7 +760,7 @@ export default function ClientsPage() {
                   placeholder="e.g. Royal Bengal Restaurant"
                   value={newBusinessName}
                   onChange={(e) => setNewBusinessName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                 />
               </div>
 
@@ -773,7 +773,7 @@ export default function ClientsPage() {
                     placeholder="e.g. Rajiv Roy"
                     value={newContactPerson}
                     onChange={(e) => setNewContactPerson(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   />
                 </div>
 
@@ -782,7 +782,7 @@ export default function ClientsPage() {
                   <select
                     value={newType}
                     onChange={(e) => setNewType(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   >
                     <option value="Restaurant">Restaurant</option>
                     <option value="Café">Café</option>
@@ -804,7 +804,7 @@ export default function ClientsPage() {
                     placeholder="client@business.com"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   />
                 </div>
 
@@ -816,7 +816,7 @@ export default function ClientsPage() {
                     placeholder="+91 98765 43210"
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   />
                 </div>
               </div>
@@ -829,7 +829,7 @@ export default function ClientsPage() {
                     placeholder="Indore, MP"
                     value={newAddress}
                     onChange={(e) => setNewAddress(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   />
                 </div>
 
@@ -839,12 +839,12 @@ export default function ClientsPage() {
                     type="number"
                     value={newRetainer}
                     onChange={(e) => setNewRetainer(Number(e.target.value))}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}

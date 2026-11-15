@@ -19,10 +19,10 @@ export function WebsiteBuilderCard() {
       <div className="flex items-center justify-between mb-3.5">
         <h3 className="text-sm font-bold text-[#171918] dark:text-white">Website Builder</h3>
         <Link
-          href="/templates"
+          href="/website-builder"
           className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-[#171918] dark:hover:text-white inline-flex items-center gap-1"
         >
-          View All <ArrowRight size={12} />
+          Open Builder <ArrowRight size={12} />
         </Link>
       </div>
 
@@ -30,7 +30,7 @@ export function WebsiteBuilderCard() {
         {TEMPLATES.map((tmpl) => (
           <Link
             key={tmpl.name}
-            href={`/templates?selected=${encodeURIComponent(tmpl.name)}`}
+            href={`/website-builder?template=${encodeURIComponent(tmpl.name)}`}
             className="group block text-center"
           >
             <div className="aspect-[4/3] w-full relative rounded-lg overflow-hidden border border-gray-200 dark:border-[#2B3532] bg-gray-100 dark:bg-[#121816] group-hover:shadow-md transition-all">

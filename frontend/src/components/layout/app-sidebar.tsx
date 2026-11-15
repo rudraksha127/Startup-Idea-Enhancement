@@ -19,6 +19,9 @@ import {
   MoreHorizontal,
   LogOut,
   ExternalLink,
+  Sparkles,
+  ShieldCheck,
+  UserCheck,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -33,12 +36,15 @@ const NAV_ITEMS = [
   { href: "/leads", label: "Leads", icon: Users, showBadge: true },
   { href: "/map-explorer", label: "Map Explorer", icon: Compass },
   { href: "/ai-agents", label: "AI Agents", icon: Bot },
+  { href: "/audits", label: "Site Audits", icon: ShieldCheck },
+  { href: "/website-builder", label: "Website Builder", icon: Sparkles },
   { href: "/outreach", label: "Outreach", icon: Send },
   { href: "/clients", label: "Clients", icon: Building2 },
   { href: "/projects", label: "Projects", icon: FolderGit2 },
   { href: "/templates", label: "Templates", icon: Layers },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/billing", label: "Billing", icon: CreditCard },
+  { href: "/team", label: "Team", icon: UserCheck },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

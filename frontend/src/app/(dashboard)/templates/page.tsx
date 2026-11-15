@@ -406,10 +406,10 @@ export default function TemplatesPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
             Website Templates
           </h1>
-          <p className="text-xs text-[#68717D] mt-0.5">
+          <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
             Professional, industry-specific templates customized for local businesses. Launch faster with AI-powered content.
           </p>
         </div>
@@ -425,43 +425,43 @@ export default function TemplatesPage() {
 
       {/* 4 Top KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
           <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
             <Layers size={16} />
           </span>
           <div>
-            <div className="text-xl font-bold text-[#171918]">24</div>
-            <div className="text-[11px] text-[#68717D]">Total Templates</div>
+            <div className="text-xl font-bold text-[#171918] dark:text-white">24</div>
+            <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Templates</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
           <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
             <CheckCircle2 size={16} />
           </span>
           <div>
-            <div className="text-xl font-bold text-[#171918]">8</div>
-            <div className="text-[11px] text-[#68717D]">Industries Covered</div>
+            <div className="text-xl font-bold text-[#171918] dark:text-white">8</div>
+            <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Industries Covered</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
           <span className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
             <TrendingUp size={16} />
           </span>
           <div>
-            <div className="text-xl font-bold text-[#171918]">12.5K</div>
-            <div className="text-[11px] text-[#68717D]">Total Deployments</div>
+            <div className="text-xl font-bold text-[#171918] dark:text-white">12.5K</div>
+            <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Deployments</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
           <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
             <Star size={16} />
           </span>
           <div>
-            <div className="text-xl font-bold text-[#171918]">4.8</div>
-            <div className="text-[11px] text-[#68717D]">Average Rating</div>
+            <div className="text-xl font-bold text-[#171918] dark:text-white">4.8</div>
+            <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Average Rating</div>
           </div>
         </div>
       </div>
@@ -492,12 +492,12 @@ export default function TemplatesPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search templates..."
-              className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none"
+              className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <select className="h-7 px-2 rounded-lg border border-gray-200 bg-white font-semibold text-gray-700 focus:outline-none shadow-2xs">
+            <select className="h-7 px-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] font-semibold text-gray-700 focus:outline-none shadow-2xs">
               <option>Sort: Popular ⌄</option>
               <option>Sort: Highest Rated</option>
               <option>Sort: Most Deployments</option>
@@ -531,14 +531,14 @@ export default function TemplatesPage() {
               <div
                 key={tmpl.id}
                 onClick={() => setSelectedTemplate(tmpl)}
-                className={`bg-white rounded-xl border transition-all cursor-pointer overflow-hidden flex flex-col justify-between shadow-xs ${
+                className={`bg-white dark:bg-[#151D1A] rounded-xl border transition-all cursor-pointer overflow-hidden flex flex-col justify-between shadow-xs ${
                   isSelected
                     ? "border-blue-500 ring-2 ring-blue-500/20"
-                    : "border-[#E7E7E2] hover:border-gray-300"
+                    : "border-[#E7E7E2] dark:border-[#22302B] hover:border-gray-300"
                 }`}
               >
                 <div>
-                  <div className="aspect-[16/10] w-full relative overflow-hidden bg-gray-900 border-b border-gray-100">
+                  <div className="aspect-[16/10] w-full relative overflow-hidden bg-gray-900 border-b border-gray-100 dark:border-[#22302B]">
                     <Image
                       src={tmpl.img}
                       alt={tmpl.name}
@@ -550,7 +550,7 @@ export default function TemplatesPage() {
 
                   <div className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-sm text-[#171918]">{tmpl.name}</h3>
+                      <h3 className="font-bold text-sm text-[#171918] dark:text-white">{tmpl.name}</h3>
                       <span className="text-[11px] text-amber-500 font-bold flex items-center gap-0.5">
                         ★ {tmpl.rating} <span className="text-gray-400 font-normal">({tmpl.uses})</span>
                       </span>
@@ -568,13 +568,13 @@ export default function TemplatesPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-[#FAF9F6] border-t border-gray-100 flex items-center gap-2">
+                <div className="p-3 bg-[#FAF9F6] dark:bg-[#121816] border-t border-gray-100 dark:border-[#22302B] flex items-center gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedTemplate(tmpl);
                     }}
-                    className="flex-1 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-[11px] font-semibold text-gray-700 shadow-2xs text-center"
+                    className="flex-1 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-[11px] font-semibold text-gray-700 shadow-2xs text-center"
                   >
                     Preview
                   </button>
@@ -596,7 +596,7 @@ export default function TemplatesPage() {
         </div>
 
         {/* Right Column (4 cols): Selected Template Inspector */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-4 text-xs">
+        <div className="lg:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-4 text-xs">
           {/* Main Hero Preview Banner */}
           <div className="aspect-[16/10] w-full rounded-xl overflow-hidden bg-gray-900 relative border border-gray-200">
             <Image
@@ -636,10 +636,10 @@ export default function TemplatesPage() {
           </div>
 
           {/* Title & Category & Rating */}
-          <div className="pb-3 border-b border-gray-100">
+          <div className="pb-3 border-b border-gray-100 dark:border-[#22302B]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base text-[#171918]">{selectedTemplate.name}</h3>
+                <h3 className="font-bold text-base text-[#171918] dark:text-white">{selectedTemplate.name}</h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700">
                   {selectedTemplate.category}
                 </span>
@@ -655,7 +655,7 @@ export default function TemplatesPage() {
 
           {/* Key Features (2-column checkmark list) */}
           <div className="space-y-2">
-            <span className="font-bold text-xs text-[#171918]">Key Features</span>
+            <span className="font-bold text-xs text-[#171918] dark:text-white">Key Features</span>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] text-gray-600">
               {selectedTemplate.features.map((feat) => (
                 <div key={feat} className="flex items-start gap-1.5">
@@ -678,15 +678,15 @@ export default function TemplatesPage() {
               <span>Use This Template</span>
               <ArrowRight size={13} />
             </Link>
-            <button className="flex-1 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs shadow-2xs text-center inline-flex items-center justify-center gap-1">
+            <button className="flex-1 py-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-gray-700 font-semibold text-xs shadow-2xs text-center inline-flex items-center justify-center gap-1">
               <span>Live Preview</span>
               <ExternalLink size={12} />
             </button>
           </div>
 
           {/* Available Variations */}
-          <div className="space-y-2 pt-2 border-t border-gray-100">
-            <span className="font-bold text-xs text-[#171918]">Available Variations</span>
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
+            <span className="font-bold text-xs text-[#171918] dark:text-white">Available Variations</span>
             <div className="grid grid-cols-5 gap-1.5 text-center">
               {selectedTemplate.variations.map((v) => {
                 const isSelected = selectedVariation === v.name;
@@ -717,13 +717,13 @@ export default function TemplatesPage() {
       {/* Custom Template Modal */}
       {isCustomModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
               <div className="flex items-center gap-2">
                 <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                   <Layers size={14} />
                 </span>
-                <h3 className="font-bold text-base text-[#171918]">Create Custom Template</h3>
+                <h3 className="font-bold text-base text-[#171918] dark:text-white">Create Custom Template</h3>
               </div>
               <button
                 onClick={() => setIsCustomModalOpen(false)}
@@ -745,7 +745,7 @@ export default function TemplatesPage() {
                   placeholder="e.g. Luxury Spa &amp; Wellness Suite"
                   value={customTemplateName}
                   onChange={(e) => setCustomTemplateName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                 />
               </div>
 
@@ -754,7 +754,7 @@ export default function TemplatesPage() {
                 <select
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
-                  className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                 >
                   <option value="Restaurant">Restaurant</option>
                   <option value="Café">Café</option>
@@ -767,7 +767,7 @@ export default function TemplatesPage() {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
                 <button
                   type="button"
                   onClick={() => setIsCustomModalOpen(false)}

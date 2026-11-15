@@ -184,16 +184,16 @@ export default function MapExplorerPage() {
       {/* Top Header & Status Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
             Map Explorer
           </h1>
-          <p className="text-xs text-[#68717D] mt-0.5">
+          <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
             Discover and analyze prospective local businesses with Google Maps intelligence & opportunity scoring.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="h-8 px-3 rounded-lg border border-gray-200 bg-white inline-flex items-center gap-1.5 text-xs text-gray-700 font-medium shadow-2xs">
+          <div className="h-8 px-3 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] inline-flex items-center gap-1.5 text-xs text-gray-700 font-medium shadow-2xs">
             <MapPin size={12} className="text-emerald-600" />
             <span>{selectedCity}</span>
             <ChevronDown size={11} className="text-gray-400" />
@@ -232,7 +232,7 @@ export default function MapExplorerPage() {
             placeholder="Search business by name, street, or keyword (e.g. Italian bistro, yoga studio)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-8 rounded-lg border border-gray-200 bg-white text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black shadow-2xs"
+            className="w-full h-9 pl-9 pr-8 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black shadow-2xs"
           />
           {isSearching && (
             <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />
@@ -251,7 +251,7 @@ export default function MapExplorerPage() {
               className={`px-3 py-1 rounded-lg font-medium whitespace-nowrap transition-colors border flex items-center gap-1 ${
                 isActive
                   ? "bg-[#171918] text-white border-[#171918]"
-                  : "bg-white text-gray-600 border-[#E7E7E2] hover:bg-gray-50 hover:text-black"
+                  : "bg-white dark:bg-[#151D1A] text-gray-600 border-[#E7E7E2] dark:border-[#22302B] hover:bg-gray-50 hover:text-black"
               }`}
             >
               <span>{pill.icon}</span>
@@ -264,9 +264,9 @@ export default function MapExplorerPage() {
       {/* 3-Column Main Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
         {/* Left Column: Businesses Found List */}
-        <div className="xl:col-span-3 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-3 shadow-xs">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-100 text-xs">
-            <span className="font-bold text-[#171918]">Businesses Found ({businesses.length})</span>
+        <div className="xl:col-span-3 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 space-y-3 shadow-xs">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B] text-xs">
+            <span className="font-bold text-[#171918] dark:text-white">Businesses Found ({businesses.length})</span>
             <span className="text-gray-400 text-[11px] cursor-pointer hover:text-black">
               Sort: Relevance
             </span>
@@ -292,7 +292,7 @@ export default function MapExplorerPage() {
                   className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-2 ${
                     isSelected
                       ? "bg-blue-50/50 border-blue-200 shadow-2xs"
-                      : "bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50/50"
+                      : "bg-white dark:bg-[#151D1A] border-gray-100 dark:border-[#22302B] hover:border-gray-200 hover:bg-gray-50/50"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -300,7 +300,7 @@ export default function MapExplorerPage() {
                       <Image src={biz.img || "/assets/templates/restaurant.jpg"} alt={biz.name} fill className="object-cover" />
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-xs text-[#171918] truncate">{biz.name}</div>
+                      <div className="font-bold text-xs text-[#171918] dark:text-white truncate">{biz.name}</div>
                       <div className="text-[11px] text-amber-500 font-semibold flex items-center gap-1">
                         ★ {biz.rating} <span className="text-gray-400 font-normal">({biz.reviews})</span>
                       </div>
@@ -334,7 +334,7 @@ export default function MapExplorerPage() {
                           e.stopPropagation();
                           handleAddLead(biz);
                         }}
-                        className="px-2 py-1 rounded bg-[#FAF9F6] border border-gray-200 hover:bg-gray-100 text-[10px] font-semibold text-gray-700"
+                        className="px-2 py-1 rounded bg-[#FAF9F6] dark:bg-[#121816] border border-gray-200 hover:bg-gray-100 text-[10px] font-semibold text-gray-700"
                       >
                         Add
                       </button>
@@ -345,21 +345,21 @@ export default function MapExplorerPage() {
             }))}
           </div>
 
-          <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+          <div className="pt-2 border-t border-gray-100 dark:border-[#22302B] flex items-center justify-between text-[11px] text-gray-500">
             <span>Showing {businesses.length} places</span>
             <span className="text-emerald-600 font-semibold">Live Synced</span>
           </div>
         </div>
 
         {/* Center Column: Interactive Map Canvas */}
-        <div className="xl:col-span-5 bg-white rounded-xl border border-[#E7E7E2] overflow-hidden shadow-xs relative flex flex-col h-[700px]">
+        <div className="xl:col-span-5 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] overflow-hidden shadow-xs relative flex flex-col h-[700px]">
           {/* Map Controls Header */}
-          <div className="p-3 bg-white/90 backdrop-blur border-b border-gray-200/80 flex items-center justify-between text-xs z-10">
+          <div className="p-3 bg-white dark:bg-[#151D1A]/90 backdrop-blur border-b border-gray-200/80 flex items-center justify-between text-xs z-10">
             <div className="flex items-center gap-1 p-0.5 bg-gray-100 rounded-lg">
               <button
                 onClick={() => setMapMode("map")}
                 className={`px-3 py-1 rounded-md font-semibold transition-colors ${
-                  mapMode === "map" ? "bg-white text-[#171918] shadow-2xs" : "text-gray-500"
+                  mapMode === "map" ? "bg-white dark:bg-[#151D1A] text-[#171918] dark:text-white shadow-2xs" : "text-gray-500"
                 }`}
               >
                 Map
@@ -367,7 +367,7 @@ export default function MapExplorerPage() {
               <button
                 onClick={() => setMapMode("satellite")}
                 className={`px-3 py-1 rounded-md font-semibold transition-colors ${
-                  mapMode === "satellite" ? "bg-white text-[#171918] shadow-2xs" : "text-gray-500"
+                  mapMode === "satellite" ? "bg-white dark:bg-[#151D1A] text-[#171918] dark:text-white shadow-2xs" : "text-gray-500"
                 }`}
               >
                 Satellite
@@ -402,7 +402,7 @@ export default function MapExplorerPage() {
             <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 
             {/* City Watermark Tag */}
-            <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-800 dark:text-gray-200 shadow-xs z-10 pointer-events-none">
+            <div className="absolute top-3 left-3 bg-white dark:bg-[#151D1A]/90 dark:bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-800 dark:text-gray-200 shadow-xs z-10 pointer-events-none">
               📍 {selectedBusiness ? selectedBusiness.name : selectedCity}
             </div>
 
@@ -413,14 +413,14 @@ export default function MapExplorerPage() {
                   showToast("Re-scanning businesses in current viewport...");
                   const timer = setTimeout(() => showToast(`✓ Found ${businesses.length} places in view`), 600);
                 }}
-                className="h-7 px-2.5 rounded-lg bg-white/95 text-gray-800 text-[11px] font-bold border border-gray-200 shadow-md hover:bg-white inline-flex items-center gap-1.5 transition-colors"
+                className="h-7 px-2.5 rounded-lg bg-white dark:bg-[#151D1A]/95 text-gray-800 text-[11px] font-bold border border-gray-200 shadow-md hover:bg-white dark:bg-[#151D1A] inline-flex items-center gap-1.5 transition-colors"
               >
                 <Compass size={12} className="text-blue-600" />
                 <span>Search In This Area</span>
               </button>
               <button
                 onClick={() => showToast("Polygon Tool: Select boundary to filter places")}
-                className="h-7 px-2.5 rounded-lg bg-white/95 text-gray-800 text-[11px] font-bold border border-gray-200 shadow-md hover:bg-white inline-flex items-center gap-1.5 transition-colors"
+                className="h-7 px-2.5 rounded-lg bg-white dark:bg-[#151D1A]/95 text-gray-800 text-[11px] font-bold border border-gray-200 shadow-md hover:bg-white dark:bg-[#151D1A] inline-flex items-center gap-1.5 transition-colors"
               >
                 <Layers size={12} className="text-gray-600" />
                 <span>Draw Area</span>
@@ -447,7 +447,7 @@ export default function MapExplorerPage() {
                     className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-md whitespace-nowrap mb-1 transition-all ${
                       isSelected
                         ? "bg-[#171918] text-white ring-2 ring-blue-400"
-                        : "bg-white/95 text-gray-800 border border-gray-200"
+                        : "bg-white dark:bg-[#151D1A]/95 text-gray-800 border border-gray-200"
                     }`}
                   >
                     {biz.name}
@@ -462,7 +462,7 @@ export default function MapExplorerPage() {
             })}
 
             {/* Zoom Controls */}
-            <div className="absolute right-4 bottom-14 flex flex-col rounded-lg bg-white border border-gray-200 shadow-md overflow-hidden text-xs z-30">
+            <div className="absolute right-4 bottom-14 flex flex-col rounded-lg bg-white dark:bg-[#151D1A] border border-gray-200 shadow-md overflow-hidden text-xs z-30">
               <button
                 onClick={() => setZoomLevel((z) => Math.min(18, z + 1))}
                 className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 font-bold"
@@ -480,7 +480,7 @@ export default function MapExplorerPage() {
           </div>
 
           {/* Bottom Pin Legend & Google Attribution */}
-          <div className="p-2.5 bg-white border-t border-gray-100 flex items-center justify-between text-xs text-gray-600 px-4">
+          <div className="p-2.5 bg-white dark:bg-[#151D1A] border-t border-gray-100 dark:border-[#22302B] flex items-center justify-between text-xs text-gray-600 px-4">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Business Pin</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Selected Pin</span>
@@ -490,7 +490,7 @@ export default function MapExplorerPage() {
         </div>
 
         {/* Right Column: Business Detail Panel */}
-        <div className="xl:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-5 shadow-xs">
+        <div className="xl:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-5 shadow-xs">
           {!selectedBusiness ? (
             <div className="py-24 px-4 text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mx-auto">
@@ -510,7 +510,7 @@ export default function MapExplorerPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 text-xs font-bold text-gray-800 shadow-md flex items-center gap-1">
+                <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white dark:bg-[#151D1A]/95 text-xs font-bold text-gray-800 shadow-md flex items-center gap-1">
                   <Star size={12} className="text-amber-500 fill-amber-500" />
                   <span>{selectedBusiness.rating}</span>
                   <span className="text-gray-400 font-normal">({selectedBusiness.reviews})</span>
@@ -522,7 +522,7 @@ export default function MapExplorerPage() {
 
               <div>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-[#171918]">{selectedBusiness.name}</h2>
+                  <h2 className="text-base font-bold text-[#171918] dark:text-white">{selectedBusiness.name}</h2>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
                     Opp Score: {selectedBusiness.opportunityScore}/10
                   </span>
@@ -561,9 +561,9 @@ export default function MapExplorerPage() {
               )}
 
               {/* AI Opportunity Analysis Card */}
-              <div className="p-3.5 rounded-xl bg-[#FAF9F6] border border-gray-100 space-y-2.5">
+              <div className="p-3.5 rounded-xl bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs text-[#171918]">AI Opportunity Analysis</h4>
+                  <h4 className="font-bold text-xs text-[#171918] dark:text-white">AI Opportunity Analysis</h4>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                     High Conversion Target
                   </span>
@@ -590,7 +590,7 @@ export default function MapExplorerPage() {
               </div>
 
               {/* Action Buttons Row */}
-              <div className="pt-2 border-t border-gray-100 space-y-2">
+              <div className="pt-2 border-t border-gray-100 dark:border-[#22302B] space-y-2">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleAddLead(selectedBusiness)}
@@ -603,7 +603,7 @@ export default function MapExplorerPage() {
 
                   <Link
                     href={`/leads`}
-                    className="h-8.5 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center justify-center"
+                    className="h-8.5 px-3 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center justify-center"
                   >
                     Audit Website
                   </Link>

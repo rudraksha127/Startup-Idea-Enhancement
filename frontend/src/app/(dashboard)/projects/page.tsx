@@ -184,10 +184,10 @@ export default function ProjectsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
             Projects
           </h1>
-          <p className="text-xs text-[#68717D] mt-0.5">
+          <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
             Manage all client projects from planning to delivery with tasks, timeline and team collaboration.
           </p>
         </div>
@@ -203,19 +203,19 @@ export default function ProjectsPage() {
 
       {/* 5 KPI Cards Across */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
               <FolderGit2 size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{totalCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{totalCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {totalCount > 0 ? "↑ 20%" : "Active"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Total Projects</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Projects</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -225,19 +225,19 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
               <Clock size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{activeCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{activeCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {activeCount > 0 ? "↑ 33%" : "Active"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Active Projects</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Active Projects</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -247,19 +247,19 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
               <CheckCircle2 size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{completedCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{completedCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {completedCount > 0 ? "↑ 100%" : "Done"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Completed</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Completed</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -269,19 +269,19 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
               <Clock size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{onHoldCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{onHoldCount}</span>
                 <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1 py-0.2 rounded">
                   0%
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">On Hold</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">On Hold</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -291,19 +291,19 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
               <AlertCircle size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">0</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">0</span>
                 <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1 py-0.2 rounded border border-rose-200">
                   0
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Cancelled</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Cancelled</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -317,10 +317,10 @@ export default function ProjectsPage() {
       {/* Main Grid: Left Projects Table + Right Selected Project Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left Column (8 cols): Projects Table */}
-        <div className="lg:col-span-8 bg-white rounded-xl border border-[#E7E7E2] shadow-xs overflow-hidden">
+        <div className="lg:col-span-8 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] shadow-xs overflow-hidden">
           {/* Tabs & Controls */}
-          <div className="p-4 border-b border-gray-100 space-y-3">
-            <div className="flex items-center gap-1 border-b border-gray-100 text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
+          <div className="p-4 border-b border-gray-100 dark:border-[#22302B] space-y-3">
+            <div className="flex items-center gap-1 border-b border-gray-100 dark:border-[#22302B] text-xs font-semibold overflow-x-auto scrollbar-none pb-1">
               {projectTabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -344,15 +344,15 @@ export default function ProjectsPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search projects..."
-                  className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none"
+                  className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="h-7 px-2.5 rounded-lg border border-gray-200 bg-white font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1">
+                <button className="h-7 px-2.5 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1">
                   <Filter size={11} className="text-gray-400" /> Filter
                 </button>
-                <select className="h-7 px-2 rounded-lg border border-gray-200 bg-white font-semibold text-gray-700 focus:outline-none shadow-2xs">
+                <select className="h-7 px-2 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] font-semibold text-gray-700 focus:outline-none shadow-2xs">
                   <option>Sort: Last Updated ⌄</option>
                   <option>Sort: Highest Budget</option>
                   <option>Sort: Nearest Deadline</option>
@@ -364,7 +364,7 @@ export default function ProjectsPage() {
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF9F6] border-b border-[#E7E7E2] text-[#68717D] text-[11px]">
+              <thead className="bg-[#FAF9F6] dark:bg-[#121816] border-b border-[#E7E7E2] dark:border-[#22302B] text-[#68717D] dark:text-[#9AA29E] text-[11px]">
                 <tr>
                   <th className="py-2.5 px-3 w-8"><input type="checkbox" className="rounded border-gray-300" /></th>
                   <th className="py-2.5 px-2.5 font-semibold">Project Name</th>
@@ -403,7 +403,7 @@ export default function ProjectsPage() {
                         <input type="checkbox" className="rounded border-gray-300" />
                       </td>
                       <td className="py-2.5 px-2.5">
-                        <div className="font-bold text-[#171918]">{p.name}</div>
+                        <div className="font-bold text-[#171918] dark:text-white">{p.name}</div>
                         <div className="text-[10px] text-gray-400">{p.subtitle}</div>
                       </td>
                       <td className="py-2.5 px-2">
@@ -460,19 +460,19 @@ export default function ProjectsPage() {
             </table>
           </div>
 
-          <div className="p-3 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-gray-500">
+          <div className="p-3 border-t border-[#E7E7E2] dark:border-[#22302B] flex items-center justify-between text-xs text-gray-500">
             <span>Showing {projectsList.length > 0 ? 1 : 0} to {filteredProjects.length} of {projectsList.length} projects</span>
             <div className="flex items-center gap-1">
-              <button className="px-2 py-0.5 rounded border bg-white">‹</button>
+              <button className="px-2 py-0.5 rounded border bg-white dark:bg-[#151D1A]">‹</button>
               <button className="px-2 py-0.5 rounded bg-[#171918] text-white font-bold">1</button>
               <button className="px-2 py-0.5 rounded hover:bg-gray-100">2</button>
-              <button className="px-2 py-0.5 rounded border bg-white">›</button>
+              <button className="px-2 py-0.5 rounded border bg-white dark:bg-[#151D1A]">›</button>
             </div>
           </div>
         </div>
 
         {/* Right Column (4 cols): Selected Project Detail Panel */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-4 shadow-xs text-xs">
+        <div className="lg:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 space-y-4 shadow-xs text-xs">
           {!selectedProject ? (
             <div className="py-24 px-4 text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 mx-auto">
@@ -486,14 +486,14 @@ export default function ProjectsPage() {
           ) : (
             <>
               {/* Header */}
-              <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-start justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
                 <div className="flex items-center gap-2.5">
                   <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0 border border-orange-200">
                     🍽️
                   </span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-base text-[#171918]">{selectedProject.client}</h3>
+                      <h3 className="font-bold text-base text-[#171918] dark:text-white">{selectedProject.client}</h3>
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
                       </span>
@@ -509,7 +509,7 @@ export default function ProjectsPage() {
               </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-1 border-b border-gray-100 text-[11px] font-semibold pb-1 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1 border-b border-gray-100 dark:border-[#22302B] text-[11px] font-semibold pb-1 overflow-x-auto scrollbar-none">
             {["Overview", "Tasks", "Team", "Files", "Timeline", "Invoices"].map((tab) => (
               <button
                 key={tab}
@@ -539,27 +539,27 @@ export default function ProjectsPage() {
 
           {/* 6 Metric Info Blocks in 2x3 Grid */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <div className="text-[9px] text-gray-400">Client</div>
-              <div className="font-bold text-xs text-[#171918] truncate mt-0.5">{selectedProject.client}</div>
+              <div className="font-bold text-xs text-[#171918] dark:text-white truncate mt-0.5">{selectedProject.client}</div>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <div className="text-[9px] text-gray-400">Start Date</div>
-              <div className="font-bold text-xs text-[#171918] mt-0.5">{selectedProject.startDate}</div>
+              <div className="font-bold text-xs text-[#171918] dark:text-white mt-0.5">{selectedProject.startDate}</div>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <div className="text-[9px] text-gray-400">Deadline</div>
-              <div className="font-bold text-xs text-[#171918] mt-0.5">{selectedProject.deadline}</div>
+              <div className="font-bold text-xs text-[#171918] dark:text-white mt-0.5">{selectedProject.deadline}</div>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <div className="text-[9px] text-gray-400">Budget</div>
-              <div className="font-bold text-xs text-[#171918] mt-0.5">₹{selectedProject.budget.toLocaleString()}</div>
+              <div className="font-bold text-xs text-[#171918] dark:text-white mt-0.5">₹{selectedProject.budget.toLocaleString()}</div>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <div className="text-[9px] text-gray-400">Amount Paid</div>
               <div className="font-bold text-xs text-blue-700 mt-0.5">₹{selectedProject.amountPaid.toLocaleString()}</div>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+            <div className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
               <div className="text-[9px] text-gray-400">Amount Due</div>
               <div className="font-bold text-xs text-rose-700 mt-0.5">₹{selectedProject.amountDue.toLocaleString()}</div>
             </div>
@@ -568,7 +568,7 @@ export default function ProjectsPage() {
           {/* Project Progress */}
           <div className="space-y-1.5 pt-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#171918]">Project Progress</span>
+              <span className="font-bold text-[#171918] dark:text-white">Project Progress</span>
               <span className="font-bold text-blue-600">{selectedProject.progress}%</span>
             </div>
             <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
@@ -577,14 +577,14 @@ export default function ProjectsPage() {
           </div>
 
           {/* Milestones Checklist */}
-          <div className="space-y-2 pt-2 border-t border-gray-100">
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-[#171918]">Milestones</span>
+              <span className="font-bold text-xs text-[#171918] dark:text-white">Milestones</span>
               <span className="text-[10px] text-gray-400 hover:text-black cursor-pointer">View All →</span>
             </div>
             <div className="space-y-1.5 text-[11px]">
               {selectedProject.milestones.map((m) => (
-                <div key={m.title} className="p-2 rounded-lg bg-[#FAF9F6] border border-gray-100 flex items-center justify-between">
+                <div key={m.title} className="p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {m.status === "Completed" ? (
                       <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span>
@@ -593,7 +593,7 @@ export default function ProjectsPage() {
                     ) : (
                       <span className="w-4 h-4 rounded-full border border-gray-300" />
                     )}
-                    <span className="font-medium text-[#171918]">{m.title}</span>
+                    <span className="font-medium text-[#171918] dark:text-white">{m.title}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`text-[10px] font-bold ${
@@ -615,13 +615,13 @@ export default function ProjectsPage() {
       {/* Bottom Row: Project Timeline + Recent Tasks + Project Files */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Project Timeline (6 cols) */}
-        <div className="lg:col-span-6 p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-xs space-y-3">
+        <div className="lg:col-span-6 p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#171918]">Project Timeline</h3>
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Project Timeline</h3>
             <span className="text-xs text-gray-400 hover:text-black cursor-pointer">View Full Timeline →</span>
           </div>
 
-          <div className="text-[10px] text-gray-400 flex items-center justify-between border-b border-gray-100 pb-1">
+          <div className="text-[10px] text-gray-400 flex items-center justify-between border-b border-gray-100 dark:border-[#22302B] pb-1">
             <span className="font-semibold text-gray-700">Mar 2024</span>
             <div className="flex items-center gap-6 pr-4">
               <span>Mar 1</span>
@@ -656,9 +656,9 @@ export default function ProjectsPage() {
         </div>
 
         {/* Recent Tasks (3 cols) */}
-        <div className="lg:col-span-3 p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-xs space-y-3">
+        <div className="lg:col-span-3 p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#171918]">Recent Tasks</h3>
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Recent Tasks</h3>
             <span className="text-xs text-gray-400 hover:text-black cursor-pointer">View All →</span>
           </div>
 
@@ -670,7 +670,7 @@ export default function ProjectsPage() {
               { task: "Integrate payment gateway", done: false, time: "2 days ago" },
               { task: "Mobile responsiveness", done: false, time: "2 days ago" },
             ].map((task, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
                 <div className="flex items-center gap-2">
                   <span className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] ${
                     task.done ? "bg-emerald-500 text-white" : "border border-gray-300"
@@ -688,9 +688,9 @@ export default function ProjectsPage() {
         </div>
 
         {/* Project Files (3 cols) */}
-        <div className="lg:col-span-3 p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-xs space-y-3">
+        <div className="lg:col-span-3 p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#171918]">Project Files</h3>
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Project Files</h3>
             <span className="text-xs text-gray-400 hover:text-black cursor-pointer">View All →</span>
           </div>
 
@@ -702,13 +702,13 @@ export default function ProjectsPage() {
               { name: "Project_Requirements.docx", size: "0.9 MB", date: "5 Mar 2024", iconBg: "bg-blue-50 text-blue-600" },
               { name: "Brand_Assets.zip", size: "8.3 MB", date: "3 Mar 2024", iconBg: "bg-amber-50 text-amber-600" },
             ].map((file, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-[#FAF9F6] border border-gray-100">
+              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B]">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${file.iconBg}`}>
                     <FileText size={13} />
                   </span>
                   <div className="min-w-0">
-                    <div className="font-semibold text-[11px] text-[#171918] truncate">{file.name}</div>
+                    <div className="font-semibold text-[11px] text-[#171918] dark:text-white truncate">{file.name}</div>
                     <div className="text-[9px] text-gray-400">{file.size} • {file.date}</div>
                   </div>
                 </div>

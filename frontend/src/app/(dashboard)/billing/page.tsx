@@ -254,10 +254,10 @@ export default function BillingPage() {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
               Billing Overview
             </h1>
-            <p className="text-xs text-[#68717D] mt-0.5">
+            <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
               Manage invoices, track payments, and monitor your revenue and expenses.
             </p>
           </div>
@@ -265,7 +265,7 @@ export default function BillingPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportCSV}
-              className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1"
+              className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-2xs inline-flex items-center gap-1"
             >
               <Download size={12} className="text-gray-400" />
               <span>Export Invoices</span>
@@ -283,19 +283,19 @@ export default function BillingPage() {
 
       {/* 5 Top KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 font-bold text-sm">
               ₹
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-[#171918]">{totalInvoices > 0 ? `₹${totalBilled.toLocaleString("en-IN")}` : "₹0"}</span>
+                <span className="text-lg font-bold text-[#171918] dark:text-white">{totalInvoices > 0 ? `₹${totalBilled.toLocaleString("en-IN")}` : "₹0"}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {totalInvoices > 0 ? "↑ 52%" : "Active"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Total Billed</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Billed</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -305,19 +305,19 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
               <FileText size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-[#171918]">{totalInvoices > 0 ? `₹${totalPaid.toLocaleString("en-IN")}` : "₹0"}</span>
+                <span className="text-lg font-bold text-[#171918] dark:text-white">{totalInvoices > 0 ? `₹${totalPaid.toLocaleString("en-IN")}` : "₹0"}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   {totalInvoices > 0 ? "↑ 38%" : "Settled"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Total Paid</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Paid</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -327,19 +327,19 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
               <Clock size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold text-[#171918]">{totalInvoices > 0 ? `₹${totalOutstanding.toLocaleString("en-IN")}` : "₹0"}</span>
+                <span className="text-lg font-bold text-[#171918] dark:text-white">{totalInvoices > 0 ? `₹${totalOutstanding.toLocaleString("en-IN")}` : "₹0"}</span>
                 <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1 py-0.2 rounded border border-rose-200">
                   {totalOutstanding > 0 ? "Pending" : "None"}
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Outstanding</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Outstanding</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -349,19 +349,19 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
               <FileText size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{totalInvoices}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{totalInvoices}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   Active
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Total Invoices</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Total Invoices</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -371,19 +371,19 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
               <CheckCircle2 size={16} />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-bold text-[#171918]">{paidInvoicesCount}</span>
+                <span className="text-xl font-bold text-[#171918] dark:text-white">{paidInvoicesCount}</span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
                   Paid
                 </span>
               </div>
-              <div className="text-[11px] text-[#68717D]">Active Clients</div>
+              <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E]">Active Clients</div>
             </div>
           </div>
           <div className="w-12 h-5 opacity-70 hidden xl:block">
@@ -397,17 +397,17 @@ export default function BillingPage() {
       {/* Row 1: Line Chart + 2 Donut Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Revenue & Payments Over Time (6 cols) */}
-        <div className="lg:col-span-6 p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs space-y-3">
+        <div className="lg:col-span-6 p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#171918]">Revenue &amp; Payments Over Time</h3>
+              <h3 className="text-sm font-bold text-[#171918] dark:text-white">Revenue &amp; Payments Over Time</h3>
               <div className="flex items-center gap-3 text-[10px] text-gray-500 mt-1">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" /> Billed Amount</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Paid Amount</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Outstanding Amount</span>
               </div>
             </div>
-            <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-[#E7E7E2] bg-white text-xs font-medium text-gray-700">
+            <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] text-xs font-medium text-gray-700">
               <span>{timeframe}</span>
               <ChevronDown size={11} className="text-gray-400" />
             </button>
@@ -428,8 +428,8 @@ export default function BillingPage() {
         </div>
 
         {/* Invoice Status Distribution (3 cols) */}
-        <div className="lg:col-span-3 p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs space-y-3">
-          <h3 className="text-sm font-bold text-[#171918]">Invoice Status Distribution</h3>
+        <div className="lg:col-span-3 p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs space-y-3">
+          <h3 className="text-sm font-bold text-[#171918] dark:text-white">Invoice Status Distribution</h3>
           <div className="w-32 h-32 relative mx-auto my-1">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -441,7 +441,7 @@ export default function BillingPage() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-sm font-bold text-[#171918]">28</span>
+              <span className="text-sm font-bold text-[#171918] dark:text-white">28</span>
               <span className="text-[9px] text-gray-400">Total Invoices</span>
             </div>
           </div>
@@ -460,8 +460,8 @@ export default function BillingPage() {
         </div>
 
         {/* Payment Method Breakdown (3 cols) */}
-        <div className="lg:col-span-3 p-5 rounded-xl bg-white border border-[#E7E7E2] shadow-xs space-y-3">
-          <h3 className="text-sm font-bold text-[#171918]">Payment Method Breakdown</h3>
+        <div className="lg:col-span-3 p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs space-y-3">
+          <h3 className="text-sm font-bold text-[#171918] dark:text-white">Payment Method Breakdown</h3>
           <div className="w-32 h-32 relative mx-auto my-1">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -473,7 +473,7 @@ export default function BillingPage() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-xs font-bold text-[#171918]">₹10.4L</span>
+              <span className="text-xs font-bold text-[#171918] dark:text-white">₹10.4L</span>
               <span className="text-[9px] text-gray-400">Total Payments</span>
             </div>
           </div>
@@ -495,15 +495,15 @@ export default function BillingPage() {
       {/* Row 2: Recent Invoices Table (8 cols) + Upcoming Payments (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Recent Invoices Table */}
-        <div className="lg:col-span-8 bg-white rounded-xl border border-[#E7E7E2] shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#171918]">Recent Invoices</h3>
+        <div className="lg:col-span-8 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-gray-100 dark:border-[#22302B] flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Recent Invoices</h3>
             <span className="text-xs text-gray-500 hover:text-black cursor-pointer font-medium">View All →</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF9F6] border-b border-[#E7E7E2] text-[#68717D] text-[11px]">
+              <thead className="bg-[#FAF9F6] dark:bg-[#121816] border-b border-[#E7E7E2] dark:border-[#22302B] text-[#68717D] dark:text-[#9AA29E] text-[11px]">
                 <tr>
                   <th className="py-2.5 px-3 font-semibold">#</th>
                   <th className="py-2.5 px-2.5 font-semibold">Client</th>
@@ -531,11 +531,11 @@ export default function BillingPage() {
                   <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-2.5 px-3 text-gray-400 font-mono text-[10px]">{idx + 1}</td>
                     <td className="py-2.5 px-2.5">
-                      <div className="font-bold text-[#171918]">{inv.client}</div>
+                      <div className="font-bold text-[#171918] dark:text-white">{inv.client}</div>
                       <div className="text-[10px] text-gray-400 font-mono">{inv.id}</div>
                     </td>
                     <td className="py-2.5 px-2 text-gray-600">{inv.project}</td>
-                    <td className="py-2.5 px-2 font-bold text-[#171918]">{inv.amount}</td>
+                    <td className="py-2.5 px-2 font-bold text-[#171918] dark:text-white">{inv.amount}</td>
                     <td className="py-2.5 px-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStatusBadge(inv.status)}`}>
                         {inv.status}
@@ -556,21 +556,21 @@ export default function BillingPage() {
         </div>
 
         {/* Upcoming Payments */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-3 text-xs">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-[#171918]">Upcoming Payments</h3>
+        <div className="lg:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-3 text-xs">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B]">
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Upcoming Payments</h3>
             <span className="text-xs text-gray-500 hover:text-black cursor-pointer font-medium">View All →</span>
           </div>
 
           <div className="space-y-2.5">
             {UPCOMING_PAYMENTS.map((up) => (
-              <div key={up.client} className="p-2.5 rounded-lg bg-[#FAF9F6] border border-gray-100 flex items-center justify-between">
+              <div key={up.client} className="p-2.5 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-[11px] text-[#171918]">{up.client}</div>
+                  <div className="font-bold text-[11px] text-[#171918] dark:text-white">{up.client}</div>
                   <div className="text-[10px] text-gray-400">Due: {up.dueDate}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold text-xs text-[#171918]">{up.amount}</div>
+                  <div className="font-bold text-xs text-[#171918] dark:text-white">{up.amount}</div>
                   <span className={`inline-block px-1.5 py-0.2 rounded text-[9px] font-bold border ${getStatusBadge(up.status)}`}>
                     {up.status}
                   </span>
@@ -584,24 +584,24 @@ export default function BillingPage() {
       {/* Row 3: Top Clients by Revenue (5 cols) + Revenue by Service Type (4 cols) + Billing Insights (3 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Top Clients by Revenue (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-[#171918]">Top Clients by Revenue</h3>
+        <div className="lg:col-span-5 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B]">
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Top Clients by Revenue</h3>
             <span className="text-xs text-gray-500 hover:text-black cursor-pointer font-medium">View All →</span>
           </div>
 
           <div className="space-y-2 text-xs">
             {TOP_CLIENTS_REVENUE.map((tc, idx) => (
-              <div key={tc.client} className="flex items-center justify-between p-2 rounded-lg bg-[#FAF9F6] border border-gray-100 text-[11px]">
+              <div key={tc.client} className="flex items-center justify-between p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] text-[11px]">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-gray-400 w-3">{idx + 1}</span>
                   <div>
-                    <div className="font-bold text-[#171918]">{tc.client}</div>
+                    <div className="font-bold text-[#171918] dark:text-white">{tc.client}</div>
                     <div className="text-[10px] text-gray-400">Paid: {tc.paid} • Due: {tc.outstanding}</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-xs text-[#171918] block">{tc.totalBilled}</span>
+                  <span className="font-bold text-xs text-[#171918] dark:text-white block">{tc.totalBilled}</span>
                   <span className="text-[9px] text-gray-400">{tc.invoices} invoices</span>
                 </div>
               </div>
@@ -610,9 +610,9 @@ export default function BillingPage() {
         </div>
 
         {/* Revenue by Service Type (4 cols) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-[#171918]">Revenue by Service Type</h3>
+        <div className="lg:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B]">
+            <h3 className="text-sm font-bold text-[#171918] dark:text-white">Revenue by Service Type</h3>
             <span className="text-[11px] text-gray-400 cursor-pointer">Revenue ⌄</span>
           </div>
 
@@ -621,7 +621,7 @@ export default function BillingPage() {
               <div key={s.name} className="space-y-1">
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-medium text-gray-700">{s.name}</span>
-                  <span className="font-bold text-[#171918]">{s.pct}%</span>
+                  <span className="font-bold text-[#171918] dark:text-white">{s.pct}%</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
                   <div className={`h-full rounded-full ${s.color}`} style={{ width: `${s.pct * 2}%` }} />
@@ -632,8 +632,8 @@ export default function BillingPage() {
         </div>
 
         {/* Billing Insights (3 cols) */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-xs space-y-3">
-          <h3 className="text-sm font-bold text-[#171918]">Billing Insights</h3>
+        <div className="lg:col-span-3 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-3">
+          <h3 className="text-sm font-bold text-[#171918] dark:text-white">Billing Insights</h3>
 
           <div className="space-y-3 text-xs">
             <div className="flex items-start gap-2.5">
@@ -641,7 +641,7 @@ export default function BillingPage() {
                 <TrendingUp size={12} />
               </span>
               <div>
-                <div className="font-bold text-[#171918] text-[11px]">Revenue grew by 52%</div>
+                <div className="font-bold text-[#171918] dark:text-white text-[11px]">Revenue grew by 52%</div>
                 <div className="text-[10px] text-gray-500 leading-snug">
                   You generated ₹4,38,000 more revenue compared to last month.
                 </div>
@@ -653,7 +653,7 @@ export default function BillingPage() {
                 <CheckCircle2 size={12} />
               </span>
               <div>
-                <div className="font-bold text-[#171918] text-[11px]">78% payments received on time</div>
+                <div className="font-bold text-[#171918] dark:text-white text-[11px]">78% payments received on time</div>
                 <div className="text-[10px] text-gray-500 leading-snug">
                   Good job! 78% of your invoices are paid on time.
                 </div>
@@ -665,7 +665,7 @@ export default function BillingPage() {
                 <Clock size={12} />
               </span>
               <div>
-                <div className="font-bold text-[#171918] text-[11px]">3 invoices are overdue</div>
+                <div className="font-bold text-[#171918] dark:text-white text-[11px]">3 invoices are overdue</div>
                 <div className="text-[10px] text-gray-500 leading-snug">
                   Total overdue amount is ₹2,40,000.
                 </div>
@@ -677,7 +677,7 @@ export default function BillingPage() {
                 <CheckCircle2 size={12} />
               </span>
               <div>
-                <div className="font-bold text-[#171918] text-[11px]">Top client this month</div>
+                <div className="font-bold text-[#171918] dark:text-white text-[11px]">Top client this month</div>
                 <div className="text-[10px] text-gray-500 leading-snug">
                   Spice Villa Restaurant (₹2,40,000).
                 </div>
@@ -698,13 +698,13 @@ export default function BillingPage() {
       {/* Create Invoice Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-2xl bg-white border border-[#E7E7E2] p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
               <div className="flex items-center gap-2">
                 <span className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <CreditCard size={14} />
                 </span>
-                <h3 className="font-bold text-base text-[#171918]">Generate New Invoice</h3>
+                <h3 className="font-bold text-base text-[#171918] dark:text-white">Generate New Invoice</h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -723,7 +723,7 @@ export default function BillingPage() {
                   placeholder="e.g. Spice Villa Restaurant"
                   value={newClient}
                   onChange={(e) => setNewClient(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                 />
               </div>
 
@@ -735,7 +735,7 @@ export default function BillingPage() {
                   placeholder="e.g. Website Development &amp; SEO Retainer"
                   value={newProject}
                   onChange={(e) => setNewProject(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                 />
               </div>
 
@@ -748,7 +748,7 @@ export default function BillingPage() {
                     min={1000}
                     value={newAmount}
                     onChange={(e) => setNewAmount(Number(e.target.value))}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   />
                 </div>
 
@@ -757,7 +757,7 @@ export default function BillingPage() {
                   <select
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                    className="w-full px-2.5 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                   >
                     <option value="Pending">Pending</option>
                     <option value="Paid">Paid</option>
@@ -773,11 +773,11 @@ export default function BillingPage() {
                   placeholder="30 Apr 2026"
                   value={newDueDate}
                   onChange={(e) => setNewDueDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none text-xs"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-[#FAF9F6] dark:bg-[#121816] focus:bg-white dark:bg-[#151D1A] focus:outline-none text-xs"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

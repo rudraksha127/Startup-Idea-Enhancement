@@ -669,14 +669,14 @@ export default function AIAgentsPage() {
       {/* Inspection Modal */}
       {inspectionResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-gray-200">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="bg-white dark:bg-[#151D1A] rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-gray-200">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-[#22302B] pb-3">
               <div className="flex items-center gap-2.5">
                 <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                   <Bot size={18} />
                 </span>
                 <div>
-                  <h3 className="font-bold text-sm text-[#171918]">{inspectionResult.agentName}</h3>
+                  <h3 className="font-bold text-sm text-[#171918] dark:text-white">{inspectionResult.agentName}</h3>
                   <p className="text-[11px] text-gray-500">Execution Output & Audit Logs</p>
                 </div>
               </div>
@@ -750,7 +750,7 @@ export default function AIAgentsPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setViewMode("overview")}
-                className="h-8 px-2.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 inline-flex items-center gap-1.5 transition-colors shadow-2xs"
+                className="h-8 px-2.5 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-semibold text-gray-700 inline-flex items-center gap-1.5 transition-colors shadow-2xs"
               >
                 <ArrowLeft size={13} />
                 <span>Back to AI Agents</span>
@@ -760,7 +760,7 @@ export default function AIAgentsPage() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-[#171918] tracking-tight">{editedAgent.name}</h1>
+                  <h1 className="text-xl font-bold text-[#171918] dark:text-white tracking-tight">{editedAgent.name}</h1>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     ● Active
                   </span>
@@ -778,7 +778,7 @@ export default function AIAgentsPage() {
               <button
                 onClick={() => handleRunAgent(editedAgent)}
                 disabled={Boolean(runningAgentId)}
-                className="h-8 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+                className="h-8 px-3 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-semibold text-gray-700 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
               >
                 {runningAgentId ? <Loader2 size={13} className="animate-spin" /> : <Play size={12} />}
                 <span>Test Live</span>
@@ -810,7 +810,7 @@ export default function AIAgentsPage() {
                   onClick={() => setConfigTab(tab.id as any)}
                   className={`pb-2.5 px-3 transition-colors border-b-2 inline-flex items-center gap-1.5 ${
                     isActive
-                      ? "border-[#171918] text-[#171918] font-bold"
+                      ? "border-[#171918] text-[#171918] dark:text-white font-bold"
                       : "border-transparent text-gray-500 hover:text-black"
                   }`}
                 >
@@ -828,8 +828,8 @@ export default function AIAgentsPage() {
               {/* Basic Config Tab Content */}
               {configTab === "basic" && (
                 <div className="space-y-4">
-                  <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3.5 shadow-2xs">
-                    <h3 className="text-xs font-bold text-[#171918] uppercase tracking-wider text-gray-500">
+                  <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3.5 shadow-2xs">
+                    <h3 className="text-xs font-bold text-[#171918] dark:text-white uppercase tracking-wider text-gray-500">
                       General Information
                     </h3>
 
@@ -885,8 +885,8 @@ export default function AIAgentsPage() {
                   </div>
 
                   {/* Autonomy & Guardrails Card */}
-                  <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3.5 shadow-2xs">
-                    <h3 className="text-xs font-bold text-[#171918] uppercase tracking-wider text-gray-500">
+                  <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3.5 shadow-2xs">
+                    <h3 className="text-xs font-bold text-[#171918] dark:text-white uppercase tracking-wider text-gray-500">
                       Autonomy & Approval Gates
                     </h3>
 
@@ -904,7 +904,7 @@ export default function AIAgentsPage() {
                             className={`p-3 rounded-lg border cursor-pointer transition-all ${
                               isSelected
                                 ? "bg-[#171918] text-white border-[#171918] shadow-2xs"
-                                : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+                                : "bg-white dark:bg-[#151D1A] text-gray-700 border-gray-200 hover:border-gray-300"
                             }`}
                           >
                             <div className="font-bold text-xs">{lvl.title}</div>
@@ -916,7 +916,7 @@ export default function AIAgentsPage() {
                       })}
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-[#22302B] text-xs">
                       <div>
                         <span className="font-semibold text-gray-800">Human-in-the-Loop Gate</span>
                         <p className="text-[11px] text-gray-400">Require manual click approval before sending external emails or writing DB updates.</p>
@@ -935,9 +935,9 @@ export default function AIAgentsPage() {
               {/* Prompts & Instructions Tab */}
               {configTab === "prompts" && (
                 <div className="space-y-4">
-                  <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
+                  <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-bold text-[#171918] uppercase tracking-wider text-gray-500">
+                      <h3 className="text-xs font-bold text-[#171918] dark:text-white uppercase tracking-wider text-gray-500">
                         System Prompt
                       </h3>
                       <span className="text-[11px] text-gray-400 font-mono">Tokens: ~120</span>
@@ -968,8 +968,8 @@ export default function AIAgentsPage() {
                     />
                   </div>
 
-                  <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-2 shadow-2xs">
-                    <h3 className="text-xs font-bold text-[#171918] uppercase tracking-wider text-gray-500">
+                  <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-2 shadow-2xs">
+                    <h3 className="text-xs font-bold text-[#171918] dark:text-white uppercase tracking-wider text-gray-500">
                       User Prompt Template
                     </h3>
                     <input
@@ -984,8 +984,8 @@ export default function AIAgentsPage() {
 
               {/* Tools & Capabilities Tab */}
               {configTab === "tools" && (
-                <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3.5 shadow-2xs">
-                  <h3 className="text-xs font-bold text-[#171918] uppercase tracking-wider text-gray-500">
+                <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3.5 shadow-2xs">
+                  <h3 className="text-xs font-bold text-[#171918] dark:text-white uppercase tracking-wider text-gray-500">
                     Agent Capabilities & Sandboxed Tools
                   </h3>
 
@@ -999,7 +999,7 @@ export default function AIAgentsPage() {
                     ].map((tool) => {
                       const enabled = Boolean(editedAgent.capabilities?.[tool.key as keyof typeof editedAgent.capabilities]);
                       return (
-                        <div key={tool.key} className="flex items-start justify-between p-2.5 rounded-lg bg-gray-50/60 border border-gray-100">
+                        <div key={tool.key} className="flex items-start justify-between p-2.5 rounded-lg bg-gray-50/60 border border-gray-100 dark:border-[#22302B]">
                           <div>
                             <div className="font-bold text-gray-900">{tool.name}</div>
                             <div className="text-[11px] text-gray-500 mt-0.5">{tool.desc}</div>
@@ -1023,13 +1023,13 @@ export default function AIAgentsPage() {
 
               {/* Run History Tab */}
               {configTab === "history" && (
-                <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
-                  <h3 className="text-xs font-bold text-[#171918] uppercase tracking-wider text-gray-500">
+                <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
+                  <h3 className="text-xs font-bold text-[#171918] dark:text-white uppercase tracking-wider text-gray-500">
                     Recent Execution Logs
                   </h3>
                   <div className="space-y-2 text-xs">
                     {RECENT_RUNS_DATA.map((run) => (
-                      <div key={run.id} className="p-3 rounded-lg border border-gray-100 bg-[#FAF9F6] flex items-center justify-between">
+                      <div key={run.id} className="p-3 rounded-lg border border-gray-100 dark:border-[#22302B] bg-[#FAF9F6] dark:bg-[#121816] flex items-center justify-between">
                         <div>
                           <div className="font-bold text-gray-900">{run.task}</div>
                           <div className="text-[10px] text-gray-400">{run.trigger} • {run.duration}</div>
@@ -1129,10 +1129,10 @@ export default function AIAgentsPage() {
           {/* Top Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
                 AI Agents Operating System
               </h1>
-              <p className="text-xs text-[#68717D] mt-0.5">
+              <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
                 13 specialized autonomous & supervised agents executing end-to-end agency workflows.
               </p>
             </div>
@@ -1147,53 +1147,53 @@ export default function AIAgentsPage() {
 
           {/* 5 KPI Summary Cards matching Reference Mockup */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-            <div className="p-3.5 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
               <span className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
                 <Bot size={16} />
               </span>
               <div>
-                <div className="text-lg font-bold text-[#171918]">13 / 13</div>
-                <div className="text-[10px] text-[#68717D]">Active Agents</div>
+                <div className="text-lg font-bold text-[#171918] dark:text-white">13 / 13</div>
+                <div className="text-[10px] text-[#68717D] dark:text-[#9AA29E]">Active Agents</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
               <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
                 <Activity size={16} />
               </span>
               <div>
-                <div className="text-lg font-bold text-[#171918]">1,428</div>
-                <div className="text-[10px] text-[#68717D]">Tasks Done (+18%)</div>
+                <div className="text-lg font-bold text-[#171918] dark:text-white">1,428</div>
+                <div className="text-[10px] text-[#68717D] dark:text-[#9AA29E]">Tasks Done (+18%)</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
               <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
                 <Mail size={16} />
               </span>
               <div>
-                <div className="text-lg font-bold text-[#171918]">892</div>
-                <div className="text-[10px] text-[#68717D]">Emails Sent (+12%)</div>
+                <div className="text-lg font-bold text-[#171918] dark:text-white">892</div>
+                <div className="text-[10px] text-[#68717D] dark:text-[#9AA29E]">Emails Sent (+12%)</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
               <span className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
                 <CheckCircle2 size={16} />
               </span>
               <div>
-                <div className="text-lg font-bold text-[#171918]">348</div>
-                <div className="text-[10px] text-[#68717D]">Leads Qualified</div>
+                <div className="text-lg font-bold text-[#171918] dark:text-white">348</div>
+                <div className="text-[10px] text-[#68717D] dark:text-[#9AA29E]">Leads Qualified</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
               <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
                 <Clock size={16} />
               </span>
               <div>
-                <div className="text-lg font-bold text-[#171918]">1.8s</div>
-                <div className="text-[10px] text-[#68717D]">Avg Task Time</div>
+                <div className="text-lg font-bold text-[#171918] dark:text-white">1.8s</div>
+                <div className="text-[10px] text-[#68717D] dark:text-[#9AA29E]">Avg Task Time</div>
               </div>
             </div>
           </div>
@@ -1230,7 +1230,7 @@ export default function AIAgentsPage() {
                     placeholder="Search agents by role..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-8 pl-8 pr-3 rounded-lg border border-gray-200 bg-white text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black w-full sm:w-56 shadow-2xs"
+                    className="h-8 pl-8 pr-3 rounded-lg border border-gray-200 bg-white dark:bg-[#151D1A] text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black w-full sm:w-56 shadow-2xs"
                   />
                 </div>
               </div>
@@ -1243,7 +1243,7 @@ export default function AIAgentsPage() {
                   return (
                     <div
                       key={agent._id}
-                      className="bg-white rounded-xl border border-[#E7E7E2] p-4 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3.5"
+                      className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3.5"
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-start justify-between gap-2">
@@ -1252,7 +1252,7 @@ export default function AIAgentsPage() {
                               <Icon size={16} />
                             </span>
                             <div>
-                              <h3 className="font-bold text-xs text-[#171918] leading-snug">{agent.name}</h3>
+                              <h3 className="font-bold text-xs text-[#171918] dark:text-white leading-snug">{agent.name}</h3>
                               <span className="text-[10px] text-gray-500 font-medium">{agent.category}</span>
                             </div>
                           </div>
@@ -1272,14 +1272,14 @@ export default function AIAgentsPage() {
                           {agent.role}
                         </p>
 
-                        <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-[#FAF9F6] border border-gray-100 text-[11px]">
+                        <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] text-[11px]">
                           <div>
                             <div className="text-[9px] text-gray-400 uppercase font-semibold">{agent.metric1.label}</div>
-                            <div className="font-bold text-[#171918]">{agent.metric1.value}</div>
+                            <div className="font-bold text-[#171918] dark:text-white">{agent.metric1.value}</div>
                           </div>
                           <div>
                             <div className="text-[9px] text-gray-400 uppercase font-semibold">{agent.metric2.label}</div>
-                            <div className="font-bold text-[#171918]">{agent.metric2.value}</div>
+                            <div className="font-bold text-[#171918] dark:text-white">{agent.metric2.value}</div>
                           </div>
                         </div>
 
@@ -1293,7 +1293,7 @@ export default function AIAgentsPage() {
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+                      <div className="pt-2 border-t border-gray-100 dark:border-[#22302B] flex items-center justify-between gap-2">
                         <button
                           onClick={() => handleOpenConfig(agent)}
                           className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
@@ -1329,9 +1329,9 @@ export default function AIAgentsPage() {
             {/* Right 4 Columns: Performance Charts & Templates */}
             <div className="lg:col-span-4 space-y-4">
               {/* Agents Performance Bar Chart */}
-              <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
+              <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-xs text-[#171918]">Agents Performance</h3>
+                  <h3 className="font-bold text-xs text-[#171918] dark:text-white">Agents Performance</h3>
                   <span className="text-[11px] text-gray-400">Tasks Handled</span>
                 </div>
                 <div className="h-44 w-full">
@@ -1347,9 +1347,9 @@ export default function AIAgentsPage() {
               </div>
 
               {/* Model Usage Donut */}
-              <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
+              <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-xs text-[#171918]">Model Usage</h3>
+                  <h3 className="font-bold text-xs text-[#171918] dark:text-white">Model Usage</h3>
                   <span className="text-[11px] text-gray-400">Tokens %</span>
                 </div>
                 <div className="h-36 w-full flex items-center justify-center">
@@ -1364,7 +1364,7 @@ export default function AIAgentsPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="flex items-center justify-around text-[10px] text-gray-500 pt-1 border-t border-gray-100">
+                <div className="flex items-center justify-around text-[10px] text-gray-500 pt-1 border-t border-gray-100 dark:border-[#22302B]">
                   {MODEL_DATA.map((m) => (
                     <div key={m.name} className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
@@ -1375,9 +1375,9 @@ export default function AIAgentsPage() {
               </div>
 
               {/* AI Agent Templates */}
-              <div className="bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
+              <div className="bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-xs text-[#171918]">AI Agent Templates</h3>
+                  <h3 className="font-bold text-xs text-[#171918] dark:text-white">AI Agent Templates</h3>
                   <span className="text-[10px] text-blue-600 font-semibold cursor-pointer hover:underline">View All</span>
                 </div>
                 <div className="space-y-2.5 text-xs">
@@ -1386,7 +1386,7 @@ export default function AIAgentsPage() {
                     { name: "E-Commerce Prospector", desc: "Finds Shopify stores with slow mobile LCP", time: "Instant" },
                     { name: "SaaS B2B Outreacher", desc: "LinkedIn + Email multi-touch sequence", time: "Instant" },
                   ].map((tpl) => (
-                    <div key={tpl.name} className="p-2.5 rounded-lg bg-[#FAF9F6] border border-gray-100 flex items-center justify-between">
+                    <div key={tpl.name} className="p-2.5 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
                       <div>
                         <div className="font-bold text-xs text-gray-900">{tpl.name}</div>
                         <div className="text-[10px] text-gray-500">{tpl.desc}</div>
@@ -1407,15 +1407,15 @@ export default function AIAgentsPage() {
           {/* Bottom Tables: Recent Agent Runs & Upcoming Tasks */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
             {/* Recent Agent Runs Table */}
-            <div className="lg:col-span-7 bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
+            <div className="lg:col-span-7 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-xs text-[#171918]">Recent Agent Runs</h3>
+                <h3 className="font-bold text-xs text-[#171918] dark:text-white">Recent Agent Runs</h3>
                 <span className="text-[11px] text-emerald-600 font-semibold">Live Feed</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-gray-100 text-[10px] text-gray-400 uppercase font-semibold">
+                    <tr className="border-b border-gray-100 dark:border-[#22302B] text-[10px] text-gray-400 uppercase font-semibold">
                       <th className="pb-2">Agent</th>
                       <th className="pb-2">Task</th>
                       <th className="pb-2">Trigger</th>
@@ -1447,14 +1447,14 @@ export default function AIAgentsPage() {
             </div>
 
             {/* Upcoming Scheduled Tasks */}
-            <div className="lg:col-span-5 bg-white rounded-xl border border-[#E7E7E2] p-4.5 space-y-3 shadow-2xs">
+            <div className="lg:col-span-5 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-xs text-[#171918]">Upcoming Tasks Queue</h3>
+                <h3 className="font-bold text-xs text-[#171918] dark:text-white">Upcoming Tasks Queue</h3>
                 <span className="text-[11px] text-gray-400 font-medium">3 Scheduled</span>
               </div>
               <div className="space-y-2 text-xs">
                 {UPCOMING_TASKS_DATA.map((task) => (
-                  <div key={task.id} className="p-2.5 rounded-lg bg-[#FAF9F6] border border-gray-100 flex items-center justify-between">
+                  <div key={task.id} className="p-2.5 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
                     <div>
                       <div className="font-bold text-xs text-gray-800">{task.agent}</div>
                       <div className="text-[10px] text-gray-500">{task.task}</div>
