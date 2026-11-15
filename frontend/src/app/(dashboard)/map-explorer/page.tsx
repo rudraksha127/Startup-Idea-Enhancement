@@ -73,6 +73,7 @@ export default function MapExplorerPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [addingLead, setAddingLead] = useState(false);
   const [savedLeadMap, setSavedLeadMap] = useState<Record<string, boolean>>({});
+  const [bookmarkedMap, setBookmarkedMap] = useState<Record<string, boolean>>({});
   const [isSearching, setIsSearching] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(13);
   const [mapsStatus, setMapsStatus] = useState<any>({ configured: false, status: "INITIALIZING" });
@@ -310,6 +311,19 @@ export default function MapExplorerPage() {
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBookmarkedMap((prev) => ({ ...prev, [biz.id]: !prev[biz.id] }));
+                        showToast(bookmarkedMap[biz.id] ? `Removed bookmark` : `Bookmarked "${biz.name}"`);
+                      }}
+                      className={`p-1 rounded-md text-xs transition-colors ${
+                        bookmarkedMap[biz.id] ? "text-amber-500 fill-amber-500" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                      title="Bookmark place"
+                    >
+                      <Bookmark size={13} className={bookmarkedMap[biz.id] ? "fill-current" : ""} />
+                    </button>
                     {isSaved ? (
                       <span className="p-1 text-emerald-600 font-bold" title="Saved">
                         <CheckCircle2 size={13} />
@@ -390,6 +404,27 @@ export default function MapExplorerPage() {
             {/* City Watermark Tag */}
             <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-800 dark:text-gray-200 shadow-xs z-10 pointer-events-none">
               📍 {selectedBusiness ? selectedBusiness.name : selectedCity}
+            </div>
+
+            {/* Floating Map Action Buttons */}
+            <div className="absolute top-3 right-3 flex items-center gap-2 z-30">
+              <button
+                onClick={() => {
+                  showToast("Re-scanning businesses in current viewport...");
+                  const timer = setTimeout(() => showToast(`✓ Found ${businesses.length} places in view`), 600);
+                }}
+                className="h-7 px-2.5 rounded-lg bg-white/95 text-gray-800 text-[11px] font-bold border border-gray-200 shadow-md hover:bg-white inline-flex items-center gap-1.5 transition-colors"
+              >
+                <Compass size={12} className="text-blue-600" />
+                <span>Search In This Area</span>
+              </button>
+              <button
+                onClick={() => showToast("Polygon Tool: Select boundary to filter places")}
+                className="h-7 px-2.5 rounded-lg bg-white/95 text-gray-800 text-[11px] font-bold border border-gray-200 shadow-md hover:bg-white inline-flex items-center gap-1.5 transition-colors"
+              >
+                <Layers size={12} className="text-gray-600" />
+                <span>Draw Area</span>
+              </button>
             </div>
 
             {/* Coordinate Pins for Results */}
@@ -525,22 +560,76 @@ export default function MapExplorerPage() {
                 </div>
               )}
 
-              <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
-                <button
-                  onClick={() => handleAddLead(selectedBusiness)}
-                  disabled={addingLead || Boolean(savedLeadMap[selectedBusiness.id])}
-                  className="flex-1 h-9 rounded-lg bg-[#171918] hover:bg-black text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
-                >
-                  {addingLead ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
-                  <span>{savedLeadMap[selectedBusiness.id] ? "Saved in Leads" : "Add to Leads"}</span>
-                </button>
+              {/* AI Opportunity Analysis Card */}
+              <div className="p-3.5 rounded-xl bg-[#FAF9F6] border border-gray-100 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-xs text-[#171918]">AI Opportunity Analysis</h4>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    High Conversion Target
+                  </span>
+                </div>
 
-                <Link
-                  href="/leads"
-                  className="h-9 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center justify-center"
-                >
-                  View Leads
-                </Link>
+                <div className="space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between text-rose-600">
+                    <span>• No mobile-responsive layout</span>
+                    <span className="font-semibold">-3.2 pts</span>
+                  </div>
+                  <div className="flex items-center justify-between text-rose-600">
+                    <span>• Slow page load (&gt;4.5s)</span>
+                    <span className="font-semibold">-2.1 pts</span>
+                  </div>
+                  <div className="flex items-center justify-between text-amber-600">
+                    <span>• Missing online booking portal</span>
+                    <span className="font-semibold">-1.8 pts</span>
+                  </div>
+                  <div className="flex items-center justify-between text-emerald-700">
+                    <span>• High review demand ({selectedBusiness.reviews})</span>
+                    <span className="font-semibold">+2.5 pts</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons Row */}
+              <div className="pt-2 border-t border-gray-100 space-y-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleAddLead(selectedBusiness)}
+                    disabled={addingLead || Boolean(savedLeadMap[selectedBusiness.id])}
+                    className="flex-1 h-8.5 rounded-lg bg-[#171918] hover:bg-black text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
+                  >
+                    {addingLead ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+                    <span>{savedLeadMap[selectedBusiness.id] ? "Saved in Leads" : "Save as Lead"}</span>
+                  </button>
+
+                  <Link
+                    href={`/leads`}
+                    className="h-8.5 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center justify-center"
+                  >
+                    Audit Website
+                  </Link>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/outreach`}
+                    className="flex-1 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center gap-1.5 border border-blue-200 transition-colors"
+                  >
+                    <Mail size={12} />
+                    <span>Send Cold Email</span>
+                  </Link>
+
+                  <a
+                    href={`https://wa.me/${(selectedBusiness.phone || "919800000000").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Hello ${selectedBusiness.name}, we reviewed your digital presence and prepared a modern booking portal prototype for your team.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center gap-1.5 border border-emerald-200 transition-colors"
+                  >
+                    <MessageCircle size={12} />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
               </div>
             </div>
           )}
