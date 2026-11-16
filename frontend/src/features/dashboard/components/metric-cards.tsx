@@ -17,9 +17,9 @@ interface MetricCardsProps {
 export function MetricCards({ metrics }: MetricCardsProps) {
   const cards = [
     {
-      title: metrics?.totalLeads !== undefined ? "Total Leads" : "Businesses Found",
-      value: metrics?.totalLeads !== undefined ? metrics.totalLeads.toLocaleString() : "2,847",
-      trend: metrics?.leadsTrend?.replace("+", "") || "12%",
+      title: "Total Leads",
+      value: (metrics?.totalLeads ?? 0).toLocaleString(),
+      trend: metrics?.leadsTrend || "No prior period",
       icon: Users,
       color: "text-blue-600 dark:text-blue-400",
       bg: "bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50",
@@ -27,9 +27,9 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       href: "/leads",
     },
     {
-      title: metrics?.qualifiedLeads !== undefined ? "Qualified Leads" : "Leads Contacted",
-      value: metrics?.qualifiedLeads !== undefined ? metrics.qualifiedLeads.toLocaleString() : "892",
-      trend: metrics?.qualifiedTrend?.replace("+", "") || "16%",
+      title: "Leads Contacted",
+      value: (metrics?.qualifiedLeads ?? 0).toLocaleString(),
+      trend: metrics?.qualifiedTrend || "No prior period",
       icon: PhoneCall,
       color: "text-sky-600 dark:text-sky-400",
       bg: "bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50",
@@ -37,9 +37,9 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       href: "/outreach",
     },
     {
-      title: metrics?.activeOutreaches !== undefined ? "Active Outreaches" : "Positive Responses",
-      value: metrics?.activeOutreaches !== undefined ? metrics.activeOutreaches.toLocaleString() : "142",
-      trend: metrics?.outreachTrend?.replace("+", "") || "34%",
+      title: "Positive Responses",
+      value: (metrics?.activeOutreaches ?? 0).toLocaleString(),
+      trend: metrics?.outreachTrend || "No prior period",
       icon: MessageCircle,
       color: "text-emerald-600 dark:text-emerald-400",
       bg: "bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50",
@@ -47,9 +47,9 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       href: "/outreach",
     },
     {
-      title: metrics?.convertedClients !== undefined ? "Converted Clients" : "Active Clients",
-      value: metrics?.convertedClients !== undefined ? metrics.convertedClients.toLocaleString() : "38",
-      trend: metrics?.convertedTrend?.replace("+", "") || "18%",
+      title: "Active Clients",
+      value: (metrics?.convertedClients ?? 0).toLocaleString(),
+      trend: metrics?.convertedTrend || "No prior period",
       icon: Briefcase,
       color: "text-indigo-600 dark:text-indigo-400",
       bg: "bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50",
@@ -62,6 +62,8 @@ export function MetricCards({ metrics }: MetricCardsProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card) => {
         const Icon = card.icon;
+        const isCleanBaseline = card.trend.includes("No prior") || card.value === "0";
+
         return (
           <Link
             key={card.title}
@@ -77,10 +79,16 @@ export function MetricCards({ metrics }: MetricCardsProps) {
                   <span className="text-2xl font-bold tracking-tight text-[#171918] dark:text-white">
                     {card.value}
                   </span>
-                  <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    <TrendingUp size={10} className="mr-0.5" />
-                    ↑ {card.trend}
-                  </span>
+                  {isCleanBaseline ? (
+                    <span className="inline-flex items-center text-[10px] font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-800">
+                      No prior data
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-800">
+                      <TrendingUp size={10} className="mr-0.5" />
+                      {card.trend}
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-[#68717D] dark:text-[#9AA29E] font-medium mt-0.5 group-hover:text-[#171918] dark:group-hover:text-white transition-colors">
                   <span>{card.title}</span>
@@ -92,10 +100,11 @@ export function MetricCards({ metrics }: MetricCardsProps) {
             <div className="w-14 h-6 opacity-70 hidden sm:block">
               <svg viewBox="0 0 60 25" className="w-full h-full overflow-visible">
                 <path
-                  d="M 0 18 Q 15 22 25 12 T 45 10 T 60 4"
+                  d={isCleanBaseline ? "M 0 18 L 60 18" : "M 0 18 Q 15 22 25 12 T 45 10 T 60 4"}
                   fill="none"
-                  stroke={card.sparkColor}
-                  strokeWidth="2"
+                  stroke={isCleanBaseline ? "#94A3B8" : card.sparkColor}
+                  strokeWidth="1.5"
+                  strokeDasharray={isCleanBaseline ? "3 3" : undefined}
                   strokeLinecap="round"
                 />
               </svg>

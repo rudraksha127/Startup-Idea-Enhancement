@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Mail, MessageSquare, Briefcase, FileText, ArrowRight } from "lucide-react";
+import { Search, Mail, MessageSquare, Briefcase, FileText, ArrowRight, Bot } from "lucide-react";
 
 interface AgentItem {
   _id?: string;
   name: string;
   role: string;
-  status: "Active" | "Idle" | "Paused";
+  status: "Active" | "Idle" | "Paused" | "Ready";
   dailyTarget?: number;
   processedToday?: number;
 }
@@ -16,30 +16,50 @@ interface AIAgentsCardProps {
   agents?: AgentItem[];
 }
 
-const DEFAULT_AGENTS = [
-  { name: "Research Agent", role: "Scanning locations", status: "Active" as const, icon: Search, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-  { name: "Outreach Agent", role: "Sending emails", status: "Active" as const, icon: Mail, color: "text-blue-700 bg-blue-50 border-blue-200" },
-  { name: "Reply Manager", role: "Handling responses", status: "Active" as const, icon: MessageSquare, color: "text-purple-700 bg-purple-50 border-purple-200" },
-  { name: "Sales Agent", role: "Booking meetings", status: "Active" as const, icon: Briefcase, color: "text-amber-700 bg-amber-50 border-amber-200" },
-  { name: "Content Agent", role: "Creating content", status: "Active" as const, icon: FileText, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
+const BASE_AGENT_METADATA = [
+  { name: "Research Agent", defaultRole: "Market & Place Discovery", icon: Search, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+  { name: "Outreach Agent", defaultRole: "Cold Outreach Sequences", icon: Mail, color: "text-blue-700 bg-blue-50 border-blue-200" },
+  { name: "Reply Manager", defaultRole: "Inbox & Response Triage", icon: MessageSquare, color: "text-purple-700 bg-purple-50 border-purple-200" },
+  { name: "Sales Agent", defaultRole: "Meeting Scheduling", icon: Briefcase, color: "text-amber-700 bg-amber-50 border-amber-200" },
+  { name: "Content Agent", defaultRole: "Proposal & Pitch Drafting", icon: FileText, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
 ];
 
 export function AIAgentsCard({ agents }: AIAgentsCardProps) {
+  // Map configured agents or populate base agent catalog with genuine Idle / Ready status
+  const agentList = BASE_AGENT_METADATA.map((base) => {
+    const matched = agents?.find(
+      (a) => a.name.toLowerCase().includes(base.name.toLowerCase().split(" ")[0])
+    );
+    return {
+      name: base.name,
+      role: matched?.role || base.defaultRole,
+      status: (matched?.status as "Active" | "Idle" | "Paused" | "Ready") || "Idle",
+      processedToday: matched?.processedToday || 0,
+      icon: base.icon,
+      color: base.color,
+    };
+  });
+
   return (
     <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
       <div className="flex items-center justify-between mb-3.5">
-        <h3 className="text-sm font-bold text-[#171918] dark:text-white">Active AI Agents</h3>
+        <div className="flex items-center gap-2">
+          <Bot size={16} className="text-gray-500" />
+          <h3 className="text-sm font-bold text-[#171918] dark:text-white">Active AI Agents</h3>
+        </div>
         <Link
           href="/ai-agents"
-          className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-[#171918] dark:hover:text-white inline-flex items-center gap-1"
+          className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-[#171918] dark:hover:text-white inline-flex items-center gap-1 transition-colors"
         >
           Manage Agents <ArrowRight size={12} />
         </Link>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        {DEFAULT_AGENTS.map((agent) => {
+        {agentList.map((agent) => {
           const Icon = agent.icon;
+          const isActive = agent.status === "Active";
+
           return (
             <Link
               key={agent.name}
@@ -56,9 +76,15 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
               </div>
               <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{agent.role}</p>
               <div>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
-                </span>
+                {isActive ? (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Idle • Ready
+                  </span>
+                )}
               </div>
             </Link>
           );

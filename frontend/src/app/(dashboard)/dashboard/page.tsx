@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MetricCards } from "@/features/dashboard/components/metric-cards";
 import { AIAgentsCard } from "@/features/dashboard/components/ai-agents-card";
@@ -46,23 +47,29 @@ const RevenueOverview = dynamic(
   }
 );
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const range = searchParams?.get("range") || "this_month";
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [activityData, setActivityData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     Promise.all([
-      fetch("/api/dashboard/metrics").then((r) => r.json()),
+      fetch(`/api/dashboard/metrics?timeframe=${encodeURIComponent(range)}`).then((r) => r.json()),
       fetch("/api/dashboard/activity").then((r) => r.json()),
     ])
       .then(([metricsRes, activityRes]) => {
         setData(metricsRes);
         setActivityData(activityRes?.activities || []);
       })
-      .catch((err) => console.error("Failed to load dashboard data:", err));
-  }, []);
+      .catch((err) => console.error("Failed to load dashboard data:", err))
+      .finally(() => setIsLoading(false));
+  }, [range]);
 
   return (
     <div className="space-y-5">
@@ -121,5 +128,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

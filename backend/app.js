@@ -41083,63 +41083,123 @@ var InvoicesRepository = class {
 var DashboardService = class {
   static async getMetrics(orgId) {
     const [leadsRes, projects, invoices] = await Promise.all([
-      LeadsRepository.findByOrg(orgId, { limit: 1e3 }),
-      ProjectsRepository.findByOrg(orgId),
-      InvoicesRepository.findByOrg(orgId)
+      LeadsRepository.findByOrg(orgId, { limit: 1e3 }).catch(() => ({ leads: [], total: 0 })),
+      ProjectsRepository.findByOrg(orgId).catch(() => []),
+      InvoicesRepository.findByOrg(orgId).catch(() => [])
     ]);
-    const leads = leadsRes.leads;
+    const leads = leadsRes?.leads || [];
     const totalLeads = leads.length;
-    const contactedLeads = leads.filter((l) => l.qualificationStatus === "Contacted").length;
-    const activeProjects = projects.filter((p) => p.status === "Active").length;
+    const qualifiedLeads = leads.filter(
+      (l) => l.qualificationStatus === "Contacted" || l.status === "Contacted"
+    ).length;
+    const activeOutreaches = leads.filter(
+      (l) => l.qualificationStatus === "Qualified" || l.qualificationStatus === "Proposal" || l.status === "Replied" || l.status === "Interested"
+    ).length;
+    const convertedClients = projects.filter((p) => p.status === "Active").length || leads.filter((l) => l.qualificationStatus === "Converted" || l.status === "Converted").length;
     let totalBilled = 0;
     for (const inv of invoices) {
-      if (inv.status === "Paid" || inv.status === "Pending") {
+      if (inv.status === "Paid") {
         totalBilled += inv.amount || 0;
       }
     }
     const statusMap = {
-      New: leads.filter((l) => l.qualificationStatus === "New").length,
-      Contacted: contactedLeads,
+      New: leads.filter((l) => l.qualificationStatus === "New" || l.status === "New").length,
+      Contacted: qualifiedLeads,
       Qualified: leads.filter((l) => l.qualificationStatus === "Qualified").length,
       Proposal: leads.filter((l) => l.qualificationStatus === "Proposal").length,
-      Converted: leads.filter((l) => l.qualificationStatus === "Converted").length,
+      Converted: convertedClients,
       Disqualified: leads.filter((l) => l.qualificationStatus === "Disqualified").length
     };
+    let sources = [];
+    if (totalLeads > 0) {
+      const sourceCounts = {};
+      for (const lead of leads) {
+        const src = lead.source || "Google Maps Platform";
+        sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+      }
+      const palette = {
+        "Google Maps Platform": "#3568E8",
+        "Google Maps": "#3568E8",
+        "n8n Automation Ingest": "#38BDF8",
+        "Manual Discovery": "#10B981",
+        "Social Media": "#e1306c",
+        "Referrals": "#F59E0B"
+      };
+      sources = Object.entries(sourceCounts).map(([name, count]) => ({
+        name,
+        count,
+        percentage: Math.round(count / totalLeads * 100),
+        color: palette[name] || "#10251f"
+      }));
+    }
+    let growthHistory = [];
+    if (totalLeads > 0 || convertedClients > 0) {
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const currentMonthIdx = (/* @__PURE__ */ new Date()).getMonth();
+      const pastMonths = [
+        months[(currentMonthIdx - 2 + 12) % 12],
+        months[(currentMonthIdx - 1 + 12) % 12],
+        months[currentMonthIdx]
+      ];
+      growthHistory = pastMonths.map((m, idx) => ({
+        month: m,
+        leadsFound: idx === 2 ? totalLeads : 0,
+        contacted: idx === 2 ? qualifiedLeads : 0,
+        replies: idx === 2 ? activeOutreaches : 0,
+        clients: idx === 2 ? convertedClients : 0
+      }));
+    }
+    const revenueOverview = {
+      totalFormatted: `\u20B9${totalBilled > 0 ? totalBilled.toLocaleString("en-IN") : "0"}`,
+      totalRaw: totalBilled,
+      trend: totalBilled > 0 ? "+0%" : "No prior period",
+      monthly: totalBilled > 0 ? [{ month: "Current", amount: totalBilled }] : []
+    };
+    const agents = [
+      { name: "Research Agent", role: "Scanning locations", status: "Idle", processedToday: 0, dailyTarget: 50 },
+      { name: "Outreach Agent", role: "Sending emails", status: "Idle", processedToday: 0, dailyTarget: 50 },
+      { name: "Reply Manager", role: "Handling responses", status: "Idle", processedToday: 0, dailyTarget: 25 },
+      { name: "Sales Agent", role: "Booking meetings", status: "Idle", processedToday: 0, dailyTarget: 20 },
+      { name: "Content Agent", role: "Creating content", status: "Idle", processedToday: 0, dailyTarget: 15 }
+    ];
     return {
       metrics: {
         totalLeads,
-        contacted: contactedLeads,
-        meetingsBooked: leads.filter((l) => l.qualificationStatus === "Converted" || l.qualificationStatus === "Proposal").length,
-        activeProjects,
+        qualifiedLeads,
+        activeOutreaches,
+        convertedClients,
+        contacted: qualifiedLeads,
+        meetingsBooked: activeOutreaches,
+        activeProjects: convertedClients,
         pipelineValue: `\u20B9${totalBilled > 0 ? totalBilled.toLocaleString("en-IN") : "0"}`,
-        mrr: `\u20B9${Math.round(totalBilled / 6).toLocaleString("en-IN")}`
+        mrr: `\u20B9${Math.round(totalBilled / 6).toLocaleString("en-IN")}`,
+        leadsTrend: totalLeads > 0 ? "+0%" : "No prior period",
+        qualifiedTrend: qualifiedLeads > 0 ? "+0%" : "No prior period",
+        outreachTrend: activeOutreaches > 0 ? "+0%" : "No prior period",
+        convertedTrend: convertedClients > 0 ? "+0%" : "No prior period"
       },
       leadsByStatus: statusMap,
-      growthHistory: [
-        { month: "Jan", leads: Math.max(0, Math.round(totalLeads * 0.4)), contacted: Math.max(0, Math.round(contactedLeads * 0.3)) },
-        { month: "Feb", leads: Math.max(0, Math.round(totalLeads * 0.7)), contacted: Math.max(0, Math.round(contactedLeads * 0.6)) },
-        { month: "Mar", leads: totalLeads, contacted: contactedLeads }
-      ],
-      sources: [
-        { name: "Google Maps Platform", count: Math.round(totalLeads * 0.6), percentage: 60, color: "#3568E8" },
-        { name: "n8n Automation Ingest", count: Math.round(totalLeads * 0.25), percentage: 25, color: "#38BDF8" },
-        { name: "Manual Discovery", count: Math.round(totalLeads * 0.15), percentage: 15, color: "#10B981" }
-      ],
-      agents: [
-        { name: "Discovery Agent", role: "Local business research", status: "Active", processedToday: 42, dailyTarget: 50 },
-        { name: "Audit Agent", role: "Website scoring & CWV", status: "Active", processedToday: 28, dailyTarget: 30 },
-        { name: "Copywriter Agent", role: "Proposal generation", status: "Active", processedToday: 18, dailyTarget: 25 },
-        { name: "Triage Agent", role: "Inbox reply classification", status: "Active", processedToday: 6, dailyTarget: 20 }
-      ]
+      growthHistory,
+      sources,
+      revenueOverview,
+      agents
     };
   }
-  static async getActivities(_orgId) {
-    return [
-      { id: "act-1", title: "Lead discovery synchronized", detail: "Places API (New) verified business listings", timestamp: "10 mins ago", type: "discovery" },
-      { id: "act-2", title: "Autonomous website audit", detail: "Core Web Vitals & schema inspection completed", timestamp: "42 mins ago", type: "audit" },
-      { id: "act-3", title: "Outreach message queued", detail: "Dry-run campaign message drafted and validated", timestamp: "2 hours ago", type: "outreach" },
-      { id: "act-4", title: "Zoho Catalyst Datastore sync", detail: "ZCQL query execution confirmed healthy", timestamp: "4 hours ago", type: "database" }
-    ];
+  static async getActivities(orgId) {
+    try {
+      const logs = await catalystClient.find("AuditLogs", { organizationId: orgId });
+      if (logs && logs.length > 0) {
+        return logs.slice(0, 10).map((log) => ({
+          id: log.logId || log.ROWID || String(Math.random()),
+          title: log.action || "System Event",
+          detail: log.details || log.description || "Activity recorded",
+          time: log.createdAt || "Recently",
+          type: log.category || "activity"
+        }));
+      }
+    } catch {
+    }
+    return [];
   }
 };
 
