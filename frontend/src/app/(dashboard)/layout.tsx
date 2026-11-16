@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppHeader } from "@/components/layout/app-header";
@@ -44,7 +44,9 @@ export default function DashboardLayout({
 
       {/* Main content shell */}
       <div className="flex-1 flex flex-col min-w-0">
-        <AppHeader onToggleMobileNav={() => setMobileNavOpen(!mobileNavOpen)} />
+        <Suspense fallback={<div className="h-16 border-b border-[#F0F2F5] dark:border-[#1E2623] bg-white dark:bg-[#121816]" />}>
+          <AppHeader onToggleMobileNav={() => setMobileNavOpen(!mobileNavOpen)} />
+        </Suspense>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-7 max-w-[1720px] w-full mx-auto">
           {children}

@@ -20,7 +20,32 @@ export async function GET() {
     if (backendRes.ok) {
       const data = await backendRes.json();
       if (data && data.metrics) {
-        return NextResponse.json(data, {
+        const totalLeads = data.metrics.totalLeads ?? 0;
+        const qualifiedLeads = data.metrics.qualifiedLeads ?? data.metrics.contacted ?? 0;
+        const activeOutreaches = data.metrics.activeOutreaches ?? data.metrics.meetingsBooked ?? 0;
+        const convertedClients = data.metrics.convertedClients ?? data.metrics.activeProjects ?? 0;
+
+        return NextResponse.json({
+          metrics: {
+            totalLeads,
+            qualifiedLeads,
+            activeOutreaches,
+            convertedClients,
+            leadsTrend: totalLeads > 0 ? (data.metrics.leadsTrend || "+0%") : "No prior period",
+            qualifiedTrend: qualifiedLeads > 0 ? (data.metrics.qualifiedTrend || "+0%") : "No prior period",
+            outreachTrend: activeOutreaches > 0 ? (data.metrics.outreachTrend || "+0%") : "No prior period",
+            convertedTrend: convertedClients > 0 ? (data.metrics.convertedTrend || "+0%") : "No prior period",
+          },
+          growthHistory: Array.isArray(data.growthHistory) ? data.growthHistory : [],
+          sources: totalLeads > 0 && Array.isArray(data.sources) ? data.sources : [],
+          revenueOverview: data.revenueOverview || {
+            totalFormatted: data.metrics.pipelineValue || "₹0",
+            totalRaw: 0,
+            trend: "No prior period",
+            monthly: [],
+          },
+          agents: Array.isArray(data.agents) ? data.agents : [],
+        }, {
           headers: {
             "Cache-Control": "public, s-maxage=10, stale-while-revalidate=59",
           },
@@ -42,6 +67,14 @@ export async function GET() {
       orgId = defaultOrg?._id.toString();
     }
 
+    const defaultAgents = [
+      { name: "Research Agent", role: "Scanning locations", status: "Idle", processedToday: 0, dailyTarget: 50 },
+      { name: "Outreach Agent", role: "Sending emails", status: "Idle", processedToday: 0, dailyTarget: 50 },
+      { name: "Reply Manager", role: "Handling responses", status: "Idle", processedToday: 0, dailyTarget: 25 },
+      { name: "Sales Agent", role: "Booking meetings", status: "Idle", processedToday: 0, dailyTarget: 20 },
+      { name: "Content Agent", role: "Creating content", status: "Idle", processedToday: 0, dailyTarget: 15 },
+    ];
+
     if (!orgId) {
       return NextResponse.json({
         metrics: {
@@ -49,15 +82,15 @@ export async function GET() {
           qualifiedLeads: 0,
           activeOutreaches: 0,
           convertedClients: 0,
-          leadsTrend: "0%",
-          qualifiedTrend: "0%",
-          outreachTrend: "0%",
-          convertedTrend: "0%",
+          leadsTrend: "No prior period",
+          qualifiedTrend: "No prior period",
+          outreachTrend: "No prior period",
+          convertedTrend: "No prior period",
         },
         growthHistory: [],
         sources: [],
-        revenueOverview: { totalFormatted: "₹0", totalRaw: 0, trend: "0%", monthly: [] },
-        agents: [],
+        revenueOverview: { totalFormatted: "₹0", totalRaw: 0, trend: "No prior period", monthly: [] },
+        agents: defaultAgents,
       });
     }
 
@@ -70,8 +103,8 @@ export async function GET() {
       agents,
     ] = await Promise.all([
       Lead.countDocuments({ organizationId: orgId }),
-      Lead.countDocuments({ organizationId: orgId, opportunityScore: { $gte: 75 } }),
-      Lead.countDocuments({ organizationId: orgId, status: { $in: ["Contacted", "Interested", "Replied"] } }),
+      Lead.countDocuments({ organizationId: orgId, status: { $in: ["Contacted", "Qualified"] } }),
+      Lead.countDocuments({ organizationId: orgId, status: { $in: ["Interested", "Replied"] } }),
       Lead.countDocuments({ organizationId: orgId, status: "Converted" }),
       Lead.aggregate([
         { $match: { organizationId: orgId } },
@@ -88,24 +121,28 @@ export async function GET() {
       "Manual Search": "#828a84",
     };
 
-    const sources = sourceAggregation.map((s) => ({
-      name: s._id || "Other",
-      count: s.count,
-      percentage: totalLeads > 0 ? Math.round((s.count / totalLeads) * 100) : 0,
-      color: sourceColors[s._id] || "#10251f",
-    }));
+    const sources = totalLeads > 0
+      ? sourceAggregation.map((s) => ({
+          name: s._id || "Other",
+          count: s.count,
+          percentage: Math.round((s.count / totalLeads) * 100),
+          color: sourceColors[s._id] || "#10251f",
+        }))
+      : [];
 
-    const growthHistory = totalLeads > 0 ? [
-      { month: "Jan", leads: Math.round(totalLeads * 0.2), qualified: Math.round(qualifiedLeads * 0.2) },
-      { month: "Feb", leads: Math.round(totalLeads * 0.5), qualified: Math.round(qualifiedLeads * 0.5) },
-      { month: "Mar", leads: totalLeads, qualified: qualifiedLeads },
-    ] : [];
+    const growthHistory = totalLeads > 0
+      ? [
+          { month: "Jan", leadsFound: 0, contacted: 0, replies: 0, clients: 0 },
+          { month: "Feb", leadsFound: 0, contacted: 0, replies: 0, clients: 0 },
+          { month: "Mar", leadsFound: totalLeads, contacted: qualifiedLeads, replies: activeOutreaches, clients: convertedClients },
+        ]
+      : [];
 
     const revenueOverview = {
       totalFormatted: convertedClients > 0 ? `₹${(convertedClients * 35000).toLocaleString("en-IN")}` : "₹0",
       totalRaw: convertedClients * 35000,
-      trend: convertedClients > 0 ? "+15%" : "0%",
-      monthly: [],
+      trend: convertedClients > 0 ? "+0%" : "No prior period",
+      monthly: convertedClients > 0 ? [{ month: "Current", amount: convertedClients * 35000 }] : [],
     };
 
     return NextResponse.json({
@@ -114,32 +151,48 @@ export async function GET() {
         qualifiedLeads,
         activeOutreaches,
         convertedClients,
-        leadsTrend: totalLeads > 0 ? "+18%" : "0%",
-        qualifiedTrend: qualifiedLeads > 0 ? "+12%" : "0%",
-        outreachTrend: activeOutreaches > 0 ? "+24%" : "0%",
-        convertedTrend: convertedClients > 0 ? "+8%" : "0%",
+        leadsTrend: totalLeads > 0 ? "+0%" : "No prior period",
+        qualifiedTrend: qualifiedLeads > 0 ? "+0%" : "No prior period",
+        outreachTrend: activeOutreaches > 0 ? "+0%" : "No prior period",
+        convertedTrend: convertedClients > 0 ? "+0%" : "No prior period",
       },
       growthHistory,
       sources,
       revenueOverview,
-      agents,
+      agents: agents.length > 0
+        ? agents.map((a) => ({
+            name: a.name,
+            role: a.role || "Specialist Agent",
+            status: a.status || "Idle",
+            processedToday: a.processedToday || 0,
+            dailyTarget: a.dailyTarget || 20,
+          }))
+        : defaultAgents,
     });
   } catch {
+    const defaultAgents = [
+      { name: "Research Agent", role: "Scanning locations", status: "Idle", processedToday: 0, dailyTarget: 50 },
+      { name: "Outreach Agent", role: "Sending emails", status: "Idle", processedToday: 0, dailyTarget: 50 },
+      { name: "Reply Manager", role: "Handling responses", status: "Idle", processedToday: 0, dailyTarget: 25 },
+      { name: "Sales Agent", role: "Booking meetings", status: "Idle", processedToday: 0, dailyTarget: 20 },
+      { name: "Content Agent", role: "Creating content", status: "Idle", processedToday: 0, dailyTarget: 15 },
+    ];
+
     return NextResponse.json({
       metrics: {
         totalLeads: 0,
         qualifiedLeads: 0,
         activeOutreaches: 0,
         convertedClients: 0,
-        leadsTrend: "0%",
-        qualifiedTrend: "0%",
-        outreachTrend: "0%",
-        convertedTrend: "0%",
+        leadsTrend: "No prior period",
+        qualifiedTrend: "No prior period",
+        outreachTrend: "No prior period",
+        convertedTrend: "No prior period",
       },
       growthHistory: [],
       sources: [],
-      revenueOverview: { totalFormatted: "₹0", totalRaw: 0, trend: "0%", monthly: [] },
-      agents: [],
+      revenueOverview: { totalFormatted: "₹0", totalRaw: 0, trend: "No prior period", monthly: [] },
+      agents: defaultAgents,
     });
   }
 }

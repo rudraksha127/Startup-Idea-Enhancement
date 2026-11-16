@@ -40,17 +40,8 @@ export async function GET() {
       orgId = defaultOrg?._id.toString();
     }
 
-    const defaultActivities = [
-      { id: "act-1", type: "search", title: "New lead found", detail: "Glow Beauty Salon — New Delhi", time: "2m ago", icon: "search" },
-      { id: "act-2", type: "mail", title: "Email sent", detail: "To: hello@fitzonegym.in", time: "5m ago", icon: "mail" },
-      { id: "act-3", type: "reply", title: "Client replied", detail: "The Urban Kitchen", time: "12m ago", icon: "reply" },
-      { id: "act-4", type: "project", title: "New project created", detail: "Hotel Grand Plaza — Website", time: "18m ago", icon: "folder" },
-      { id: "act-5", type: "ai", title: "AI agent completed research", detail: "City Care Clinic", time: "25m ago", icon: "settings" },
-      { id: "act-6", type: "meeting", title: "Meeting scheduled", detail: "Style Fashion Store", time: "32m ago", icon: "calendar" },
-    ];
-
     if (!orgId) {
-      return NextResponse.json({ activities: defaultActivities });
+      return NextResponse.json({ activities: [] });
     }
 
     const notes = await LeadNote.find({ organizationId: orgId })
@@ -70,19 +61,11 @@ export async function GET() {
             time: "Recently",
             icon: n.type === "call" ? "calendar" : n.type === "audit" ? "file" : "message",
           }))
-        : defaultActivities,
+        : [],
     });
   } catch (error) {
-    console.warn("Dashboard activity fallback to default activities:", error);
-    const defaultActivities = [
-      { id: "act-1", type: "search", title: "New lead found", detail: "Glow Beauty Salon — New Delhi", time: "2m ago", icon: "search" },
-      { id: "act-2", type: "mail", title: "Email sent", detail: "To: hello@fitzonegym.in", time: "5m ago", icon: "mail" },
-      { id: "act-3", type: "reply", title: "Client replied", detail: "The Urban Kitchen", time: "12m ago", icon: "reply" },
-      { id: "act-4", type: "project", title: "New project created", detail: "Hotel Grand Plaza — Website", time: "18m ago", icon: "folder" },
-      { id: "act-5", type: "ai", title: "AI agent completed research", detail: "City Care Clinic", time: "25m ago", icon: "settings" },
-      { id: "act-6", type: "meeting", title: "Meeting scheduled", detail: "Style Fashion Store", time: "32m ago", icon: "calendar" },
-    ];
-    return NextResponse.json({ activities: defaultActivities });
+    console.warn("Dashboard activity fallback to clean baseline:", error);
+    return NextResponse.json({ activities: [] });
   }
 }
 
