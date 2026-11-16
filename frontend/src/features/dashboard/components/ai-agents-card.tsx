@@ -41,15 +41,18 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
         {DEFAULT_AGENTS.map((agent) => {
           const Icon = agent.icon;
           return (
-            <div
+            <Link
               key={agent.name}
-              className="p-3 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex flex-col justify-between space-y-2 hover:border-gray-200 dark:hover:border-[#2B3532] transition-colors"
+              href={`/ai-agents?agent=${encodeURIComponent(agent.name)}`}
+              className="p-3 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex flex-col justify-between space-y-2 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-xs transition-all cursor-pointer group"
             >
               <div className="flex items-center gap-2">
-                <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs shrink-0 ${agent.color}`}>
+                <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs shrink-0 ${agent.color} group-hover:scale-105 transition-transform`}>
                   <Icon size={13} />
                 </span>
-                <span className="font-bold text-[11px] text-[#171918] dark:text-white truncate">{agent.name}</span>
+                <span className="font-bold text-[11px] text-[#171918] dark:text-white truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                  {agent.name}
+                </span>
               </div>
               <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{agent.role}</p>
               <div>
@@ -57,7 +60,7 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
                 </span>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

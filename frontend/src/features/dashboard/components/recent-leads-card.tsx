@@ -91,15 +91,19 @@ export function RecentLeadsCard() {
       ) : (
         <div className="divide-y divide-[#F2F2EE] dark:divide-[#1C2723]">
           {leads.map((lead) => (
-            <div key={lead.id} className="py-2.5 flex items-center justify-between">
+            <Link
+              key={lead.id}
+              href={`/leads?selected=${lead.id}`}
+              className="py-2.5 px-2 -mx-2 rounded-lg flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors group cursor-pointer"
+            >
               <div>
-                <p className="text-xs font-bold text-[#171918] dark:text-white">{lead.name}</p>
+                <p className="text-xs font-bold text-[#171918] dark:text-white group-hover:text-emerald-600 transition-colors">{lead.name}</p>
                 <p className="text-[11px] text-gray-400">{lead.category} • {lead.location}</p>
               </div>
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${getBadgeStyle(lead.status)}`}>
                 {lead.status}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}

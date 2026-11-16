@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Users, PhoneCall, MessageCircle, Briefcase, TrendingUp } from "lucide-react";
 
 interface MetricCardsProps {
@@ -23,6 +24,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       color: "text-blue-600 dark:text-blue-400",
       bg: "bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50",
       sparkColor: "#3568E8",
+      href: "/leads",
     },
     {
       title: metrics?.qualifiedLeads !== undefined ? "Qualified Leads" : "Leads Contacted",
@@ -32,6 +34,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       color: "text-sky-600 dark:text-sky-400",
       bg: "bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50",
       sparkColor: "#38BDF8",
+      href: "/outreach",
     },
     {
       title: metrics?.activeOutreaches !== undefined ? "Active Outreaches" : "Positive Responses",
@@ -41,6 +44,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       color: "text-emerald-600 dark:text-emerald-400",
       bg: "bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50",
       sparkColor: "#10B981",
+      href: "/outreach",
     },
     {
       title: metrics?.convertedClients !== undefined ? "Converted Clients" : "Active Clients",
@@ -50,6 +54,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       color: "text-indigo-600 dark:text-indigo-400",
       bg: "bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50",
       sparkColor: "#6366F1",
+      href: "/clients",
     },
   ];
 
@@ -58,12 +63,13 @@ export function MetricCards({ metrics }: MetricCardsProps) {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <div
+          <Link
             key={card.title}
-            className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between"
+            href={card.href}
+            className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs hover:shadow-md hover:border-gray-300 dark:hover:border-[#35433E] hover:-translate-y-0.5 transition-all flex items-center justify-between cursor-pointer group"
           >
             <div className="flex items-center gap-3.5">
-              <span className={`w-11 h-11 rounded-xl ${card.bg} ${card.color} flex items-center justify-center shrink-0`}>
+              <span className={`w-11 h-11 rounded-xl ${card.bg} ${card.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
                 <Icon size={18} />
               </span>
               <div>
@@ -76,7 +82,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
                     ↑ {card.trend}
                   </span>
                 </div>
-                <div className="text-xs text-[#68717D] dark:text-[#9AA29E] font-medium mt-0.5">
+                <div className="text-xs text-[#68717D] dark:text-[#9AA29E] font-medium mt-0.5 group-hover:text-[#171918] dark:group-hover:text-white transition-colors">
                   <span>{card.title}</span>
                 </div>
               </div>
@@ -94,7 +100,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
                 />
               </svg>
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>

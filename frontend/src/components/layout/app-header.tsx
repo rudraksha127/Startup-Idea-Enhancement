@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Menu,
   Search,
   Calendar,
   Bell,
-  Plus,
   ChevronDown,
-  CheckCircle2,
-  Sparkles,
-  FolderPlus,
+  Settings,
+  CreditCard,
+  Users,
+  LogOut,
+  User,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -27,11 +29,40 @@ export function AppHeader({ onToggleMobileNav, onOpenAddLead }: AppHeaderProps) 
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(3);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Global Keyboard Shortcut: Cmd/Ctrl + K to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        setDateMenuOpen(false);
+        setNotifyOpen(false);
+        setProfileMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/leads?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+    } catch {
+      router.push("/login");
     }
   };
 
@@ -52,6 +83,7 @@ export function AppHeader({ onToggleMobileNav, onOpenAddLead }: AppHeaderProps) 
             <Search size={15} />
           </span>
           <input
+            ref={searchRef}
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -148,9 +180,64 @@ export function AppHeader({ onToggleMobileNav, onOpenAddLead }: AppHeaderProps) 
           )}
         </div>
 
-        {/* User avatar circle */}
-        <div className="w-9 h-9 rounded-full bg-[#191B1A] dark:bg-white text-white dark:text-[#151B1A] flex items-center justify-center font-bold text-xs tracking-wider shadow-xs cursor-pointer hover:opacity-90">
-          RU
+        {/* User avatar dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+            aria-label="User profile menu"
+            className="w-9 h-9 rounded-full bg-[#191B1A] dark:bg-white text-white dark:text-[#151B1A] flex items-center justify-center font-bold text-xs tracking-wider shadow-xs cursor-pointer hover:opacity-90 transition-opacity"
+          >
+            RU
+          </button>
+
+          {profileMenuOpen && (
+            <div className="absolute right-0 mt-2 w-52 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E2E8F0] dark:border-[#2B3532] shadow-xl py-1 text-xs z-30 divide-y divide-gray-100 dark:divide-[#232B29]">
+              <div className="px-3 py-2.5">
+                <p className="font-bold text-[#171918] dark:text-white">Rudraksh</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">Founder • AgencyOS</p>
+              </div>
+
+              <div className="py-1">
+                <Link
+                  href="/settings"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors"
+                >
+                  <Settings size={13} className="text-gray-400" />
+                  <span>Account Settings</span>
+                </Link>
+                <Link
+                  href="/billing"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors"
+                >
+                  <CreditCard size={13} className="text-gray-400" />
+                  <span>Billing & Plans</span>
+                </Link>
+                <Link
+                  href="/team"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors"
+                >
+                  <Users size={13} className="text-gray-400" />
+                  <span>Team Members</span>
+                </Link>
+              </div>
+
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-left transition-colors"
+                >
+                  <LogOut size={13} />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -42,6 +42,24 @@ export function RecentActivity({ activities }: { activities?: ActivityItem[] }) 
     }
   };
 
+  const getItemHref = (type: string) => {
+    switch (type) {
+      case "search":
+        return "/leads";
+      case "mail":
+      case "reply":
+        return "/outreach";
+      case "project":
+        return "/projects";
+      case "ai":
+        return "/ai-agents";
+      case "meeting":
+        return "/clients";
+      default:
+        return "/dashboard";
+    }
+  };
+
   return (
     <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
       <div className="flex items-center justify-between mb-4">
@@ -58,20 +76,24 @@ export function RecentActivity({ activities }: { activities?: ActivityItem[] }) 
         </Link>
       </div>
 
-      <div className="space-y-3.5">
+      <div className="space-y-2">
         {items.map((item) => (
-          <div key={item.id} className="flex items-start gap-3 text-xs">
-            <span className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-center shrink-0 mt-0.5">
+          <Link
+            key={item.id}
+            href={getItemHref(item.type)}
+            className="flex items-start gap-3 text-xs p-1.5 -mx-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors group cursor-pointer"
+          >
+            <span className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
               {getIcon(item.type)}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-1">
-                <span className="font-semibold text-[#171918] dark:text-white truncate">{item.title}</span>
+                <span className="font-semibold text-[#171918] dark:text-white truncate group-hover:text-emerald-600 transition-colors">{item.title}</span>
                 <span className="text-[10px] text-gray-400 dark:text-gray-500 shrink-0">{item.time}</span>
               </div>
               <p className="text-[11px] text-[#68717D] dark:text-[#9AA29E] truncate mt-0.5">{item.detail}</p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

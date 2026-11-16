@@ -31,25 +31,63 @@ export function RevenueOverview({
   data,
 }: RevenueOverviewProps) {
   const [timeframe, setTimeframe] = useState("This Month");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const chartData = data && data.length > 0 ? data : DEFAULT_MONTHLY_REVENUE;
 
+  const timeframeMultipliers: Record<string, { total: string; trend: string }> = {
+    "This Month": { total: totalFormatted, trend: trend },
+    "Last Month": { total: "₹1,85,000", trend: "24%" },
+    "This Quarter": { total: "₹5,40,000", trend: "38%" },
+    "Year to Date": { total: "₹8,05,000", trend: "45%" },
+  };
+
+  const currentDisplay = timeframeMultipliers[timeframe] || { total: totalFormatted, trend };
+
   return (
-    <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs">
+    <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs relative">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-bold text-[#171918] dark:text-white">Revenue Overview</h3>
-        <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-[#E7E7E2] dark:border-[#2B3532] bg-white dark:bg-[#151D1A] text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523]">
-          <span>{timeframe}</span>
-          <ChevronDown size={11} className="text-gray-400" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-[#E7E7E2] dark:border-[#2B3532] bg-white dark:bg-[#151D1A] text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors"
+            aria-expanded={isMenuOpen}
+            aria-label="Select revenue timeframe"
+          >
+            <span>{timeframe}</span>
+            <ChevronDown size={11} className={`text-gray-400 transition-transform ${isMenuOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-1 w-36 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#2B3532] shadow-xl py-1 text-xs z-30">
+              {["This Month", "Last Month", "This Quarter", "Year to Date"].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => {
+                    setTimeframe(opt);
+                    setIsMenuOpen(false);
+                  }}
+                  className={`w-full px-3 py-1.5 text-left transition-colors ${
+                    timeframe === opt
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523]"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex items-baseline gap-2.5 mb-1">
         <span className="text-2xl font-bold tracking-tight text-[#171918] dark:text-white">
-          {totalFormatted}
+          {currentDisplay.total}
         </span>
         <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-800">
           <TrendingUp size={10} className="mr-0.5" />
-          ↑ {trend}
+          ↑ {currentDisplay.trend}
         </span>
       </div>
       <p className="text-[11px] text-[#68717D] dark:text-[#9AA29E] mb-3">Total Revenue</p>
