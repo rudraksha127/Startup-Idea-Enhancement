@@ -77,15 +77,19 @@ export function ClientsPipelineCard() {
       ) : (
         <div className="divide-y divide-[#F2F2EE] dark:divide-[#1C2723]">
           {clients.slice(0, 4).map((c) => (
-            <div key={c.id} className="py-2.5 flex items-center justify-between">
+            <Link
+              key={c.id}
+              href="/clients"
+              className="py-2.5 px-2 -mx-2 rounded-lg flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#1D2523] transition-colors group cursor-pointer"
+            >
               <div>
-                <p className="text-xs font-bold text-[#171918] dark:text-white">{c.name}</p>
+                <p className="text-xs font-bold text-[#171918] dark:text-white group-hover:text-emerald-600 transition-colors">{c.name}</p>
                 <p className="text-[11px] text-gray-400">{c.service}</p>
               </div>
               <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
                 {c.amount}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}
