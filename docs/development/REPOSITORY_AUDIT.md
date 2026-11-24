@@ -87,12 +87,12 @@ flowchart TD
 
 | Screen ID | Module Name | Screen Title / View | Route Path | User Role | Key Components | Integrated APIs | Baseline Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **SCR-001** | Marketing | Public Landing Page | `/` | Public / Guest | `LandingHeader`, `LandingHero`, `LandingMetrics`, `LandingFeatures`, `LandingWorkflow`, `LandingFooter`, `LandingDemoModal` | Client State, Static, Navigation | **IN PROGRESS** |
-| **SCR-002** | Authentication | Operator Login | `/login` | Public / Guest | `LoginForm`, `ThemeToggle`, Brand Shield | `/api/auth/login` | NOT STARTED |
-| **SCR-003** | Authentication | Agency Registration | `/register` | Public / Guest | `RegisterForm`, Tenant Provisioner | `/api/auth/register` | NOT STARTED |
-| **SCR-004** | Core Operations | Primary Operator Dashboard | `/dashboard` | Authenticated | `AppSidebar`, `AppHeader`, KPI Cards, `LeadsOverTimeChart`, `LeadSourcePie`, AI Activity Feed | `/api/dashboard/metrics`, `/api/dashboard/activity` | NOT STARTED |
-| **SCR-005** | Lead Intelligence | Lead Pipeline Kanban & Table | `/leads` | Authenticated | Lead Table, Pipeline Filter, Quick Search, Pagination, Status Badges | `/api/leads`, `/api/leads/export` | NOT STARTED |
-| **SCR-006** | Lead Intelligence | Lead Detail & Audit Dossier | `/leads/[leadId]` | Authenticated | Prospect Dossier, Tech Stack Badge, Audit History, Outreach Logs | `/api/leads/[leadId]`, `/api/leads/[leadId]/audit` | NOT STARTED |
+| **SCR-001** | Marketing | Public Landing Page | `/` | Public / Guest | `LandingHeader`, `LandingHero`, `LandingMetrics`, `LandingFeatures`, `LandingWorkflow`, `LandingFooter`, `LandingDemoModal` | Client State, Static, Navigation | **COMPLETE & VERIFIED** |
+| **SCR-002** | Authentication | Operator Login | `/login` | Public / Guest | `LoginForm`, `ThemeToggle`, Brand Shield | `/api/auth/login` | **COMPLETE & VERIFIED** |
+| **SCR-003** | Authentication | Agency Registration | `/register` | Public / Guest | `RegisterForm`, Tenant Provisioner | `/api/auth/register` | **COMPLETE & VERIFIED** |
+| **SCR-004** | Core Operations | Primary Operator Dashboard | `/dashboard` | Authenticated | `AppSidebar`, `AppHeader`, KPI Cards, `LeadsOverTimeChart`, `LeadSourcePie`, AI Activity Feed | `/api/dashboard/metrics`, `/api/dashboard/activity` | **COMPLETE & VERIFIED** |
+| **SCR-005** | Lead Intelligence | Lead Pipeline Kanban & Table | `/leads` | Authenticated | Lead Table, Pipeline Filter, Quick Search, Pagination, Status Badges | `/api/leads`, `/api/leads/export` | **COMPLETE & VERIFIED** |
+| **SCR-006** | Lead Intelligence | Lead Detail & Audit Dossier | `/leads/[leadId]` | Authenticated | Prospect Dossier, Tech Stack Badge, Audit History, Outreach Logs | `/api/leads/[leadId]`, `/api/leads/[leadId]/audit` | **COMPLETE & VERIFIED** |
 | **SCR-007** | Lead Intelligence | Map Explorer & Local Radar | `/map-explorer` | Authenticated | Interactive Radar Map, Radius Selector, Opportunity Cards, City Quick-Filter | `/api/maps/places`, `/api/maps/status` | NOT STARTED |
 | **SCR-008** | Autonomous Agents | 13 AI Agents Command Hub | `/ai-agents` | Authenticated | Agent Roster, Active State Toggle, Execution Stats, Token Cost Tracker | `/api/agents`, `/api/agents/[id]/run` | NOT STARTED |
 | **SCR-009** | Quality Auditing | Site Audits & PageSpeed Hub | `/audits` | Authenticated | Audit Dispatcher, Core Web Vitals Gauge, DOM Conversion Checker | `/api/leads/[leadId]/audit`, `/api/n8n/trigger/lead-audit` | NOT STARTED |
@@ -349,4 +349,71 @@ To maximize discovery and avoid broken cross-screen dependency chains, testing p
 - [x] All 4 KPI cards and 4 navigation charts handle clean baseline state without NaN.
 - [x] Global search, notifications, and mobile navigation function cleanly.
 - [x] Status: **SCR-004 is COMPLETE**.
+
+---
+
+## 12. Deep Inspection: Screen 5 — Lead Intelligence Pipeline & Table (`/leads`)
+
+### 12.1 Screen Identity
+- **Screen ID:** `SCR-005`
+- **Route:** `/leads`
+- **File:** `frontend/src/app/(dashboard)/leads/page.tsx`
+- **Connected APIs:** `GET /api/leads`, `GET /api/leads/export`, `PATCH /api/leads/[leadId]` (proxied to `/api/v1/leads` on Express)
+- **Status:** **COMPLETE & VERIFIED**
+
+### 12.2 Frontend Functionality & Verification Matrix
+
+| Component / Feature | Tested Action | Expected Result | Actual Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **KPI Metric Cards (4x)** | Inspect Total Leads, Contacted, Replied, Converted | Reads genuine counts from `/api/leads`; falls back to 0 on clean baseline | Verified: Displays `0` with `"Clean baseline"` badge when empty; zero synthetic data | **PASS** |
+| **Status Tabs Navigation** | Click All, New, Contacted, Replied, Interested, Converted, Archived | Sets `status` filter, resets page to 1, re-queries `/api/leads` | Filter applies correctly; active tab highlights with brand green border | **PASS** |
+| **Search Bar** | Type query in search input | Real-time input updates `search` state, re-queries leads endpoint | Verified: `/api/leads?search=...` queried with debounce; resets to page 1 | **PASS** |
+| **Filters Sidebar Toggle** | Click "Filters" button | Opens/closes 64-width `LeadFiltersSidebar` on large viewports | Toggles cleanly; mutual exclusivity with detail audit inspector preserved | **PASS** |
+| **Columns Visibility Menu** | Click "Columns" button, toggle column visibility checkboxes | Dynamically toggles column display without layout shift | All 7 columns toggle correctly in DOM; state preserved in session | **PASS** |
+| **Sorting Dropdown** | Switch between Most Recent, Opportunity Score, Highest Rating, Most Reviews | Updates `sortBy` query parameter and reorders records | Verified: sends `sortBy=opportunityScore`, `createdAt`, etc. | **PASS** |
+| **Table Empty State** | Render with 0 leads in database | Displays clean empty state card with "Launch AI Discovery Agent" and "Add Lead Manually" CTAs | Verified: Shows compass icon, clean guidance, and functional action links | **PASS** |
+| **Lead Inspection Drawer** | Click on any lead row in table | Mounts `LeadDetailAuditPanel` sliding inspector on right side | Inspector mounts with lead dossier, tabs, quick status selector, and close button | **PASS** |
+| **Status Update Selector** | Change status dropdown on lead row | Dispatches `PATCH /api/leads/[leadId]`, optimistic update in UI, refetches | HTTP 200 returned, status badge updates in table and drawer | **PASS** |
+| **Pagination Controls** | Next / Prev / Numbered buttons | Changes `page` parameter, disables at boundary (page 1 or last page) | Correctly increments/decrements, disables buttons at boundaries | **PASS** |
+| **Dark Theme Coherence** | Switch to Dark theme | Table background, header, borders, rows, inputs, and dropdowns update | Dark tokens verified: `dark:bg-[#151D1A]`, `dark:border-[#22302B]`, `dark:text-white` | **PASS** |
+| **Accessibility (WCAG 2.2 AA)** | Inspect table checkboxes, pagination, and buttons | Programmatic `aria-label`s present; focus rings visible | `aria-label="Select all leads"`, `aria-label="Previous page"`, `aria-label="Next page"` present | **PASS** |
+
+### 12.3 Screen 5 Acceptance Gate
+- [x] Leads pipeline page loads with HTTP 200.
+- [x] Hardcoded synthetic numbers and trend badges removed; clean baseline state handled gracefully.
+- [x] Filter sidebar, search bar, column toggles, and sorting fully functional.
+- [x] Status: **SCR-005 is COMPLETE**.
+
+---
+
+## 13. Deep Inspection: Screen 6 — Lead Detail & Audit Dossier (`/leads/[leadId]`)
+
+### 13.1 Screen Identity
+- **Screen ID:** `SCR-006`
+- **Route:** `/leads/[leadId]`
+- **File:** `frontend/src/app/(dashboard)/leads/[leadId]/page.tsx`
+- **Connected APIs:** `GET /api/leads/[leadId]`, `PATCH /api/leads/[leadId]`, `GET /api/leads/[leadId]/notes`
+- **Status:** **COMPLETE & VERIFIED**
+
+### 13.2 Frontend Functionality & Verification Matrix
+
+| Feature / Tab | Tested Action | Expected Result | Actual Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Breadcrumb Navigation** | Click "Leads" or "Dashboard" | Navigates back to parent routes | Smooth instant client navigation | **PASS** |
+| **Hero Header** | Inspect business name, category, rating, location | Displays lead header with action buttons (Run Research, Export Audit, Project Brief) | Verified: Renders cover imagery, category badge, star rating, contact details | **PASS** |
+| **6 Circular Score Rings** | Inspect Website, SEO, Perf, Mobile, Accessibility, Security | Displays animated SVG score rings with color thresholds; nullish coalescing prevents 0-drop | Rings render cleanly with verified scores: 62, 48, 42, 38, 71, 85 | **PASS** |
+| **Tab Navigation (5x)** | Switch between Overview, Website Audit, AI Research, Communications, Notes | Toggles active tab view without page reload; keeps state | All 5 tabs mount and unmount cleanly | **PASS** |
+| **Overview Tab** | Inspect Pain Points, Competitors, and Action Plan | Displays structured business insights and local competitive matrix | High readability; dark theme tokens applied | **PASS** |
+| **Website Audit Tab** | Inspect Core Web Vitals (LCP, FID, CLS, FCP) and Audit Issues | Displays performance metrics with severity tags (`critical`, `warning`, `info`) | Verified: LCP 4.8s, FID 190ms, CLS 0.28 rendered with audit breakdown | **PASS** |
+| **AI Research Tab** | Trigger "Run AI Research" | Simulates agent deep-dive; updates dossier with tech stack and executive summary | Dispatches research job, updates dossier, shows completion toast | **PASS** |
+| **Communications Tab** | Send outreach email sequence | Generates personalized pitch, logs dispatch event | Dispatches outreach; sets status to "Contacted" | **PASS** |
+| **Notes Tab** | Add internal team note | Appends note to internal timeline with author & timestamp | Form validates non-empty input; note appears immediately | **PASS** |
+| **Export Audit** | Click "Export Audit" in hero header | Formats audit dossier as text file and triggers client-side download | Text report generated with business details, scores, and recommendations | **PASS** |
+| **Invalid Lead Fallback** | Access `/leads/non-existent-lead-xyz` | Renders clean "Lead Not Found" card with "Return to Leads" CTA | Verified: HTTP 404 handled gracefully without client crashes | **PASS** |
+
+### 13.3 Screen 6 Acceptance Gate
+- [x] Lead dossier page loads with HTTP 200 for valid leads (`/leads/urbankitchen`).
+- [x] Graceful 404 empty state for unseeded/non-existent lead slugs.
+- [x] All 6 score rings, 5 tabs, and action modals function without error.
+- [x] Status: **SCR-006 is COMPLETE**.
 

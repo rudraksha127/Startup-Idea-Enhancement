@@ -57,13 +57,13 @@ export function LeadFiltersSidebar({
   ];
 
   return (
-    <div className="w-64 bg-white rounded-xl border border-[#E7E7E2] p-4 space-y-5 text-xs shadow-xs shrink-0 hidden lg:block">
+    <div className="w-64 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 space-y-5 text-xs shadow-xs shrink-0 hidden lg:block">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-        <span className="font-bold text-sm text-[#171918]">Filters</span>
+      <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B]">
+        <span className="font-bold text-sm text-[#171918] dark:text-white">Filters</span>
         <button
           onClick={onReset}
-          className="text-[11px] font-semibold text-emerald-700 hover:underline"
+          className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
         >
           Reset All
         </button>
@@ -71,7 +71,7 @@ export function LeadFiltersSidebar({
 
       {/* Location */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between font-semibold text-[#171918]">
+        <div className="flex items-center justify-between font-semibold text-[#171918] dark:text-white">
           <span>Location</span>
           <ChevronDown size={13} className="text-gray-400" />
         </div>
@@ -82,14 +82,14 @@ export function LeadFiltersSidebar({
             value={locationSearch}
             onChange={(e) => setLocationSearch(e.target.value)}
             placeholder="Search city or area..."
-            className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 bg-[#FAF9F6] focus:bg-white focus:outline-none"
+            className="w-full pl-7 pr-2.5 py-1 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-[#FAF9F6] dark:bg-[#1A2420] text-gray-900 dark:text-white placeholder-gray-400 focus:bg-white dark:focus:bg-[#151D1A] focus:outline-none"
           />
         </div>
       </div>
 
       {/* Category */}
-      <div className="space-y-2 pt-2 border-t border-gray-100">
-        <div className="flex items-center justify-between font-semibold text-[#171918]">
+      <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
+        <div className="flex items-center justify-between font-semibold text-[#171918] dark:text-white">
           <span>Category</span>
           <ChevronDown size={13} className="text-gray-400" />
         </div>
@@ -97,21 +97,21 @@ export function LeadFiltersSidebar({
           {categories.map((c) => (
             <label
               key={c.name}
-              className="flex items-center justify-between cursor-pointer text-gray-600 hover:text-black"
+              className="flex items-center justify-between cursor-pointer text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
             >
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={category === c.name}
                   onChange={() => onCategoryChange(category === c.name ? "All" : c.name)}
-                  className="rounded border-gray-300 text-[#171918] focus:ring-0"
+                  className="rounded border-gray-300 dark:border-gray-600 text-[#171918] focus:ring-0"
                 />
                 <span>{c.name}</span>
               </div>
-              <span className="text-gray-400">({c.count})</span>
+              <span className="text-gray-400 dark:text-gray-500">({c.count})</span>
             </label>
           ))}
-          <button className="text-[10px] text-emerald-700 font-semibold hover:underline pt-0.5">
+          <button className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold hover:underline pt-0.5">
             + Show More
           </button>
         </div>

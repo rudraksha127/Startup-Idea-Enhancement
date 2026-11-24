@@ -34,10 +34,10 @@ export function LeadDetailAuditPanel({
   if (!lead) return null;
 
   return (
-    <div className="w-full xl:w-[620px] bg-white rounded-2xl border border-[#E7E7E2] p-5 shadow-lg text-[#171918] space-y-4 shrink-0 overflow-y-auto max-h-[calc(100vh-140px)]">
+    <div className="w-full xl:w-[620px] bg-white dark:bg-[#151D1A] rounded-2xl border border-[#E7E7E2] dark:border-[#22302B] p-5 shadow-lg text-[#171918] dark:text-white space-y-4 shrink-0 overflow-y-auto max-h-[calc(100vh-140px)]">
       {/* Top Header Card */}
-      <div className="flex items-start gap-3.5 pb-3 border-b border-gray-100 relative">
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 relative shrink-0 border border-gray-200">
+      <div className="flex items-start gap-3.5 pb-3 border-b border-gray-100 dark:border-[#22302B] relative">
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative shrink-0 border border-gray-200 dark:border-gray-700">
           <Image
             src={lead.imageUrl || "/assets/urban-kitchen.jpg"}
             alt={lead.businessName}
@@ -48,13 +48,13 @@ export function LeadDetailAuditPanel({
 
         <div className="flex-1 min-w-0 pr-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-[#171918] truncate">
+            <h2 className="text-base font-bold text-[#171918] dark:text-white truncate">
               {lead.businessName}
             </h2>
             <select
               value={lead.status}
               onChange={(e) => onStatusChange(e.target.value)}
-              className="text-[11px] font-bold px-2 py-0.5 rounded-md border border-blue-200 bg-blue-50 text-blue-700 focus:outline-none"
+              className="text-[11px] font-bold px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 focus:outline-none"
             >
               <option value="New">New</option>
               <option value="Contacted">Contacted</option>

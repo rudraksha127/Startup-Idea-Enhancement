@@ -159,13 +159,13 @@ export default function LeadsPage() {
   };
 
   const STATUS_TABS = [
-    { label: "All Leads", key: "All", count: counts.All ?? 2847 },
-    { label: "New", key: "New", count: counts.New ?? 120 },
-    { label: "Contacted", key: "Contacted", count: counts.Contacted ?? 892 },
-    { label: "Replied", key: "Replied", count: counts.Replied ?? 142 },
-    { label: "Interested", key: "Interested", count: counts.Interested ?? 68 },
-    { label: "Converted", key: "Converted", count: counts.Converted ?? 38 },
-    { label: "Archived", key: "Archived", count: counts.Archived ?? 96 },
+    { label: "All Leads", key: "All", count: counts.All || 0 },
+    { label: "New", key: "New", count: counts.New || 0 },
+    { label: "Contacted", key: "Contacted", count: counts.Contacted || 0 },
+    { label: "Replied", key: "Replied", count: counts.Replied || 0 },
+    { label: "Interested", key: "Interested", count: counts.Interested || 0 },
+    { label: "Converted", key: "Converted", count: counts.Converted || 0 },
+    { label: "Archived", key: "Archived", count: counts.Archived || 0 },
   ];
 
   return (
@@ -173,11 +173,11 @@ export default function LeadsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
             Leads
             <span className="sr-only">Leads Management</span>
           </h1>
-          <p className="text-xs text-[#68717D] mt-0.5">
+          <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
             Manage and track all your discovered business opportunities.
           </p>
         </div>
@@ -187,7 +187,7 @@ export default function LeadsPage() {
           <a
             href="/api/leads/export"
             download
-            className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-[#171918] inline-flex items-center gap-1.5 shadow-2xs"
+            className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 dark:hover:bg-[#1A2420] text-xs font-semibold text-[#171918] dark:text-white inline-flex items-center gap-1.5 shadow-2xs"
           >
             <Download size={13} className="text-gray-500" />
             <span>Export CSV</span>
@@ -195,7 +195,7 @@ export default function LeadsPage() {
 
           <button
             onClick={() => setImportModalOpen(true)}
-            className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-[#171918] inline-flex items-center gap-1.5 shadow-2xs"
+            className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 dark:hover:bg-[#1A2420] text-xs font-semibold text-[#171918] dark:text-white inline-flex items-center gap-1.5 shadow-2xs"
           >
             <Upload size={13} className="text-gray-500" />
             <span>Import</span>
@@ -203,7 +203,7 @@ export default function LeadsPage() {
 
           <button
             onClick={() => setAddModalOpen(true)}
-            className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+            className="h-8 px-3.5 rounded-lg bg-[#171918] dark:bg-emerald-600 hover:bg-[#232B29] dark:hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
           >
             <Plus size={14} />
             <span>Add Lead</span>
@@ -213,77 +213,101 @@ export default function LeadsPage() {
 
       {/* 4 KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
+          <span className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/50">
             <Users size={17} />
           </span>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-[#171918]">
-                {(counts.All ?? 2847).toLocaleString()}
+              <span className="text-xl font-bold text-[#171918] dark:text-white">
+                {(counts.All || 0).toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                ↑ 12%
-              </span>
+              {counts.All > 0 ? (
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
+                  Active
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-1 py-0.2 rounded border border-gray-200 dark:border-gray-700">
+                  Clean baseline
+                </span>
+              )}
             </div>
-            <div className="text-xs text-[#68717D]">Total Leads</div>
+            <div className="text-xs text-[#68717D] dark:text-[#9AA29E]">Total Leads</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
+          <span className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-100 dark:border-sky-900/50">
             <Mail size={17} />
           </span>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-[#171918]">
-                {(counts.Contacted ?? 892).toLocaleString()}
+              <span className="text-xl font-bold text-[#171918] dark:text-white">
+                {(counts.Contacted || 0).toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                ↑ 16%
-              </span>
+              {counts.Contacted > 0 ? (
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
+                  Active
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-1 py-0.2 rounded border border-gray-200 dark:border-gray-700">
+                  Clean baseline
+                </span>
+              )}
             </div>
-            <div className="text-xs text-[#68717D]">Contacted</div>
+            <div className="text-xs text-[#68717D] dark:text-[#9AA29E]">Contacted</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
+          <span className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-900/50">
             <MessageCircle size={17} />
           </span>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-[#171918]">
-                {(counts.Replied ?? 142).toLocaleString()}
+              <span className="text-xl font-bold text-[#171918] dark:text-white">
+                {(counts.Replied || 0).toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                ↑ 34%
-              </span>
+              {counts.Replied > 0 ? (
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
+                  Active
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-1 py-0.2 rounded border border-gray-200 dark:border-gray-700">
+                  Clean baseline
+                </span>
+              )}
             </div>
-            <div className="text-xs text-[#68717D]">Replied</div>
+            <div className="text-xs text-[#68717D] dark:text-[#9AA29E]">Replied</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#E7E7E2] shadow-2xs flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center gap-3">
+          <span className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-900/50">
             <Handshake size={17} />
           </span>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-[#171918]">
-                {(counts.Converted ?? 38).toLocaleString()}
+              <span className="text-xl font-bold text-[#171918] dark:text-white">
+                {(counts.Converted || 0).toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                ↑ 18%
-              </span>
+              {counts.Converted > 0 ? (
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
+                  Active
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-1 py-0.2 rounded border border-gray-200 dark:border-gray-700">
+                  Clean baseline
+                </span>
+              )}
             </div>
-            <div className="text-xs text-[#68717D]">Converted</div>
+            <div className="text-xs text-[#68717D] dark:text-[#9AA29E]">Converted</div>
           </div>
         </div>
       </div>
 
       {/* Status Tabs Navigation */}
-      <div className="flex items-center gap-1 border-b border-[#E7E7E2] text-xs font-semibold overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-1 border-b border-[#E7E7E2] dark:border-[#22302B] text-xs font-semibold overflow-x-auto scrollbar-none">
         {STATUS_TABS.map((tab) => {
           const isActive = status === tab.key;
           return (
@@ -295,8 +319,8 @@ export default function LeadsPage() {
               }}
               className={`pb-2.5 px-3 transition-colors border-b-2 whitespace-nowrap flex items-center gap-1.5 ${
                 isActive
-                  ? "border-[#25835B] text-[#171918] font-bold"
-                  : "border-transparent text-[#68717D] hover:text-[#171918]"
+                  ? "border-[#25835B] dark:border-emerald-400 text-[#171918] dark:text-white font-bold"
+                  : "border-transparent text-[#68717D] dark:text-[#9AA29E] hover:text-[#171918] dark:hover:text-white"
               }`}
             >
               <span>{tab.label}</span>
@@ -318,7 +342,7 @@ export default function LeadsPage() {
               setPage(1);
             }}
             placeholder="Search by business name, category, location..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[#E7E7E2] bg-white focus:outline-none focus:ring-1 focus:ring-[#171918]"
+            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#171918] dark:focus:ring-emerald-400"
           />
         </div>
 
@@ -328,22 +352,22 @@ export default function LeadsPage() {
               if (inspectedLead) setInspectedLead(null);
               setShowFilters(!showFilters);
             }}
-            className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 inline-flex items-center gap-1.5 shadow-2xs"
+            className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 dark:hover:bg-[#1A2420] text-xs font-semibold text-gray-700 dark:text-gray-200 inline-flex items-center gap-1.5 shadow-2xs"
           >
-            <Filter size={12} className="text-gray-500" />
+            <Filter size={12} className="text-gray-500 dark:text-gray-400" />
             <span>Filters</span>
           </button>
 
           <div className="relative">
             <button
               onClick={() => setShowColumnsMenu((prev) => !prev)}
-              className="h-8 px-3 rounded-lg border border-[#E7E7E2] bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 inline-flex items-center gap-1.5 shadow-2xs hidden sm:inline-flex"
+              className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 dark:hover:bg-[#1A2420] text-xs font-semibold text-gray-700 dark:text-gray-200 inline-flex items-center gap-1.5 shadow-2xs hidden sm:inline-flex"
             >
-              <Columns size={12} className="text-gray-500" />
+              <Columns size={12} className="text-gray-500 dark:text-gray-400" />
               <span>Columns</span>
             </button>
             {showColumnsMenu && (
-              <div className="absolute right-0 top-9 w-48 bg-white border border-[#E7E7E2] rounded-xl shadow-lg p-2 z-30 space-y-1 text-xs">
+              <div className="absolute right-0 top-9 w-48 bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] rounded-xl shadow-lg p-2 z-30 space-y-1 text-xs">
                 <div className="text-[10px] font-bold text-gray-400 px-2 py-1">Toggle Columns</div>
                 {Object.entries(visibleColumns).map(([key, isChecked]) => (
                   <button
@@ -354,10 +378,10 @@ export default function LeadsPage() {
                         [key]: !isChecked,
                       }))
                     }
-                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-gray-50 text-left capitalize"
+                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-gray-50 dark:hover:bg-[#1A2420] text-left capitalize text-gray-800 dark:text-gray-200"
                   >
                     <span>{key.replace(/([A-Z])/g, " $1")}</span>
-                    {isChecked ? <Check size={12} className="text-emerald-600" /> : <span className="w-3" />}
+                    {isChecked ? <Check size={12} className="text-emerald-600 dark:text-emerald-400" /> : <span className="w-3" />}
                   </button>
                 ))}
               </div>
@@ -370,7 +394,7 @@ export default function LeadsPage() {
               setSortBy(e.target.value);
               setPage(1);
             }}
-            className="h-8 px-2.5 rounded-lg border border-[#E7E7E2] bg-white text-xs font-semibold text-gray-700 focus:outline-none shadow-2xs"
+            className="h-8 px-2.5 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none shadow-2xs"
           >
             <option value="createdAt">Sort: Most Recent</option>
             <option value="opportunityScore">Sort: Opportunity Score</option>
@@ -383,17 +407,18 @@ export default function LeadsPage() {
       {/* Main Content Area: Table + Right Panel */}
       <div className="flex items-start gap-5">
         {/* Leads Data Table */}
-        <div className="flex-1 bg-white rounded-xl border border-[#E7E7E2] shadow-xs overflow-hidden">
+        <div className="flex-1 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF9F6] border-b border-[#E7E7E2] text-[#68717D] text-[11px]">
+              <thead className="bg-[#FAF9F6] dark:bg-[#121816] border-b border-[#E7E7E2] dark:border-[#22302B] text-[#68717D] dark:text-[#9AA29E] text-[11px]">
                 <tr>
                   <th className="py-3 px-3.5 w-10">
                     <input
                       type="checkbox"
+                      aria-label="Select all leads"
                       checked={selectedIds.length > 0 && selectedIds.length === leads.length}
                       onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-[#171918] focus:ring-0"
+                      className="rounded border-gray-300 dark:border-gray-600 text-[#171918] focus:ring-0"
                     />
                   </th>
                   <th className="py-3 px-3 font-semibold">Business ⌄</th>
@@ -406,29 +431,29 @@ export default function LeadsPage() {
                   <th className="py-3 px-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-[#22302B]">
                 {leads.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-16 text-center text-gray-500">
+                    <td colSpan={9} className="py-16 text-center text-gray-500 dark:text-gray-400">
                       <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
                           <Compass size={22} />
                         </div>
-                        <p className="font-bold text-gray-800 text-sm">No leads in database yet</p>
-                        <p className="text-xs text-gray-500 text-center">
+                        <p className="font-bold text-gray-800 dark:text-white text-sm">No leads in database yet</p>
+                        <p className="text-xs text-gray-500 dark:text-[#9AA29E] text-center">
                           Your system is completely clean. Run the Prospect Discovery Agent to discover local businesses, or add a lead manually.
                         </p>
                         <div className="flex items-center gap-2 mt-3">
                           <Link
                             href="/ai-agents"
-                            className="px-3.5 py-1.5 rounded-lg bg-[#111614] hover:bg-black text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+                            className="px-3.5 py-1.5 rounded-lg bg-[#111614] hover:bg-black dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors"
                           >
                             <Bot size={13} />
                             <span>Launch AI Discovery Agent</span>
                           </Link>
                           <button
                             onClick={() => setAddModalOpen(true)}
-                            className="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors"
+                            className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1A2420] text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#22302B] transition-colors"
                           >
                             Add Lead Manually
                           </button>
@@ -547,14 +572,15 @@ export default function LeadsPage() {
           </div>
 
           {/* Table Footer / Pagination */}
-          <div className="p-3.5 border-t border-[#E7E7E2] flex items-center justify-between text-xs text-[#68717D]">
+          <div className="p-3.5 border-t border-[#E7E7E2] dark:border-[#22302B] flex items-center justify-between text-xs text-[#68717D] dark:text-[#9AA29E]">
             <span>Showing {leads.length > 0 ? (page - 1) * 10 + 1 : 0} – {Math.min(page * 10, total)} of {total.toLocaleString()} leads</span>
 
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-1 rounded border border-[#E7E7E2] disabled:opacity-30 hover:bg-gray-50"
+                aria-label="Previous page"
+                className="p-1 rounded border border-[#E7E7E2] dark:border-[#22302B] disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-[#1A2420] text-gray-700 dark:text-gray-300"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -564,8 +590,8 @@ export default function LeadsPage() {
                   onClick={() => setPage(num)}
                   className={`w-7 h-7 rounded-lg text-xs font-semibold ${
                     page === num
-                      ? "bg-[#171918] text-white"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-[#171918] dark:bg-emerald-600 text-white"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1A2420]"
                   }`}
                 >
                   {num}
@@ -575,7 +601,8 @@ export default function LeadsPage() {
               <button
                 onClick={() => setPage((p) => Math.min(Math.ceil(total / 10), p + 1))}
                 disabled={page >= Math.ceil(total / 10)}
-                className="p-1 rounded border border-[#E7E7E2] disabled:opacity-30 hover:bg-gray-50"
+                aria-label="Next page"
+                className="p-1 rounded border border-[#E7E7E2] dark:border-[#22302B] disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-[#1A2420] text-gray-700 dark:text-gray-300"
               >
                 <ChevronRight size={14} />
               </button>
