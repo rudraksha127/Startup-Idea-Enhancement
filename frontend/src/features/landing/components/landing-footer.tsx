@@ -35,21 +35,21 @@ export function LandingFooter() {
       </section>
 
       {/* Main Footer */}
-      <footer id="resources" className="border-t border-[#E7E7E2] bg-[#F3F1EB] py-8 text-xs text-[#68717D]">
+      <footer id="resources" className="border-t border-[#E7E7E2] dark:border-[#22302b] bg-[#F3F1EB] dark:bg-[#0d1312] py-8 text-xs text-[#68717D] dark:text-[#9aa29e] transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#171918]">AgencyOS</span>
+            <span className="font-bold text-[#171918] dark:text-white">AgencyOS</span>
             <span>·</span>
             <span>Find Clients. Close Projects. You Build. We Handle the Rest.</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-[#171918] transition-colors">
+            <Link href="/login" className="hover:text-[#171918] dark:hover:text-white transition-colors">
               Login
             </Link>
-            <Link href="/dashboard" className="hover:text-[#171918] transition-colors">
+            <Link href="/dashboard" className="hover:text-[#171918] dark:hover:text-white transition-colors">
               Operations Dashboard
             </Link>
-            <span className="text-[#828a84]">© 2026 AgencyOS. All rights reserved.</span>
+            <span className="text-[#828a84] dark:text-gray-500">© 2026 AgencyOS. All rights reserved.</span>
           </div>
         </div>
       </footer>

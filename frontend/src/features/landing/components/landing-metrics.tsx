@@ -1,6 +1,6 @@
 export function LandingMetrics() {
   return (
-    <section className="border-y border-[#E7E7E2] dark:border-[#22302b] bg-[#F3F1EB] dark:bg-[#111715] transition-colors py-10">
+    <section id="case-studies" className="border-y border-[#E7E7E2] dark:border-[#22302b] bg-[#F3F1EB] dark:bg-[#111715] transition-colors py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 4 Big Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center border-b border-[#E7E7E2] dark:border-[#22302b] pb-8 mb-8">
