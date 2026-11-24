@@ -6,7 +6,7 @@
 **Active Working Branch:** `agent/antigravity/audit-repository`  
 **Production / Stable Branch:** `main`  
 **Repository Remote:** `https://github.com/rudraksha127/Startup-Idea-Enhancement`  
-**Pull Request:** Targeting `main` for ChatGPT and Rudraksh review  
+**Pull Request:** [PR #2](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/2) (Targeting `main` for ChatGPT & Rudraksh review)  
 **Live Services Status:**
   - Backend Express API: `http://localhost:4000` (HEALTHY - HTTP 200)
   - Frontend Next.js 16: `http://localhost:3000` (OPERATIONAL - HTTP 200)  
