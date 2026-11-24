@@ -48,7 +48,9 @@ The table below provides verifiable proof for each setup phase as mandated by Ph
   - `agent/antigravity/*`: Implementation branches for Antigravity tasks.
   - `review/*`: PR review resolution branches.
   - `hotfix/*`: Emergency patches.
-- **Current Branch:** `agent/antigravity/setup-collaboration` (branch pointer established).
+- **Current Branch:** `agent/antigravity/setup-collaboration` (branch pointer established & pushed to remote).
+- **Pull Request URL:** [https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1)
+- **Commit SHA:** `4c47116`
 - **Safety Guarantee:** Antigravity does not stage or touch the user's uncommitted work from `feat/TASK-021-m0-subtraction`.
 
 ---
