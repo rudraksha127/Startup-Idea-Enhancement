@@ -33,10 +33,10 @@ describe("UI Components", () => {
     render(<MetricCards metrics={metrics} />);
     expect(screen.getByText("Total Leads")).toBeDefined();
     expect(screen.getByText("1,248")).toBeDefined();
-    expect(screen.getByText("Qualified Leads")).toBeDefined();
+    expect(screen.getByText("Leads Contacted")).toBeDefined();
     expect(screen.getByText("342")).toBeDefined();
-    expect(screen.getByText("Active Outreaches")).toBeDefined();
-    expect(screen.getByText("Converted Clients")).toBeDefined();
+    expect(screen.getByText("Positive Responses")).toBeDefined();
+    expect(screen.getByText("Active Clients")).toBeDefined();
   });
 });
 

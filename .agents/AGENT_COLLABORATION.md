@@ -102,7 +102,7 @@ To ensure seamless resumption across IDE sessions or model changes:
 ### Before Ending an Agent Session:
 1. Update `AGENT_HANDOFF.md` with:
    - Active task ID and status.
-   - Exact commit SHA and branch name.
+   - Exact commit SHA and branch name (the recorded SHA identifies the code state being handed off; the later handoff commit is identified via Git log).
    - Files modified.
    - Real command verification evidence.
    - Immediate next action for the incoming agent.
@@ -113,4 +113,4 @@ To ensure seamless resumption across IDE sessions or model changes:
 1. Read `AGENT_HANDOFF.md` first.
 2. Verify local git state (`git status`, `git branch`, `git log -1`).
 3. Check `docs/engineering/WORK_QUEUE.md` for task dependencies.
-4. Continue execution directly from the recorded "Next Action" without repeating verified steps.
+4. Compare the current code and working tree with the recorded checkpoint; repeat affected checks if either has changed since they were recorded, and skip verified steps only when the relevant state is unchanged.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Bot,
   Search,
@@ -59,13 +59,13 @@ interface Agent {
   name: string;
   category: string;
   role: string;
-  status: "Active" | "Idle" | "Paused";
+  status: "Active" | "Idle" | "Paused" | "Running";
   lastRun: string;
   metric1: { label: string; value: string };
   metric2: { label: string; value: string };
   model: string;
   modelBadge: string;
-  autonomyLevel: "Supervised" | "Semi-Autonomous" | "Autonomous";
+  autonomyLevel: "Supervised" | "Semi-Autonomous" | "Autonomous" | "Unspecified";
   requiresApproval: boolean;
   systemPrompt?: string;
   userPromptTemplate?: string;
@@ -80,379 +80,86 @@ interface Agent {
   color: string;
 }
 
-const CANONICAL_13_UI_AGENTS: Agent[] = [
-  {
-    _id: "market-research",
-    agentId: "market-research",
-    name: "Market Research Agent",
-    category: "Research",
-    role: "Finds and analyzes local businesses, extracts market demand and target segments.",
-    status: "Active",
-    lastRun: "Last run 5 min ago",
-    metric1: { label: "Businesses found", value: "1,248" },
-    metric2: { label: "Target niches", value: "4 segments" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Market Intel",
-    autonomyLevel: "Autonomous",
-    requiresApproval: false,
-    systemPrompt: "You are an expert market intelligence analyst specialized in local digital economy expansion. Analyze competition density, pricing tiers, and underserved market segments for {{business_type}} in {{location}}.",
-    userPromptTemplate: "Analyze market opportunity for {{business_type}} within {{radius}} radius of {{location}}.",
-    capabilities: {
-      webScraping: true,
-      placesApi: true,
-      emailVerification: false,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: Search,
-    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
-  },
-  {
-    _id: "prospect-discovery",
-    agentId: "prospect-discovery",
-    name: "Prospect Discovery Agent",
-    category: "Discovery",
-    role: "Discovers prospective local business leads matching agency ICP criteria via Google Maps & directories.",
-    status: "Active",
-    lastRun: "Last run 12 min ago",
-    metric1: { label: "Discovered leads", value: "420" },
-    metric2: { label: "Deduplicated", value: "100%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "High Speed",
-    autonomyLevel: "Semi-Autonomous",
-    requiresApproval: false,
-    systemPrompt: "You are a prospect discovery specialist. Identify high-potential SMB leads from Google Maps Platform query results matching category {{business_type}} with rating under {{rating_min}} or missing website.",
-    userPromptTemplate: "Extract {{business_type}} in {{location}} within {{radius}} radius.",
-    capabilities: {
-      webScraping: true,
-      placesApi: true,
-      emailVerification: true,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: Compass,
-    color: "text-blue-700 bg-blue-50 border-blue-200",
-  },
-  {
-    _id: "website-audit",
-    agentId: "website-audit",
-    name: "Website Audit Agent",
-    category: "Audit",
-    role: "Crawls existing SMB sites, identifies performance bottlenecks, mobile failures, and SEO gaps.",
-    status: "Active",
-    lastRun: "Last run 20 min ago",
-    metric1: { label: "Audits executed", value: "186" },
-    metric2: { label: "Avg website score", value: "58/100" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Technical",
-    autonomyLevel: "Autonomous",
-    requiresApproval: false,
-    systemPrompt: "You are a technical web performance auditor. Audit target URL {{website_url}} across 6 core vectors: LCP page speed, mobile responsive viewport, SSL certificate, meta tags, schema markup, and call-to-actions.",
-    userPromptTemplate: "Perform diagnostic technical audit on {{website_url}}.",
-    capabilities: {
-      webScraping: true,
-      placesApi: false,
-      emailVerification: false,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: Code,
-    color: "text-purple-700 bg-purple-50 border-purple-200",
-  },
-  {
-    _id: "opportunity-scoring",
-    agentId: "opportunity-scoring",
-    name: "Opportunity Scoring Agent",
-    category: "Intelligence",
-    role: "Calculates commercial value score (1-10) based on review volume, traffic potential, and website health.",
-    status: "Active",
-    lastRun: "Last run 32 min ago",
-    metric1: { label: "High opp leads", value: "88" },
-    metric2: { label: "Avg opp score", value: "8.4/10" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Predictive",
-    autonomyLevel: "Autonomous",
-    requiresApproval: false,
-    systemPrompt: "You are a deal prioritization intelligence engine. Calculate commercial upside score (1-10) using formula: Inverse(Website Quality) * Review Volume Weight * Local Search Density.",
-    userPromptTemplate: "Calculate opportunity score for {{business_name}} at {{location}}.",
-    capabilities: {
-      webScraping: false,
-      placesApi: true,
-      emailVerification: false,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: TrendingUp,
-    color: "text-amber-700 bg-amber-50 border-amber-200",
-  },
-  {
-    _id: "lead-enrichment",
-    agentId: "lead-enrichment",
-    name: "Lead Enrichment Agent",
-    category: "Enrichment",
-    role: "Finds decision maker contact details, validates phone numbers, and verifies deliverable email addresses.",
-    status: "Active",
-    lastRun: "Last run 15 min ago",
-    metric1: { label: "Enriched contacts", value: "312" },
-    metric2: { label: "Verified emails", value: "94%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Multi-Source",
-    autonomyLevel: "Semi-Autonomous",
-    requiresApproval: false,
-    systemPrompt: "You are an executive enrichment researcher. Uncover verified business owner contacts, WhatsApp lines, and official emails for {{business_name}}.",
-    userPromptTemplate: "Enrich executive contact details for {{business_name}} in {{location}}.",
-    capabilities: {
-      webScraping: true,
-      placesApi: true,
-      emailVerification: true,
-      opportunityScoring: false,
-      crmSync: true,
-    },
-    icon: ShieldCheck,
-    color: "text-indigo-700 bg-indigo-50 border-indigo-200",
-  },
-  {
-    _id: "email-outreach",
-    agentId: "email-outreach",
-    name: "Email Outreach Agent",
-    category: "Outreach",
-    role: "Drafts hyper-personalized value pitches citing specific audit findings and simulated redesign previews.",
-    status: "Active",
-    lastRun: "Last run 2 min ago",
-    metric1: { label: "Emails sent", value: "892" },
-    metric2: { label: "Open rate", value: "68.4%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Personalized",
-    autonomyLevel: "Semi-Autonomous",
-    requiresApproval: false,
-    systemPrompt: "You are a consultative sales copywriter. Generate ultra-tailored cold outreach highlighting specific website vulnerabilities and offering a free interactive prototype.",
-    userPromptTemplate: "Draft cold email pitch for {{owner_name}} at {{business_name}} regarding their {{business_type}} website.",
-    capabilities: {
-      webScraping: false,
-      placesApi: false,
-      emailVerification: true,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: Mail,
-    color: "text-blue-700 bg-blue-50 border-blue-200",
-  },
-  {
-    _id: "whatsapp-outreach",
-    agentId: "whatsapp-outreach",
-    name: "WhatsApp Outreach Agent",
-    category: "Outreach",
-    role: "Dispatches direct WhatsApp messages to verified business mobile numbers with quick interactive demo links.",
-    status: "Active",
-    lastRun: "Last run 8 min ago",
-    metric1: { label: "Messages sent", value: "430" },
-    metric2: { label: "Response rate", value: "34.2%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Direct Link",
-    autonomyLevel: "Semi-Autonomous",
-    requiresApproval: false,
-    systemPrompt: "Draft friendly, professional WhatsApp business messages with concise bullet points and 1 clear action link.",
-    userPromptTemplate: "Generate WhatsApp intro message for {{business_name}}.",
-    capabilities: {
-      webScraping: false,
-      placesApi: false,
-      emailVerification: true,
-      opportunityScoring: false,
-      crmSync: true,
-    },
-    icon: MessageSquare,
-    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
-  },
-  {
-    _id: "inbox-triage",
-    agentId: "inbox-triage",
-    name: "Inbox & Reply Triage Agent",
-    category: "Communications",
-    role: "Classifies incoming responses, detects positive intent, and drafts contextual replies for human approval.",
-    status: "Active",
-    lastRun: "Last run 4 min ago",
-    metric1: { label: "Triaged replies", value: "142" },
-    metric2: { label: "Intent accuracy", value: "98.6%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Supervised Gate",
-    autonomyLevel: "Supervised",
-    requiresApproval: true,
-    systemPrompt: "Classify incoming replies into: Interested, Pricing Question, Meeting Request, Objection, or Unsubscribe. Formulate contextual next-step answer.",
-    userPromptTemplate: "Classify incoming reply from {{sender_name}}: '{{reply_text}}'",
-    capabilities: {
-      webScraping: false,
-      placesApi: false,
-      emailVerification: false,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: Clock,
-    color: "text-sky-700 bg-sky-50 border-sky-200",
-  },
-  {
-    _id: "proposal-scope",
-    agentId: "proposal-scope",
-    name: "Proposal & Scope Agent",
-    category: "Sales",
-    role: "Drafts commercial proposals, SOWs, deliverables, and payment terms from rate cards.",
-    status: "Active",
-    lastRun: "Last run 1 hour ago",
-    metric1: { label: "Proposals drafted", value: "24" },
-    metric2: { label: "Value Quoted", value: "₹18.4L" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Supervised Gate",
-    autonomyLevel: "Supervised",
-    requiresApproval: true,
-    systemPrompt: "Structure formal agency proposal with milestones: UX Wireframe, Next.js Frontend, Cloudflare Edge Deployment, Local SEO Schema, and 30-day warranty.",
-    userPromptTemplate: "Generate formal proposal for {{business_name}} for total value of {{budget}}.",
-    capabilities: {
-      webScraping: false,
-      placesApi: false,
-      emailVerification: false,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: FileText,
-    color: "text-indigo-700 bg-indigo-50 border-indigo-200",
-  },
-  {
-    _id: "client-onboarding",
-    agentId: "client-onboarding",
-    name: "Client Onboarding Agent",
-    category: "Operations",
-    role: "Generates asset intake checklists, tracks brand asset collection, and triggers project kickoff.",
-    status: "Active",
-    lastRun: "Last run 2 hours ago",
-    metric1: { label: "Clients onboarded", value: "16" },
-    metric2: { label: "Checklists active", value: "4" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Workflows",
-    autonomyLevel: "Semi-Autonomous",
-    requiresApproval: false,
-    systemPrompt: "Create automated client onboarding checklists including logo, color palette, menu/services catalog, staff photos, and domain DNS access.",
-    userPromptTemplate: "Generate onboarding intake checklist for {{business_name}}.",
-    capabilities: {
-      webScraping: false,
-      placesApi: false,
-      emailVerification: true,
-      opportunityScoring: false,
-      crmSync: true,
-    },
-    icon: Briefcase,
-    color: "text-cyan-700 bg-cyan-50 border-cyan-200",
-  },
-  {
-    _id: "project-planning",
-    agentId: "project-planning",
-    name: "Project Planning Agent",
-    category: "Delivery",
-    role: "Decomposes statements of work into sprint milestones, work items, and task dependencies.",
-    status: "Active",
-    lastRun: "Last run 3 hours ago",
-    metric1: { label: "Sprints structured", value: "12" },
-    metric2: { label: "Total tasks", value: "96" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Agile Engine",
-    autonomyLevel: "Autonomous",
-    requiresApproval: false,
-    systemPrompt: "Break down client deliverable into 4 discrete sprint milestones with explicit dependencies and verification criteria.",
-    userPromptTemplate: "Create project sprint plan for {{project_name}}.",
-    capabilities: {
-      webScraping: false,
-      placesApi: false,
-      emailVerification: false,
-      opportunityScoring: false,
-      crmSync: true,
-    },
-    icon: Layers,
-    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
-  },
-  {
-    _id: "website-qa",
-    agentId: "website-qa",
-    name: "Website QA & Delivery Agent",
-    category: "QA",
-    role: "Executes automated staging assertions, tests mobile viewport layouts, and validates zero broken links.",
-    status: "Active",
-    lastRun: "Last run 45 min ago",
-    metric1: { label: "Test suites passed", value: "32/32" },
-    metric2: { label: "Quality score", value: "99.2%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Supervised Gate",
-    autonomyLevel: "Supervised",
-    requiresApproval: true,
-    systemPrompt: "Validate staging URL for Lighthouse score > 90, zero console errors, mobile touch targets >= 48px, and valid Schema.org tags.",
-    userPromptTemplate: "Run full QA test suite on staging build {{staging_url}}.",
-    capabilities: {
-      webScraping: true,
-      placesApi: false,
-      emailVerification: false,
-      opportunityScoring: true,
-      crmSync: true,
-    },
-    icon: Code,
-    color: "text-red-700 bg-red-50 border-red-200",
-  },
-  {
-    _id: "maintenance-monitoring",
-    agentId: "maintenance-monitoring",
-    name: "Maintenance & Monitoring Agent",
-    category: "Reliability",
-    role: "24/7 uptime watchdog, TLS certificate health check, and renewal notifications.",
-    status: "Active",
-    lastRun: "Last run 1 min ago",
-    metric1: { label: "Sites monitored", value: "48 live" },
-    metric2: { label: "Uptime 30d", value: "99.98%" },
-    model: "gemini-2.0-flash",
-    modelBadge: "Watchdog",
-    autonomyLevel: "Autonomous",
-    requiresApproval: false,
-    systemPrompt: "Monitor endpoint HTTP status codes, latency percentiles, SSL expiration days remaining, and DNS health.",
-    userPromptTemplate: "Check health status for all live client production URLs.",
-    capabilities: {
-      webScraping: true,
-      placesApi: false,
-      emailVerification: false,
-      opportunityScoring: false,
-      crmSync: true,
-    },
-    icon: Activity,
-    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
-  },
-];
+/**
+ * M0 subtraction: there is no canonical agent catalogue in the UI any more.
+ * Agents are whatever the API actually returns. Fields the database does not
+ * store are marked as not recorded rather than invented.
+ */
+function iconForCategory(category: string) {
+  const value = (category || "").toLowerCase();
+  if (value.includes("research")) {
+    return { icon: Compass, color: "bg-sky-50 text-sky-600 border-sky-100" };
+  }
+  if (value.includes("discovery")) {
+    return { icon: Search, color: "bg-blue-50 text-blue-600 border-blue-100" };
+  }
+  if (value.includes("email") || value.includes("outreach")) {
+    return { icon: Mail, color: "bg-purple-50 text-purple-600 border-purple-100" };
+  }
+  if (value.includes("audit")) {
+    return { icon: ShieldCheck, color: "bg-emerald-50 text-emerald-600 border-emerald-100" };
+  }
+  if (value.includes("triage")) {
+    return { icon: MessageSquare, color: "bg-amber-50 text-amber-600 border-amber-100" };
+  }
+  return { icon: Bot, color: "bg-gray-50 text-gray-600 border-gray-200" };
+}
 
-const PERFORMANCE_DATA = [
-  { agent: "Prospect", tasks: 420 },
-  { agent: "Auditor", tasks: 312 },
-  { agent: "Outreach", tasks: 892 },
-  { agent: "Triage", tasks: 184 },
-  { agent: "QA", tasks: 96 },
-];
+function formatLastRun(value: unknown): string {
+  if (!value) return "Never run";
+  const date = new Date(value as string);
+  if (Number.isNaN(date.getTime())) return "Never run";
+  return `Last run ${date.toLocaleString()}`;
+}
 
-const MODEL_DATA = [
-  { name: "Gemini 2.0 Flash", value: 65, color: "#10B981" },
-  { name: "Claude 3.5 Sonnet", value: 20, color: "#F97316" },
-  { name: "GPT-4o", value: 15, color: "#3568E8" },
-];
+function mapDbAgent(db: any): Agent {
+  const { icon, color } = iconForCategory(db?.category ?? "");
+  const idString = String(db?._id ?? "");
+  return {
+    _id: idString,
+    agentId: idString,
+    name: db?.name ?? "Unnamed agent",
+    category: db?.category ?? "Uncategorised",
+    role: db?.role ?? "",
+    status: (db?.status as Agent["status"]) ?? "Idle",
+    lastRun: formatLastRun(db?.lastRunAt),
+    metric1: {
+      label: "Processed today",
+      value: String(db?.processedToday ?? 0),
+    },
+    metric2: {
+      label: "Daily target",
+      value: String(db?.dailyTarget ?? 0),
+    },
+    model: "Not recorded",
+    modelBadge: "",
+    autonomyLevel: "Unspecified",
+    requiresApproval: false,
+    systemPrompt: db?.systemPrompt ?? "",
+    icon,
+    color,
+  };
+}
 
-const RECENT_RUNS_DATA = [
-  { id: "r1", agent: "Prospect Discovery Agent", task: "Google Places Discovery", trigger: "Schedule (09:00 AM)", duration: "1.4s", status: "Success", result: "24 leads found" },
-  { id: "r2", agent: "Email Outreach Agent", task: "Batch Cold Outreach", trigger: "Event Trigger", duration: "2.1s", status: "Success", result: "48 emails dispatched" },
-  { id: "r3", agent: "Website Audit Agent", task: "Mobile Speed Diagnostics", trigger: "Manual Run", duration: "3.2s", status: "Success", result: "Audit Score: 62/100" },
-  { id: "r4", agent: "Inbox & Reply Triage", task: "Intent Classification", trigger: "Webhook", duration: "0.8s", status: "Needs Approval", result: "Positive Intent Detected" },
-];
+/**
+ * M0 subtraction: these synthetic data constants have been removed.
+ * Empty arrays ensure the UI renders honest empty states instead of fabricated metrics.
+ */
+interface RecentRun { id: string; agent: string; task: string; trigger: string; duration: string; status: string; }
+interface PerformancePoint { date: string; value: number; }
+interface ModelUsage { name: string; value: number; color: string; }
+interface UpcomingTask { id: string; agent: string; task: string; scheduled: string; priority: string; }
 
-const UPCOMING_TASKS_DATA = [
-  { id: "u1", agent: "Maintenance Watchdog", scheduled: "In 4 mins", task: "Health Check (48 domains)", priority: "Normal" },
-  { id: "u2", agent: "Prospect Discovery", scheduled: "In 25 mins", task: "Indore Cafes Scan (Radius 10km)", priority: "High" },
-  { id: "u3", agent: "Email Outreach", scheduled: "Tomorrow 10:00 AM", task: "Sequence Step #2 Follow-ups", priority: "Normal" },
-];
+const RECENT_RUNS_DATA: RecentRun[] = [];
+const PERFORMANCE_DATA: PerformancePoint[] = [];
+const MODEL_DATA: ModelUsage[] = [];
+const UPCOMING_TASKS_DATA: UpcomingTask[] = [];
 
 export default function AIAgentsPage() {
   const [viewMode, setViewMode] = useState<"overview" | "config">("overview");
-  const [agentsList, setAgentsList] = useState<Agent[]>(CANONICAL_13_UI_AGENTS);
-  const [selectedAgent, setSelectedAgent] = useState<Agent>(CANONICAL_13_UI_AGENTS[0]);
-  const [activeTab, setActiveTab] = useState("All Agents (13)");
+  const [agentsList, setAgentsList] = useState<Agent[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [runningAgentId, setRunningAgentId] = useState<string | null>(null);
@@ -460,7 +167,8 @@ export default function AIAgentsPage() {
 
   // Configuration View Subtabs & State
   const [configTab, setConfigTab] = useState<"basic" | "prompts" | "tools" | "history">("basic");
-  const [editedAgent, setEditedAgent] = useState<Agent>(CANONICAL_13_UI_AGENTS[0]);
+  const [editedAgent, setEditedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [testLocation, setTestLocation] = useState("Connaught Place, New Delhi");
   const [testCategory, setTestCategory] = useState("Restaurant");
   const [testRadius, setTestRadius] = useState("5 km");
@@ -472,40 +180,28 @@ export default function AIAgentsPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  useEffect(() => {
-    async function loadAgents() {
-      try {
-        const res = await fetch("/api/agents");
-        const data = await res.json();
-        if (data.agents && data.agents.length > 0) {
-          setAgentsList((prev) =>
-            prev.map((uiAgent) => {
-              const dbAgent = data.agents.find(
-                (d: any) =>
-                  d.name?.toLowerCase().includes(uiAgent.name.toLowerCase().slice(0, 6)) ||
-                  uiAgent.name.toLowerCase().includes(d.name?.toLowerCase().slice(0, 6))
-              );
-              if (dbAgent) {
-                return {
-                  ...uiAgent,
-                  _id: dbAgent._id || uiAgent._id,
-                  status: dbAgent.status || uiAgent.status,
-                  metric1: {
-                    ...uiAgent.metric1,
-                    value: dbAgent.processedToday ? dbAgent.processedToday.toString() : uiAgent.metric1.value,
-                  },
-                };
-              }
-              return uiAgent;
-            })
-          );
-        }
-      } catch (err) {
-        console.warn("Using canonical agent catalog", err);
+  const loadAgents = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/agents");
+      if (!res.ok) {
+        setLoadError(`Failed to load agents catalog (HTTP ${res.status})`);
+        return;
       }
+      const data = await res.json();
+      if (!data || !Array.isArray(data.agents)) {
+        setLoadError("Invalid response format from agents catalog");
+        return;
+      }
+      setAgentsList(data.agents.map((dbAgent: any) => mapDbAgent(dbAgent)));
+    } catch (err: any) {
+      setLoadError(err?.message || "Failed to load agents catalog");
     }
-    loadAgents();
   }, []);
+
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
 
   const handleOpenConfig = (agent: Agent) => {
     setSelectedAgent(agent);
@@ -563,6 +259,7 @@ export default function AIAgentsPage() {
   };
 
   const handleRunSimulation = async () => {
+    if (!editedAgent) return;
     setIsSimulating(true);
     try {
       const res = await fetch(`/api/agents/${editedAgent.agentId || editedAgent._id}/run`, {
@@ -631,6 +328,7 @@ export default function AIAgentsPage() {
   };
 
   const handleSaveConfig = () => {
+    if (!editedAgent) return;
     setAgentsList((prev) =>
       prev.map((a) => (a._id === editedAgent._id ? { ...editedAgent } : a))
     );
@@ -638,10 +336,13 @@ export default function AIAgentsPage() {
   };
 
   const insertVariable = (varName: string) => {
-    setEditedAgent((prev) => ({
-      ...prev,
-      systemPrompt: (prev.systemPrompt || "") + ` {{${varName}}}`,
-    }));
+    setEditedAgent((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        systemPrompt: (prev.systemPrompt || "") + ` {{${varName}}}`,
+      };
+    });
   };
 
   const filteredAgents = agentsList.filter((a) => {
@@ -650,9 +351,9 @@ export default function AIAgentsPage() {
       a.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (activeTab === "Active") return matchesSearch && a.status === "Active";
-    if (activeTab === "Supervised") return matchesSearch && a.autonomyLevel === "Supervised";
-    if (activeTab === "Autonomous") return matchesSearch && a.autonomyLevel === "Autonomous";
+    if (activeTab === "active") return matchesSearch && (a.status === "Active" || a.status === "Running");
+    if (activeTab === "supervised") return matchesSearch && a.autonomyLevel === "Supervised";
+    if (activeTab === "autonomous") return matchesSearch && a.autonomyLevel === "Autonomous";
     return matchesSearch;
   });
 
@@ -743,7 +444,7 @@ export default function AIAgentsPage() {
       {/* ========================================================================= */}
       {/* VIEW MODE 1: CONFIGURATION SCREEN (AgencyOS AI Agent Configuration)      */}
       {/* ========================================================================= */}
-      {viewMode === "config" ? (
+      {viewMode === "config" && editedAgent ? (
         <div className="space-y-5 animate-in fade-in duration-200">
           {/* Breadcrumbs & Configuration Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-4">
@@ -1028,17 +729,23 @@ export default function AIAgentsPage() {
                     Recent Execution Logs
                   </h3>
                   <div className="space-y-2 text-xs">
-                    {RECENT_RUNS_DATA.map((run) => (
-                      <div key={run.id} className="p-3 rounded-lg border border-gray-100 dark:border-[#22302B] bg-[#FAF9F6] dark:bg-[#121816] flex items-center justify-between">
-                        <div>
-                          <div className="font-bold text-gray-900">{run.task}</div>
-                          <div className="text-[10px] text-gray-400">{run.trigger} • {run.duration}</div>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          {run.status}
-                        </span>
+                    {RECENT_RUNS_DATA.length === 0 ? (
+                      <div className="py-6 text-center text-xs text-gray-400">
+                        No recent execution history recorded for this agent.
                       </div>
-                    ))}
+                    ) : (
+                      RECENT_RUNS_DATA.map((run) => (
+                        <div key={run.id} className="p-3 rounded-lg border border-gray-100 dark:border-[#22302B] bg-[#FAF9F6] dark:bg-[#121816] flex items-center justify-between">
+                          <div>
+                            <div className="font-bold text-gray-900">{run.task}</div>
+                            <div className="text-[10px] text-gray-400">{run.trigger} • {run.duration}</div>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {run.status}
+                          </span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -1133,17 +840,33 @@ export default function AIAgentsPage() {
                 AI Agents Operating System
               </h1>
               <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
-                13 specialized autonomous & supervised agents executing end-to-end agency workflows.
+                {agentsList.length} specialized autonomous & supervised agents executing end-to-end agency workflows.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Agent Runtime: 13 / 13 Online</span>
+                <span>Agent Runtime: {agentsList.filter((a) => a.status === "Active" || a.status === "Running").length} / {agentsList.length} Online</span>
               </div>
             </div>
           </div>
+
+          {/* Load Error Banner with Retry */}
+          {loadError && (
+            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <AlertCircle size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>{loadError}</span>
+              </div>
+              <button
+                onClick={() => loadAgents()}
+                className="px-3 py-1 rounded-lg bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 font-semibold hover:bg-amber-300 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
           {/* 5 KPI Summary Cards matching Reference Mockup */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
@@ -1205,19 +928,24 @@ export default function AIAgentsPage() {
               {/* Tabs & Search Filter */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 pb-2">
                 <div className="flex items-center gap-1 overflow-x-auto scrollbar-none text-xs font-semibold">
-                  {["All Agents (13)", "Active", "Supervised", "Autonomous"].map((tab) => {
-                    const isActive = activeTab === tab;
+                  {[
+                    { id: "all", label: `All Agents (${agentsList.length})` },
+                    { id: "active", label: "Active" },
+                    { id: "supervised", label: "Supervised" },
+                    { id: "autonomous", label: "Autonomous" },
+                  ].map((tab) => {
+                    const isActive = activeTab === tab.id;
                     return (
                       <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
                         className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
                           isActive
                             ? "bg-[#171918] text-white"
                             : "text-gray-600 hover:text-black hover:bg-gray-100"
                         }`}
                       >
-                        {tab}
+                        {tab.label}
                       </button>
                     );
                   })}
@@ -1236,8 +964,21 @@ export default function AIAgentsPage() {
               </div>
 
               {/* Agents Grid (2 columns on left rail) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {filteredAgents.map((agent) => {
+              {filteredAgents.length === 0 ? (
+                <div className="p-8 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] text-center text-xs text-gray-500 space-y-2">
+                  <Bot size={24} className="mx-auto text-gray-400" />
+                  <p className="font-semibold text-gray-700 dark:text-gray-300">
+                    {agentsList.length === 0 ? "No agents loaded" : "No matching agents found"}
+                  </p>
+                  <p className="text-[11px] text-gray-400">
+                    {agentsList.length === 0
+                      ? "The agents catalog is currently empty."
+                      : `No agents found matching "${searchQuery || activeTab}".`}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {filteredAgents.map((agent) => {
                   const Icon = agent.icon;
                   const isRunning = runningAgentId === agent._id;
                   return (
@@ -1324,6 +1065,7 @@ export default function AIAgentsPage() {
                   );
                 })}
               </div>
+              )}
             </div>
 
             {/* Right 4 Columns: Performance Charts & Templates */}
@@ -1334,15 +1076,22 @@ export default function AIAgentsPage() {
                   <h3 className="font-bold text-xs text-[#171918] dark:text-white">Agents Performance</h3>
                   <span className="text-[11px] text-gray-400">Tasks Handled</span>
                 </div>
-                <div className="h-44 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={PERFORMANCE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <XAxis dataKey="agent" stroke="#94A3B8" fontSize={10} tickLine={false} />
-                      <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} />
-                      <Tooltip {...WHITE_TOOLTIP_STYLE} />
-                      <Bar dataKey="tasks" fill="#171918" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="h-44 w-full flex items-center justify-center">
+                  {PERFORMANCE_DATA.length === 0 ? (
+                    <div className="text-center text-xs text-gray-400">
+                      <p className="font-medium text-gray-500 dark:text-gray-400">No performance telemetry available</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Execution throughput metrics will populate as agent tasks execute.</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={PERFORMANCE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <XAxis dataKey="agent" stroke="#94A3B8" fontSize={10} tickLine={false} />
+                        <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} />
+                        <Tooltip {...WHITE_TOOLTIP_STYLE} />
+                        <Bar dataKey="tasks" fill="#171918" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </div>
 
@@ -1353,16 +1102,23 @@ export default function AIAgentsPage() {
                   <span className="text-[11px] text-gray-400">Tokens %</span>
                 </div>
                 <div className="h-36 w-full flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={MODEL_DATA} innerRadius={42} outerRadius={62} dataKey="value" paddingAngle={4}>
-                        {MODEL_DATA.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip {...WHITE_TOOLTIP_STYLE} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  {MODEL_DATA.length === 0 ? (
+                    <div className="text-center text-xs text-gray-400">
+                      <p className="font-medium text-gray-500 dark:text-gray-400">No model usage recorded</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Token distribution and provider metrics will display after runs.</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={MODEL_DATA} innerRadius={42} outerRadius={62} dataKey="value" paddingAngle={4}>
+                          {MODEL_DATA.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip {...WHITE_TOOLTIP_STYLE} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
                 <div className="flex items-center justify-around text-[10px] text-gray-500 pt-1 border-t border-gray-100 dark:border-[#22302B]">
                   {MODEL_DATA.map((m) => (
@@ -1410,7 +1166,7 @@ export default function AIAgentsPage() {
             <div className="lg:col-span-7 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-xs text-[#171918] dark:text-white">Recent Agent Runs</h3>
-                <span className="text-[11px] text-emerald-600 font-semibold">Live Feed</span>
+                <span className="text-[11px] text-gray-400 font-semibold">{RECENT_RUNS_DATA.length > 0 ? "Live Feed" : "No Active Runs"}</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
@@ -1424,23 +1180,31 @@ export default function AIAgentsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50 text-[11px]">
-                    {RECENT_RUNS_DATA.map((run) => (
-                      <tr key={run.id} className="hover:bg-gray-50/50">
-                        <td className="py-2.5 font-bold text-gray-800">{run.agent}</td>
-                        <td className="py-2.5 text-gray-600">{run.task}</td>
-                        <td className="py-2.5 text-gray-400">{run.trigger}</td>
-                        <td className="py-2.5 font-mono text-gray-500">{run.duration}</td>
-                        <td className="py-2.5 text-right">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            run.status === "Success"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-amber-50 text-amber-700 border border-amber-200"
-                          }`}>
-                            {run.status}
-                          </span>
+                    {RECENT_RUNS_DATA.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-xs text-gray-400">
+                          No recent agent runs recorded in the current session.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      RECENT_RUNS_DATA.map((run) => (
+                        <tr key={run.id} className="hover:bg-gray-50/50">
+                          <td className="py-2.5 font-bold text-gray-800">{run.agent}</td>
+                          <td className="py-2.5 text-gray-600">{run.task}</td>
+                          <td className="py-2.5 text-gray-400">{run.trigger}</td>
+                          <td className="py-2.5 font-mono text-gray-500">{run.duration}</td>
+                          <td className="py-2.5 text-right">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              run.status === "Success"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}>
+                              {run.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1450,21 +1214,27 @@ export default function AIAgentsPage() {
             <div className="lg:col-span-5 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4.5 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-xs text-[#171918] dark:text-white">Upcoming Tasks Queue</h3>
-                <span className="text-[11px] text-gray-400 font-medium">3 Scheduled</span>
+                <span className="text-[11px] text-gray-400 font-medium">{UPCOMING_TASKS_DATA.length} Scheduled</span>
               </div>
               <div className="space-y-2 text-xs">
-                {UPCOMING_TASKS_DATA.map((task) => (
-                  <div key={task.id} className="p-2.5 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-xs text-gray-800">{task.agent}</div>
-                      <div className="text-[10px] text-gray-500">{task.task}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[11px] font-bold text-blue-600">{task.scheduled}</div>
-                      <div className="text-[9px] text-gray-400 uppercase font-semibold">{task.priority} Priority</div>
-                    </div>
+                {UPCOMING_TASKS_DATA.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-gray-400">
+                    No scheduled tasks queued.
                   </div>
-                ))}
+                ) : (
+                  UPCOMING_TASKS_DATA.map((task) => (
+                    <div key={task.id} className="p-2.5 rounded-lg bg-[#FAF9F6] dark:bg-[#121816] border border-gray-100 dark:border-[#22302B] flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-xs text-gray-800">{task.agent}</div>
+                        <div className="text-[10px] text-gray-500">{task.task}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[11px] font-bold text-blue-600">{task.scheduled}</div>
+                        <div className="text-[9px] text-gray-400 uppercase font-semibold">{task.priority} Priority</div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

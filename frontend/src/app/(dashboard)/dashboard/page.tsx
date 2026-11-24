@@ -58,17 +58,36 @@ function DashboardContent() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     setIsLoading(true);
     Promise.all([
-      fetch(`/api/dashboard/metrics?timeframe=${encodeURIComponent(range)}`).then((r) => r.json()),
-      fetch("/api/dashboard/activity").then((r) => r.json()),
+      fetch(`/api/dashboard/metrics?timeframe=${encodeURIComponent(range)}`, {
+        signal: controller.signal,
+      }).then((r) => r.json()),
+      fetch("/api/dashboard/activity", {
+        signal: controller.signal,
+      }).then((r) => r.json()),
     ])
       .then(([metricsRes, activityRes]) => {
-        setData(metricsRes);
-        setActivityData(activityRes?.activities || []);
+        if (!controller.signal.aborted) {
+          setData(metricsRes);
+          setActivityData(activityRes?.activities || []);
+        }
       })
-      .catch((err) => console.error("Failed to load dashboard data:", err))
-      .finally(() => setIsLoading(false));
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Failed to load dashboard data:", err);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, [range]);
 
   return (

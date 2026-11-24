@@ -228,21 +228,13 @@ export class AgentOrchestrator {
   }
 
   /**
-   * Approves a paused execution waiting in AWAITING_APPROVAL state.
+   * M0 subtraction: approval is not implemented. The previous implementation
+   * returned a canned success with invented token and cost figures.
    */
-  static async approveRun(runId: string, approverId: string): Promise<ExecutionResult> {
-    return {
-      runId,
-      agentId: "approved-run",
-      agentName: "Approved Execution",
-      status: "COMPLETED",
-      outputPayload: { approved: true, approvedBy: approverId },
-      requiresApproval: false,
-      tokensUsed: 400,
-      durationMs: 250,
-      costEstimatedUsd: 0.0001,
-      logs: [{ timestamp: new Date(), level: "info", message: `Approved by ${approverId}` }],
-    };
+  static async approveRun(_runId: string, _approverId: string): Promise<ExecutionResult> {
+    throw new Error(
+      "approval_not_implemented: no approval record exists and no run was resumed"
+    );
   }
 
   /**

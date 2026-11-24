@@ -43,7 +43,7 @@ The table below provides verifiable proof for each setup phase as mandated by Ph
 ## 3. Branching & Synchronization State
 
 - **Branch Convention Active:**
-  - `main`: Protected production branch.
+  - `main`: Production branch (requires branch protection rulesets / repo policy safeguards to prevent direct pushes).
   - `feature/*`: Product features.
   - `agent/antigravity/*`: Implementation branches for Antigravity tasks.
   - `review/*`: PR review resolution branches.

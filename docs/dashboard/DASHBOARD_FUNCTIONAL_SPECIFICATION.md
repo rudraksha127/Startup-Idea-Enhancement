@@ -98,9 +98,10 @@ All dashboard calculations follow strict accounting and operational formulas der
   "growthHistory": [],
   "sources": [],
   "revenueOverview": {
-    "totalBilled": 0,
-    "monthlyData": [],
-    "currency": "INR"
+    "totalFormatted": "₹0",
+    "totalRaw": 0,
+    "trend": "No prior period",
+    "monthly": []
   },
   "agents": [
     { "name": "Research Agent", "role": "Scanning locations", "status": "Idle", "processedToday": 0, "dailyTarget": 50 },

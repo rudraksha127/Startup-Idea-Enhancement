@@ -14,11 +14,11 @@
 | **AGENCYOS-000** | Multi-Agent Collaboration Infrastructure Setup | **CRITICAL** | Antigravity | ChatGPT / Rudraksh | `DONE` | `agent/antigravity/setup-collaboration` | [#1](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1) |
 | **AGENCYOS-001** | Complete Repository Engineering Audit | **CRITICAL** | Antigravity | ChatGPT | `IN_PROGRESS` | `agent/antigravity/setup-collaboration` | [#1](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1) |
 | **AGENCYOS-002** | 77-Screen Blueprint Alignment & Route Inventory | **P1** | Antigravity | ChatGPT | `BACKLOG` | `feature/blueprint-alignment` | - |
-| **AGENCYOS-003** | Cloudflare Pages Static Export Optimization & Route Audit | **P1** | Antigravity | ChatGPT | `feature/cloudflare-pages-export` | - |
-| **AGENCYOS-004** | Zoho Catalyst AppSail Express API Contract Harmonization | **P1** | Antigravity | ChatGPT | `feature/catalyst-api-harmonization` | - |
-| **AGENCYOS-005** | Multi-Tenant Data Store Isolation & Policy Hardening | **P0** | Antigravity | ChatGPT | `feature/datastore-isolation` | - |
-| **AGENCYOS-006** | AI Agent Gateway Multi-Provider Token Budget & Fallbacks | **P1** | Antigravity | ChatGPT | `feature/ai-gateway-governance` | - |
-| **AGENCYOS-007** | Automated n8n Webhook Ingestion & Audit Pipeline Validation | **P2** | Antigravity | ChatGPT | `feature/n8n-webhook-validation` | - |
+| **AGENCYOS-003** | Cloudflare Pages Static Export Optimization & Route Audit | **P1** | Antigravity | ChatGPT | `BACKLOG` | `feature/cloudflare-pages-export` | - |
+| **AGENCYOS-004** | Zoho Catalyst AppSail Express API Contract Harmonization | **P1** | Antigravity | ChatGPT | `BACKLOG` | `feature/catalyst-api-harmonization` | - |
+| **AGENCYOS-005** | Multi-Tenant Data Store Isolation & Policy Hardening | **P0** | Antigravity | ChatGPT | `BACKLOG` | `feature/datastore-isolation` | - |
+| **AGENCYOS-006** | AI Agent Gateway Multi-Provider Token Budget & Fallbacks | **P1** | Antigravity | ChatGPT | `BACKLOG` | `feature/ai-gateway-governance` | - |
+| **AGENCYOS-007** | Automated n8n Webhook Ingestion & Audit Pipeline Validation | **P2** | Antigravity | ChatGPT | `BACKLOG` | `feature/n8n-webhook-validation` | - |
 
 ---
 

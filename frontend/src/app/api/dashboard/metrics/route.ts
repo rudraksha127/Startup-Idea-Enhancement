@@ -31,10 +31,10 @@ export async function GET() {
             qualifiedLeads,
             activeOutreaches,
             convertedClients,
-            leadsTrend: totalLeads > 0 ? (data.metrics.leadsTrend || "+0%") : "No prior period",
-            qualifiedTrend: qualifiedLeads > 0 ? (data.metrics.qualifiedTrend || "+0%") : "No prior period",
-            outreachTrend: activeOutreaches > 0 ? (data.metrics.outreachTrend || "+0%") : "No prior period",
-            convertedTrend: convertedClients > 0 ? (data.metrics.convertedTrend || "+0%") : "No prior period",
+            leadsTrend: data.metrics.leadsTrend || "No prior period",
+            qualifiedTrend: data.metrics.qualifiedTrend || "No prior period",
+            outreachTrend: data.metrics.outreachTrend || "No prior period",
+            convertedTrend: data.metrics.convertedTrend || "No prior period",
           },
           growthHistory: Array.isArray(data.growthHistory) ? data.growthHistory : [],
           sources: totalLeads > 0 && Array.isArray(data.sources) ? data.sources : [],
@@ -103,7 +103,7 @@ export async function GET() {
       agents,
     ] = await Promise.all([
       Lead.countDocuments({ organizationId: orgId }),
-      Lead.countDocuments({ organizationId: orgId, status: { $in: ["Contacted", "Qualified"] } }),
+      Lead.countDocuments({ organizationId: orgId, $or: [{ status: "Contacted" }, { lastContactedAt: { $ne: null } }] }),
       Lead.countDocuments({ organizationId: orgId, status: { $in: ["Interested", "Replied"] } }),
       Lead.countDocuments({ organizationId: orgId, status: "Converted" }),
       Lead.aggregate([
@@ -130,19 +130,13 @@ export async function GET() {
         }))
       : [];
 
-    const growthHistory = totalLeads > 0
-      ? [
-          { month: "Jan", leadsFound: 0, contacted: 0, replies: 0, clients: 0 },
-          { month: "Feb", leadsFound: 0, contacted: 0, replies: 0, clients: 0 },
-          { month: "Mar", leadsFound: totalLeads, contacted: qualifiedLeads, replies: activeOutreaches, clients: convertedClients },
-        ]
-      : [];
+    const growthHistory: any[] = [];
 
     const revenueOverview = {
-      totalFormatted: convertedClients > 0 ? `₹${(convertedClients * 35000).toLocaleString("en-IN")}` : "₹0",
-      totalRaw: convertedClients * 35000,
-      trend: convertedClients > 0 ? "+0%" : "No prior period",
-      monthly: convertedClients > 0 ? [{ month: "Current", amount: convertedClients * 35000 }] : [],
+      totalFormatted: "₹0",
+      totalRaw: 0,
+      trend: "No prior period",
+      monthly: [],
     };
 
     return NextResponse.json({
@@ -151,10 +145,10 @@ export async function GET() {
         qualifiedLeads,
         activeOutreaches,
         convertedClients,
-        leadsTrend: totalLeads > 0 ? "+0%" : "No prior period",
-        qualifiedTrend: qualifiedLeads > 0 ? "+0%" : "No prior period",
-        outreachTrend: activeOutreaches > 0 ? "+0%" : "No prior period",
-        convertedTrend: convertedClients > 0 ? "+0%" : "No prior period",
+        leadsTrend: "No prior period",
+        qualifiedTrend: "No prior period",
+        outreachTrend: "No prior period",
+        convertedTrend: "No prior period",
       },
       growthHistory,
       sources,

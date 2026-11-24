@@ -55,5 +55,5 @@ We accept **Option C**:
 4. Rudraksh holds sole authority to merge pull requests into `main` and execute production deployments.
 
 #### 4. Consequences
-- **Positive:** Absolute auditability, zero secret leakage risk, resilient to IDE restarts, seamless asynchronous coordination.
+- **Positive:** Absolute auditability, strict policy prohibiting committing or pushing secrets (mitigating exposure risk), resilient to IDE restarts, seamless asynchronous coordination.
 - **Negative:** Agents must conscientiously update handoff documents and git logs upon completing each task.

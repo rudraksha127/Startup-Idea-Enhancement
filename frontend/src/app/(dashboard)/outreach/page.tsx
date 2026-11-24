@@ -64,13 +64,13 @@ import {
 import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
 // Outreach 30-Day Performance Data matching Image 2
-const SEQUENCE_PERFORMANCE_DATA = [
-  { day: "Mar 1", sent: 350, opened: 240, replied: 42, meetings: 14 },
-  { day: "Mar 7", sent: 580, opened: 410, replied: 68, meetings: 21 },
-  { day: "Mar 14", sent: 842, opened: 571, replied: 102, meetings: 41 },
-  { day: "Mar 21", sent: 980, opened: 680, replied: 115, meetings: 48 },
-  { day: "Mar 28", sent: 1120, opened: 790, replied: 138, meetings: 56 },
-];
+const SEQUENCE_PERFORMANCE_DATA: Array<{
+  day: string;
+  sent: number;
+  opened: number;
+  replied: number;
+  meetings: number;
+}> = [];
 
 interface CampaignItem {
   id: string;
@@ -86,15 +86,6 @@ interface CampaignItem {
   status: "Active" | "Paused" | "Draft" | "Completed";
   createdAt: string;
 }
-
-const DEFAULT_CAMPAIGNS: CampaignItem[] = [
-  { id: "1", name: "Indore Restaurants", service: "Website Development", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Restaurants Indore", sent: 542, opens: "68%", replies: "12%", meetings: 28, status: "Active", createdAt: "12 Mar 2024" },
-  { id: "2", name: "Jaipur Cafes", service: "Website + SEO", type: "Email + Follow-up", typeBadgeBg: "bg-purple-50 text-purple-700", audience: "Cafes Jaipur", sent: 432, opens: "62%", replies: "10%", meetings: 18, status: "Active", createdAt: "10 Mar 2024" },
-  { id: "3", name: "Delhi Clinics", service: "Booking Website", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Clinics New Delhi", sent: 612, opens: "71%", replies: "14%", meetings: 32, status: "Active", createdAt: "8 Mar 2024" },
-  { id: "4", name: "Fitness Gyms", service: "Website Redesign", type: "LinkedIn + Email", typeBadgeBg: "bg-indigo-50 text-indigo-700", audience: "Gyms Indore", sent: 284, opens: "58%", replies: "8%", meetings: 12, status: "Paused", createdAt: "5 Mar 2024" },
-  { id: "5", name: "Fashion Stores", service: "Ecommerce", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Retail Stores Indore", sent: 468, opens: "66%", replies: "11%", meetings: 16, status: "Active", createdAt: "3 Mar 2024" },
-  { id: "6", name: "Hotels in MP", service: "Booking Website", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Hotels Madhya Pradesh", sent: 320, opens: "64%", replies: "9%", meetings: 11, status: "Draft", createdAt: "28 Feb 2024" },
-];
 
 export default function OutreachPage() {
   // Navigation tabs: Default to sequence builder as shown in screenshot
@@ -122,7 +113,7 @@ export default function OutreachPage() {
   );
 
   // Campaigns list state
-  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>(DEFAULT_CAMPAIGNS);
+  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>([]);
   const [campaignSearch, setCampaignSearch] = useState("");
   const [activeCampaignFilter, setActiveCampaignFilter] = useState("All");
 
@@ -262,9 +253,9 @@ export default function OutreachPage() {
             <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-bold text-[#171918] dark:text-white">1,248</span>
-                  <span className="text-[10px] font-bold text-[#059669] bg-[#ECFDF5] px-1 py-0.2 rounded border border-[#A7F3D0]">
-                    ↑ 32%
+                  <span className="text-xl font-bold text-[#171918] dark:text-white">0</span>
+                  <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-1 py-0.2 rounded border border-gray-200">
+                    No data
                   </span>
                 </div>
                 <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E] mt-0.5">Total Leads</div>
@@ -278,9 +269,9 @@ export default function OutreachPage() {
             <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-bold text-[#171918] dark:text-white">892</span>
-                  <span className="text-[10px] font-bold text-[#059669] bg-[#ECFDF5] px-1 py-0.2 rounded border border-[#A7F3D0]">
-                    ↑ 28%
+                  <span className="text-xl font-bold text-[#171918] dark:text-white">0</span>
+                  <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-1 py-0.2 rounded border border-gray-200">
+                    No data
                   </span>
                 </div>
                 <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E] mt-0.5">Emails Sent</div>
@@ -294,9 +285,9 @@ export default function OutreachPage() {
             <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-bold text-[#171918] dark:text-white">142</span>
-                  <span className="text-[10px] font-bold text-[#059669] bg-[#ECFDF5] px-1 py-0.2 rounded border border-[#A7F3D0]">
-                    ↑ 18%
+                  <span className="text-xl font-bold text-[#171918] dark:text-white">0</span>
+                  <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-1 py-0.2 rounded border border-gray-200">
+                    No data
                   </span>
                 </div>
                 <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E] mt-0.5">Replies Received</div>
@@ -310,9 +301,9 @@ export default function OutreachPage() {
             <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-bold text-[#171918] dark:text-white">38</span>
-                  <span className="text-[10px] font-bold text-[#059669] bg-[#ECFDF5] px-1 py-0.2 rounded border border-[#A7F3D0]">
-                    ↑ 25%
+                  <span className="text-xl font-bold text-[#171918] dark:text-white">0</span>
+                  <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-1 py-0.2 rounded border border-gray-200">
+                    No data
                   </span>
                 </div>
                 <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E] mt-0.5">Meetings Booked</div>
@@ -326,9 +317,9 @@ export default function OutreachPage() {
             <div className="p-3.5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-2xs flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-bold text-[#171918] dark:text-white">4.6%</span>
-                  <span className="text-[10px] font-bold text-[#059669] bg-[#ECFDF5] px-1 py-0.2 rounded border border-[#A7F3D0]">
-                    ↑ 1.2%
+                  <span className="text-xl font-bold text-[#171918] dark:text-white">—</span>
+                  <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-1 py-0.2 rounded border border-gray-200">
+                    No data
                   </span>
                 </div>
                 <div className="text-[11px] text-[#68717D] dark:text-[#9AA29E] mt-0.5">Conversion Rate</div>
@@ -894,19 +885,19 @@ export default function OutreachPage() {
               {/* 4 Summary Badges */}
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
                 <div className="p-2 rounded-lg bg-blue-50/60 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40">
-                  <span className="font-extrabold text-blue-700 dark:text-blue-300 block text-sm">2,847</span>
+                  <span className="font-extrabold text-blue-700 dark:text-blue-300 block text-sm">0</span>
                   <span className="text-[10px] text-gray-500">Leads Enrolled</span>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-50/60 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
-                  <span className="font-extrabold text-emerald-700 dark:text-emerald-300 block text-sm">68%</span>
+                  <span className="font-extrabold text-emerald-700 dark:text-emerald-300 block text-sm">—</span>
                   <span className="text-[10px] text-gray-500">Open Rate</span>
                 </div>
                 <div className="p-2 rounded-lg bg-amber-50/60 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
-                  <span className="font-extrabold text-amber-700 dark:text-amber-300 block text-sm">12%</span>
+                  <span className="font-extrabold text-amber-700 dark:text-amber-300 block text-sm">—</span>
                   <span className="text-[10px] text-gray-500">Reply Rate</span>
                 </div>
                 <div className="p-2 rounded-lg bg-purple-50/60 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/40">
-                  <span className="font-extrabold text-purple-700 dark:text-purple-300 block text-sm">38</span>
+                  <span className="font-extrabold text-purple-700 dark:text-purple-300 block text-sm">0</span>
                   <span className="text-[10px] text-gray-500">Meetings Booked</span>
                 </div>
               </div>
@@ -928,6 +919,11 @@ export default function OutreachPage() {
               </div>
 
               {/* Recharts Multi-Line Graph */}
+              {SEQUENCE_PERFORMANCE_DATA.length === 0 && (
+                <p className="text-[11px] text-gray-500 text-center py-2">
+                  No performance data recorded.
+                </p>
+              )}
               <div className="h-40 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={SEQUENCE_PERFORMANCE_DATA}>
@@ -1020,6 +1016,13 @@ export default function OutreachPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E7E7E2] dark:divide-[#22302B]">
+                  {campaignsList.length === 0 && (
+                    <tr>
+                      <td colSpan={10} className="py-8 px-4 text-center text-[11px] text-gray-500">
+                        No campaigns. Nothing is stored and no campaign has been sent.
+                      </td>
+                    </tr>
+                  )}
                   {campaignsList.map((c) => (
                     <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-[#1E2824] transition-colors">
                       <td className="py-3 px-4 font-bold text-[#171918] dark:text-white">{c.name}</td>

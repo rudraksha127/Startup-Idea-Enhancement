@@ -7,7 +7,7 @@ interface AgentItem {
   _id?: string;
   name: string;
   role: string;
-  status: "Active" | "Idle" | "Paused" | "Ready";
+  status: "Active" | "Idle" | "Paused" | "Ready" | "Running";
   dailyTarget?: number;
   processedToday?: number;
 }
@@ -33,7 +33,7 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
     return {
       name: base.name,
       role: matched?.role || base.defaultRole,
-      status: (matched?.status as "Active" | "Idle" | "Paused" | "Ready") || "Idle",
+      status: (matched?.status as "Active" | "Idle" | "Paused" | "Ready" | "Running") || "Idle",
       processedToday: matched?.processedToday || 0,
       icon: base.icon,
       color: base.color,
@@ -58,7 +58,8 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {agentList.map((agent) => {
           const Icon = agent.icon;
-          const isActive = agent.status === "Active";
+          const isPaused = agent.status?.toLowerCase() === "paused";
+          const isActive = agent.status === "Active" || agent.status === "Running";
 
           return (
             <Link
@@ -79,6 +80,10 @@ export function AIAgentsCard({ agents }: AIAgentsCardProps) {
                 {isActive ? (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active
+                  </span>
+                ) : isPaused ? (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Paused
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">

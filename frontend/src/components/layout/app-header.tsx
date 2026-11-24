@@ -94,6 +94,27 @@ export function AppHeader({ onToggleMobileNav, onDateRangeChange }: AppHeaderPro
   const [dateRange, setDateRange] = useState(() => getCurrentMonthLabel());
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
 
+  // Synchronize dateRange with URL query parameters and browser navigation
+  const currentRangeParam = searchParams?.get("range");
+  useEffect(() => {
+    if (!currentRangeParam || currentRangeParam === "this_month") {
+      setDateRange(getCurrentMonthLabel());
+    } else if (currentRangeParam === "7d" || currentRangeParam === "last_7_days") {
+      setDateRange("Last 7 days");
+    } else if (currentRangeParam === "30d" || currentRangeParam === "last_30_days") {
+      setDateRange("Last 30 days");
+    } else if (currentRangeParam === "ytd" || currentRangeParam === "this_year") {
+      setDateRange("This year");
+    } else if (currentRangeParam === "today") {
+      setDateRange("Today");
+    } else if (currentRangeParam === "yesterday") {
+      setDateRange("Yesterday");
+    } else {
+      const formatted = currentRangeParam.replace(/_/g, " ");
+      setDateRange(formatted.charAt(0).toUpperCase() + formatted.slice(1));
+    }
+  }, [currentRangeParam]);
+
   // Notification State
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -138,23 +159,38 @@ export function AppHeader({ onToggleMobileNav, onDateRangeChange }: AppHeaderPro
     setSearchOpen(true);
     setSelectedIndex(-1);
 
+    const controller = new AbortController();
+    const queryTerm = searchQuery.trim();
+
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(queryTerm)}`, {
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return;
         if (res.ok) {
           const data = await res.json();
-          setSearchResults(data.results || []);
+          if (!controller.signal.aborted) {
+            setSearchResults(data.results || []);
+          }
         } else {
+          if (!controller.signal.aborted) setSearchResults([]);
+        }
+      } catch (err: any) {
+        if (err?.name !== "AbortError") {
           setSearchResults([]);
         }
-      } catch {
-        setSearchResults([]);
       } finally {
-        setIsSearching(false);
+        if (!controller.signal.aborted) {
+          setIsSearching(false);
+        }
       }
     }, 220);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [searchQuery]);
 
   // Global Keyboard Shortcuts
@@ -227,9 +263,16 @@ export function AppHeader({ onToggleMobileNav, onDateRangeChange }: AppHeaderPro
     setDateRange(option);
     setDateMenuOpen(false);
     onDateRangeChange?.(option);
-    // Update URL param if on dashboard
+
+    // Map selections to normalized backend range parameters
+    let rangeVal = option.toLowerCase().replace(/\s+/g, "_");
+    if (option === "Last 7 days") rangeVal = "7d";
+    else if (option === "Last 30 days") rangeVal = "30d";
+    else if (option === "This year" || option === "Year to date") rangeVal = "ytd";
+    else if (option === "This month") rangeVal = "this_month";
+
     const params = new URLSearchParams(searchParams?.toString() || "");
-    params.set("range", option.toLowerCase().replace(/\s+/g, "_"));
+    params.set("range", rangeVal);
     router.replace(`/dashboard?${params.toString()}`);
   };
 
@@ -250,9 +293,11 @@ export function AppHeader({ onToggleMobileNav, onDateRangeChange }: AppHeaderPro
   const handleSignOut = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
     } catch {
+      // Endpoint error fallback
+    } finally {
       router.push("/login");
+      router.refresh();
     }
   };
 

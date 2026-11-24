@@ -57,293 +57,14 @@ interface BusinessResult {
 }
 
 // 10 Detailed realistic businesses matching the design screenshot
-const REALISTIC_BUSINESSES: BusinessResult[] = [
-  {
-    id: "biz-1",
-    name: "The Urban Kitchen",
-    rating: 4.4,
-    reviews: 1234,
-    category: "Restaurant",
-    distance: "0.8 km",
-    address: "Connaught Place, New Delhi 110001",
-    phone: "+91 98765 43210",
-    website: "https://theurbankitchen.in",
-    img: "/assets/urban-kitchen.jpg",
-    gallery: [
-      "/assets/urban-kitchen.jpg",
-      "/assets/templates/restaurant.jpg",
-      "/assets/templates/hotel.jpg",
-      "/assets/templates/cafe.jpg",
-    ],
-    opportunityScore: 8.5,
-    hours: "Open • Closes 11:00 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "No website found or outdated",
-      "High number of customer reviews",
-      "Weak social media presence",
-      "Good location and brand presence",
-      "Potential for online reservations",
-    ],
-    pinColor: "orange",
-    mapCoord: { x: 58, y: 38 },
-  },
-  {
-    id: "biz-2",
-    name: "Spice Junction",
-    rating: 4.6,
-    reviews: 892,
-    category: "Restaurant",
-    distance: "1.2 km",
-    address: "Scheme 54, Vijay Nagar, Indore 452010",
-    phone: "+91 98260 11223",
-    website: "https://spicejunction-indore.com",
-    img: "/assets/templates/restaurant.jpg",
-    gallery: ["/assets/templates/restaurant.jpg", "/assets/urban-kitchen.jpg"],
-    opportunityScore: 7.8,
-    hours: "Open • Closes 11:30 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "Menu not mobile-friendly",
-      "890+ active customer reviews",
-      "No online table reservation",
-      "Prime Vijay Nagar commercial hub",
-      "Fast ROI on modern web presence",
-    ],
-    pinColor: "red",
-    mapCoord: { x: 52, y: 41 },
-  },
-  {
-    id: "biz-3",
-    name: "Flavors of India",
-    rating: 4.3,
-    reviews: 764,
-    category: "Restaurant",
-    distance: "1.4 km",
-    address: "AB Road, Near Palasia Square, Indore 452001",
-    phone: "+91 98261 44556",
-    website: "",
-    img: "/assets/templates/hotel.jpg",
-    gallery: ["/assets/templates/hotel.jpg", "/assets/templates/restaurant.jpg"],
-    opportunityScore: 8.9,
-    hours: "Open • Closes 10:30 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "No active website domain registered",
-      "Competitor websites outranking on Google",
-      "High walk-in review velocity",
-      "Great candidate for instant AI website build",
-      "Online order button absent",
-    ],
-    pinColor: "red",
-    mapCoord: { x: 44, y: 52 },
-  },
-  {
-    id: "biz-4",
-    name: "Tandoori Nights",
-    rating: 4.1,
-    reviews: 986,
-    category: "Restaurant",
-    distance: "1.8 km",
-    address: "Chhatripura Main Road, Indore 452007",
-    phone: "+91 98262 77889",
-    website: "",
-    img: "/assets/templates/restaurant.jpg",
-    gallery: ["/assets/templates/restaurant.jpg"],
-    opportunityScore: 8.2,
-    hours: "Open • Closes 12:00 AM",
-    priceRange: "₹ (Budget-Friendly)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "Zero digital presence beyond Google Pin",
-      "Late-night dining hotspot",
-      "Over 980 positive food reviews",
-      "High demand for digital QR menu",
-      "Can easily add WhatsApp direct ordering",
-    ],
-    pinColor: "orange",
-    mapCoord: { x: 62, y: 45 },
-  },
-  {
-    id: "biz-5",
-    name: "Café Central",
-    rating: 4.5,
-    reviews: 632,
-    category: "Cafe",
-    distance: "2.1 km",
-    address: "Pipliyahana Road, Near World Cup Square, Indore",
-    phone: "+91 98263 99001",
-    website: "https://cafecentral.co.in",
-    img: "/assets/templates/cafe.jpg",
-    gallery: ["/assets/templates/cafe.jpg", "/assets/urban-kitchen.jpg"],
-    opportunityScore: 7.4,
-    hours: "Open • Closes 11:00 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "Medium Potential",
-    oppChecklist: [
-      "Slow WordPress site (>5.2s load)",
-      "High youth demographic engagement",
-      "No event booking landing page",
-      "Instagram bio links to broken page",
-      "Prime target for modern Next.js revamp",
-    ],
-    pinColor: "orange",
-    mapCoord: { x: 38, y: 63 },
-  },
-  {
-    id: "biz-6",
-    name: "The Food Factory",
-    rating: 4.2,
-    reviews: 421,
-    category: "Restaurant",
-    distance: "2.3 km",
-    address: "Bhanwarkuan Main Road, Indore 452014",
-    phone: "+91 98264 22334",
-    website: "",
-    img: "/assets/templates/restaurant.jpg",
-    gallery: ["/assets/templates/restaurant.jpg"],
-    opportunityScore: 8.6,
-    hours: "Open • Closes 11:00 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "Missing website link on Google Maps",
-      "Close to major university colleges",
-      "Huge student traffic needing delivery menu",
-      "Low digital marketing competition in local radius",
-      "Easy conversion to recurring retainer",
-    ],
-    pinColor: "red",
-    mapCoord: { x: 46, y: 69 },
-  },
-  {
-    id: "biz-7",
-    name: "Hotel Grand Plaza",
-    rating: 4.4,
-    reviews: 512,
-    category: "Hotel",
-    distance: "2.5 km",
-    address: "South Tukoganj, Near Railway Station, Indore 452001",
-    phone: "+91 98265 55667",
-    website: "https://grandplazaindore.com",
-    img: "/assets/templates/hotel.jpg",
-    gallery: ["/assets/templates/hotel.jpg"],
-    opportunityScore: 7.9,
-    hours: "Open 24 Hours",
-    priceRange: "₹₹₹ (Upscale)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "OTA commissions eating 22% profits",
-      "Direct room booking engine required",
-      "Outdated non-responsive website",
-      "Corporate banquet hall marketing needed",
-      "High budget agency prospect ($2,500+ deal)",
-    ],
-    pinColor: "blue",
-    mapCoord: { x: 67, y: 65 },
-  },
-  {
-    id: "biz-8",
-    name: "Brew & Bites",
-    rating: 4.3,
-    reviews: 389,
-    category: "Cafe",
-    distance: "2.7 km",
-    address: "New Palasia, 56 Dukan Area, Indore 452001",
-    phone: "+91 98266 77880",
-    website: "",
-    img: "/assets/templates/cafe.jpg",
-    gallery: ["/assets/templates/cafe.jpg"],
-    opportunityScore: 8.1,
-    hours: "Open • Closes 11:00 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "Prime 56 Dukan foodie tourist hub",
-      "No official website or Google catalog",
-      "High customer interest in artisan coffee",
-      "Social media traffic wasted without lead capture",
-      "Ready for instant proposal delivery",
-    ],
-    pinColor: "orange",
-    mapCoord: { x: 51, y: 74 },
-  },
-  {
-    id: "biz-9",
-    name: "The Green Bowl",
-    rating: 4.6,
-    reviews: 298,
-    category: "Healthy Food",
-    distance: "2.8 km",
-    address: "Old Palasia, Indore 452018",
-    phone: "+91 98267 88991",
-    website: "https://thegreenbowl.in",
-    img: "/assets/templates/restaurant.jpg",
-    gallery: ["/assets/templates/restaurant.jpg"],
-    opportunityScore: 7.2,
-    hours: "Open • Closes 10:00 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "Medium Potential",
-    oppChecklist: [
-      "Clean diet and meal plan subscription absent",
-      "High average order value",
-      "Website lacks SEO optimization for local search",
-      "Good potential for recurring monthly retainers",
-      "Fast response to WhatsApp outreach",
-    ],
-    pinColor: "green",
-    mapCoord: { x: 42, y: 32 },
-  },
-  {
-    id: "biz-10",
-    name: "Royal Dine",
-    rating: 4.1,
-    reviews: 450,
-    category: "Restaurant",
-    distance: "3.1 km",
-    address: "Annapurna Road, Near Temple, Indore 452009",
-    phone: "+91 98268 00112",
-    website: "",
-    img: "/assets/templates/restaurant.jpg",
-    gallery: ["/assets/templates/restaurant.jpg"],
-    opportunityScore: 8.7,
-    hours: "Open • Closes 11:00 PM",
-    priceRange: "₹₹ (Moderate)",
-    source: "Google Maps",
-    potential: "High Potential",
-    oppChecklist: [
-      "Traditional family restaurant lacking digital presence",
-      "Over 450 positive reviews on Maps",
-      "Zero competition from nearby websites",
-      "Family dining booking portal opportunity",
-      "Immediate conversion potential",
-    ],
-    pinColor: "yellow",
-    mapCoord: { x: 48, y: 81 },
-  },
-];
-
-// Cluster definitions matching the screenshot
 const MAP_CLUSTERS = [
-  { id: "c1", label: "28", x: 50, y: 46, color: "bg-[#EA4335]", size: "w-8 h-8", text: "text-white" },
-  { id: "c2", label: "24", x: 58, y: 77, color: "bg-[#EA4335]", size: "w-8 h-8", text: "text-white" },
-  { id: "c3", label: "12", x: 45, y: 40, color: "bg-[#4285F4]", size: "w-7 h-7", text: "text-white" },
-  { id: "c4", label: "15", x: 58, y: 63, color: "bg-[#4285F4]", size: "w-7 h-7", text: "text-white" },
-  { id: "c5", label: "8", x: 65, y: 42, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
-  { id: "c6", label: "6", x: 44, y: 73, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
-  { id: "c7", label: "10", x: 63, y: 82, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
+  { id: "c1", label: "", x: 50, y: 46, color: "bg-[#EA4335]", size: "w-8 h-8", text: "text-white" },
+  { id: "c2", label: "", x: 58, y: 77, color: "bg-[#EA4335]", size: "w-8 h-8", text: "text-white" },
+  { id: "c3", label: "", x: 45, y: 40, color: "bg-[#4285F4]", size: "w-7 h-7", text: "text-white" },
+  { id: "c4", label: "", x: 58, y: 63, color: "bg-[#4285F4]", size: "w-7 h-7", text: "text-white" },
+  { id: "c5", label: "", x: 65, y: 42, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
+  { id: "c6", label: "", x: 44, y: 73, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
+  { id: "c7", label: "", x: 63, y: 82, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
 ];
 
 const CATEGORY_PILLS = [
@@ -361,8 +82,8 @@ const CATEGORY_PILLS = [
 ];
 
 export default function MapExplorerPage() {
-  const [businesses, setBusinesses] = useState<BusinessResult[]>(REALISTIC_BUSINESSES);
-  const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult>(REALISTIC_BUSINESSES[0]);
+  const [businesses, setBusinesses] = useState<BusinessResult[]>([]);
+  const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult | null>(null);
   const [searchQuery, setSearchQuery] = useState("Restaurant");
   const [selectedCity, setSelectedCity] = useState("Indore, Madhya Pradesh");
   const [activeCategoryPill, setActiveCategoryPill] = useState("Restaurant");
@@ -401,26 +122,26 @@ export default function MapExplorerPage() {
           category: biz.category || "Restaurant",
           address: biz.address,
           city: selectedCity.split(",")[0].trim(),
-          phone: biz.phone || "+91 98000 00000",
+          phone: biz.phone,
           website: biz.website || "",
-          rating: biz.rating || 4.2,
-          reviewCount: biz.reviews || 100,
-          opportunityScore: biz.opportunityScore || 8.0,
+          rating: biz.rating,
+          reviewCount: biz.reviews,
+          opportunityScore: biz.opportunityScore,
           source: "Map Explorer",
           status: "New",
         }),
       });
       const data = await res.json();
-      if (data.success || data.lead) {
+      if (res.ok && (data.success || data.lead)) {
         setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
-        showToast(`✓ Added "${biz.name}" to Leads pipeline!`);
+        showToast(`✓ Added "${biz.name}" to Leads pipeline`);
       } else {
-        setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
-        showToast(`✓ Added "${biz.name}" to Leads pipeline!`);
+        showToast(
+          `Could not add "${biz.name}": ${data.message || data.error || "request failed"}`
+        );
       }
     } catch {
-      setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
-      showToast(`✓ Added "${biz.name}" to Leads pipeline!`);
+      showToast(`Could not add "${biz.name}". Nothing was saved.`);
     } finally {
       setAddingLead(false);
     }
@@ -445,11 +166,14 @@ export default function MapExplorerPage() {
           <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
             Discover businesses with real opportunities
           </p>
+          <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1">
+            Discovery is not connected. No businesses are loaded.
+          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => showToast("Opening saved searches...")}
+            onClick={() => showToast("Saved searches are not implemented.")}
             className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-medium text-gray-700 dark:text-gray-200 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
           >
             <Bookmark size={13} className="text-gray-400" />
@@ -457,7 +181,7 @@ export default function MapExplorerPage() {
           </button>
 
           <button
-            onClick={() => showToast("Territories: Indore, Delhi, Mumbai configured")}
+            onClick={() => showToast("No territories are configured.")}
             className="h-8 px-3 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 text-xs font-medium text-gray-700 dark:text-gray-200 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
           >
             <MapPin size={13} className="text-gray-400" />
@@ -467,7 +191,7 @@ export default function MapExplorerPage() {
           <button
             onClick={() => {
               setSearchQuery("");
-              showToast("Ready for new search query");
+              showToast("Discovery is not connected. No query was run.");
             }}
             className="h-8 px-3.5 rounded-lg bg-[#171918] hover:bg-[#232B29] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors"
           >
@@ -563,10 +287,10 @@ export default function MapExplorerPage() {
 
       {/* 3-COLUMN MAIN LAYOUT */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-3.5 items-start">
-        {/* COLUMN 1: Businesses Found (2,847) List */}
+        {/* COLUMN 1: Loaded Businesses */}
         <div className="xl:col-span-3 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-3.5 space-y-3 shadow-xs">
           <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B] text-xs">
-            <span className="font-bold text-[#171918] dark:text-white">Businesses Found (2,847)</span>
+            <span className="font-bold text-[#171918] dark:text-white">Businesses Found ({businesses.length})</span>
             <div className="flex items-center gap-1 text-gray-400 text-[11px] cursor-pointer hover:text-black">
               <span>Sort by: Relevance</span>
               <ChevronDown size={10} />
@@ -574,6 +298,12 @@ export default function MapExplorerPage() {
           </div>
 
           <div className="space-y-2 max-h-[610px] overflow-y-auto pr-0.5">
+            {businesses.length === 0 && (
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 py-6 text-center leading-relaxed">
+                No businesses loaded. Discovery is not connected in this
+                milestone; nothing is being displayed.
+              </p>
+            )}
             {businesses.map((biz) => {
               const isSelected = selectedBusiness?.id === biz.id;
               const isBookmarked = Boolean(bookmarkedMap[biz.id]);
@@ -897,20 +627,24 @@ export default function MapExplorerPage() {
               </g>
             </svg>
 
-            {/* CLUSTERS OVERLAY (Matching screenshot circles 28, 24, 12, 15, 8, 6, 10) */}
-            {MAP_CLUSTERS.map((cl) => (
-              <div
-                key={cl.id}
-                style={{ left: `${cl.x}%`, top: `${cl.y}%` }}
-                onClick={() => showToast(`Cluster: ${cl.label} businesses discovered here`)}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 ${cl.size} ${cl.color} ${cl.text} rounded-full font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-900 cursor-pointer transition-transform hover:scale-125 z-20`}
-              >
-                {cl.label}
-              </div>
-            ))}
+            {/* CLUSTERS OVERLAY (Displayed only when genuine businesses are loaded) */}
+            {businesses.length > 0 &&
+              MAP_CLUSTERS.map((cl) => (
+                <div
+                  key={cl.id}
+                  style={{ left: `${cl.x}%`, top: `${cl.y}%` }}
+                  onClick={() => showToast(`Cluster: ${businesses.length} businesses loaded`)}
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 ${cl.size} ${cl.color} ${cl.text} rounded-full font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-900 cursor-pointer transition-transform hover:scale-125 z-20`}
+                >
+                  {cl.label}
+                </div>
+              ))}
 
             {/* INDIVIDUAL TEARDROP PINS (Matching screenshot) */}
             {businesses.map((biz) => {
+              if (!biz.mapCoord || typeof biz.mapCoord.x !== "number" || typeof biz.mapCoord.y !== "number") {
+                return null;
+              }
               const isSelected = selectedBusiness?.id === biz.id;
 
               // Color classes for map pins
@@ -1015,7 +749,7 @@ export default function MapExplorerPage() {
           </div>
         </div>
 
-        {/* COLUMN 3: Right Drawer (The Urban Kitchen Detail Panel) */}
+        {selectedBusiness ? (
         <div className="xl:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-4">
           {/* Top Hero Image Carousel */}
           <div className="relative h-44 rounded-xl overflow-hidden bg-gray-100 border border-gray-200/80">
@@ -1263,8 +997,8 @@ export default function MapExplorerPage() {
                 <span className="font-medium text-gray-700 dark:text-gray-300 truncate">Generate Outreach</span>
               </Link>
 
-              <Link
-                href={`/audits?url=${encodeURIComponent(selectedBusiness.website || "urban-kitchen.in")}`}
+          <Link
+            href={`/audits?url=${encodeURIComponent(selectedBusiness.website || "")}`}
                 className="p-2 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-2xs"
               >
                 <Globe size={13} className="text-emerald-600 shrink-0" />
@@ -1289,6 +1023,20 @@ export default function MapExplorerPage() {
             </div>
           </div>
         </div>
+        ) : (
+          <div className="xl:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-6 shadow-xs">
+            <div className="py-16 text-center">
+              <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm font-bold text-gray-800 dark:text-white">
+                No business selected
+              </p>
+              <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                No business data is loaded. Nothing is fabricated to fill this
+                panel.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

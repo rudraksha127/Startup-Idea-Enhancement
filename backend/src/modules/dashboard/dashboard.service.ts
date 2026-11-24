@@ -5,17 +5,18 @@ import { catalystClient } from "../../infrastructure/persistence/zoho-catalyst/c
 
 export class DashboardService {
   static async getMetrics(orgId: string) {
-    // Parallelize all 3 repository queries to eliminate sequential I/O latency
+    // Parallelize all 3 repository queries to eliminate sequential I/O latency.
+    // Propagate repository errors instead of silently masking them with zero metrics.
     const [leadsRes, projects, invoices] = await Promise.all([
-      LeadsRepository.findByOrg(orgId, { limit: 1000 }).catch(() => ({ leads: [], total: 0 })),
-      ProjectsRepository.findByOrg(orgId).catch(() => []),
-      InvoicesRepository.findByOrg(orgId).catch(() => []),
+      LeadsRepository.findByOrg(orgId, { limit: 1000 }),
+      ProjectsRepository.findByOrg(orgId),
+      InvoicesRepository.findByOrg(orgId),
     ]);
     const leads = leadsRes?.leads || [];
 
     const totalLeads = leads.length;
     const qualifiedLeads = leads.filter(
-      (l) => l.qualificationStatus === "Contacted" || (l as any).status === "Contacted"
+      (l) => l.qualificationStatus === "Contacted" || (l as any).status === "Contacted" || (l as any).lastContactedAt != null
     ).length;
     const activeOutreaches = leads.filter(
       (l) =>
@@ -24,9 +25,11 @@ export class DashboardService {
         (l as any).status === "Replied" ||
         (l as any).status === "Interested"
     ).length;
-    const convertedClients =
-      projects.filter((p) => p.status === "Active").length ||
-      leads.filter((l) => l.qualificationStatus === "Converted" || (l as any).status === "Converted").length;
+    const activeProjectsCount = projects.filter((p) => p.status === "Active").length;
+    const convertedLeadsCount = leads.filter(
+      (l) => l.qualificationStatus === "Converted" || (l as any).status === "Converted"
+    ).length;
+    const convertedClients = activeProjectsCount + convertedLeadsCount;
 
     let totalBilled = 0;
     for (const inv of invoices) {
@@ -40,7 +43,7 @@ export class DashboardService {
       Contacted: qualifiedLeads,
       Qualified: leads.filter((l) => l.qualificationStatus === "Qualified").length,
       Proposal: leads.filter((l) => l.qualificationStatus === "Proposal").length,
-      Converted: convertedClients,
+      Converted: convertedLeadsCount,
       Disqualified: leads.filter((l) => l.qualificationStatus === "Disqualified").length,
     };
 
@@ -79,26 +82,63 @@ export class DashboardService {
 
     if (totalLeads > 0 || convertedClients > 0) {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const currentMonthIdx = new Date().getMonth();
+      const now = new Date();
+      const currentMonthIdx = now.getMonth();
       const pastMonths = [
-        months[(currentMonthIdx - 2 + 12) % 12],
-        months[(currentMonthIdx - 1 + 12) % 12],
-        months[currentMonthIdx],
+        { name: months[(currentMonthIdx - 2 + 12) % 12], monthIdx: (currentMonthIdx - 2 + 12) % 12 },
+        { name: months[(currentMonthIdx - 1 + 12) % 12], monthIdx: (currentMonthIdx - 1 + 12) % 12 },
+        { name: months[currentMonthIdx], monthIdx: currentMonthIdx },
       ];
-      growthHistory = pastMonths.map((m, idx) => ({
-        month: m,
-        leadsFound: idx === 2 ? totalLeads : 0,
-        contacted: idx === 2 ? qualifiedLeads : 0,
-        replies: idx === 2 ? activeOutreaches : 0,
-        clients: idx === 2 ? convertedClients : 0,
-      }));
+
+      const hasDates = leads.some((l) => l.createdAt) || projects.some((p) => p.createdAt);
+      if (hasDates) {
+        growthHistory = pastMonths.map((m) => {
+          const mLeads = leads.filter((l) => {
+            if (!l.createdAt) return false;
+            const d = new Date(l.createdAt);
+            return d.getMonth() === m.monthIdx;
+          });
+          const mProjects = projects.filter((p) => {
+            if (!p.createdAt) return false;
+            const d = new Date(p.createdAt);
+            return d.getMonth() === m.monthIdx && p.status === "Active";
+          });
+          return {
+            month: m.name,
+            leadsFound: mLeads.length,
+            contacted: mLeads.filter(
+              (l) => l.qualificationStatus === "Contacted" || (l as any).status === "Contacted" || (l as any).lastContactedAt != null
+            ).length,
+            replies: mLeads.filter(
+              (l) =>
+                l.qualificationStatus === "Qualified" ||
+                l.qualificationStatus === "Proposal" ||
+                (l as any).status === "Replied" ||
+                (l as any).status === "Interested"
+            ).length,
+            clients: mProjects.length + mLeads.filter((l) => l.qualificationStatus === "Converted" || (l as any).status === "Converted").length,
+          };
+        });
+      } else {
+        growthHistory = [];
+      }
     }
+
+    const now = new Date();
+    const currentMonthInvoices = invoices.filter((inv) => {
+      if (inv.status !== "Paid") return false;
+      const dateStr = inv.paidAt || inv.createdAt;
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const currentPeriodBilled = currentMonthInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
 
     const revenueOverview = {
       totalFormatted: `₹${totalBilled > 0 ? totalBilled.toLocaleString("en-IN") : "0"}`,
       totalRaw: totalBilled,
-      trend: totalBilled > 0 ? "+0%" : "No prior period",
-      monthly: totalBilled > 0 ? [{ month: "Current", amount: totalBilled }] : [],
+      trend: "No prior period",
+      monthly: currentPeriodBilled > 0 ? [{ month: "Current", amount: currentPeriodBilled }] : [],
     };
 
     // Actual configured agent health (Idle/Ready in fresh workspace, not fake "Active scanning")
@@ -118,13 +158,13 @@ export class DashboardService {
         convertedClients,
         contacted: qualifiedLeads,
         meetingsBooked: activeOutreaches,
-        activeProjects: convertedClients,
+        activeProjects: activeProjectsCount,
         pipelineValue: `₹${totalBilled > 0 ? totalBilled.toLocaleString("en-IN") : "0"}`,
         mrr: `₹${Math.round(totalBilled / 6).toLocaleString("en-IN")}`,
-        leadsTrend: totalLeads > 0 ? "+0%" : "No prior period",
-        qualifiedTrend: qualifiedLeads > 0 ? "+0%" : "No prior period",
-        outreachTrend: activeOutreaches > 0 ? "+0%" : "No prior period",
-        convertedTrend: convertedClients > 0 ? "+0%" : "No prior period",
+        leadsTrend: "No prior period",
+        qualifiedTrend: "No prior period",
+        outreachTrend: "No prior period",
+        convertedTrend: "No prior period",
       },
       leadsByStatus: statusMap,
       growthHistory,

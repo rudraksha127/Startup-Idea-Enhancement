@@ -41,10 +41,15 @@ export class AgentsController {
   };
 
   static approveRun = async (req: Request, res: Response) => {
-    const runId = extractId(req.params.runId);
-    const approverId = (req as any).user?.userId || "founder";
-    const result = await AgentsService.approveRun(runId, approverId);
-    return res.status(200).json({ success: true, ...result });
+    // M0 subtraction: there is no persisted approval record and no gate.
+    // This endpoint previously returned a canned success.
+    void req;
+    return res.status(501).json({
+      success: false,
+      error: "approval_not_implemented",
+      message:
+        "No approval gate is implemented. No approval was recorded and no run was resumed.",
+    });
   };
 
   static getRunHistory = async (req: Request, res: Response) => {

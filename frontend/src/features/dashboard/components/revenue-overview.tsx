@@ -27,7 +27,7 @@ export function RevenueOverview({
 
   const chartData = Array.isArray(data) ? data : [];
   const hasData = chartData.length > 0 && chartData.some((d) => d.amount > 0);
-  const isCleanBaseline = trend.includes("No prior") || totalFormatted === "₹0" || !hasData;
+  const isCleanBaseline = !trend || trend.includes("No prior") || trend === "Unavailable";
 
   return (
     <div className="p-5 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#22302B] shadow-xs relative flex flex-col justify-between min-h-[260px]">
@@ -50,22 +50,31 @@ export function RevenueOverview({
 
             {isMenuOpen && (
               <div className="absolute right-0 mt-1 w-36 rounded-xl bg-white dark:bg-[#151D1A] border border-[#E7E7E2] dark:border-[#2B3532] shadow-xl py-1 text-xs z-30">
-                {["This Month", "Last Month", "This Quarter", "Year to Date"].map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => {
-                      setTimeframe(opt);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`w-full px-3 py-1.5 text-left transition-colors ${
-                      timeframe === opt
-                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523]"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
+                {["This Month", "Last Month", "This Quarter", "Year to Date"].map((opt) => {
+                  const isAvailable = opt === "This Month";
+                  return (
+                    <button
+                      key={opt}
+                      disabled={!isAvailable}
+                      onClick={() => {
+                        if (isAvailable) {
+                          setTimeframe(opt);
+                          setIsMenuOpen(false);
+                        }
+                      }}
+                      className={`w-full px-3 py-1.5 text-left transition-colors flex items-center justify-between ${
+                        timeframe === opt
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold"
+                          : !isAvailable
+                          ? "text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-60"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1D2523]"
+                      }`}
+                    >
+                      <span>{opt}</span>
+                      {!isAvailable && <span className="text-[9px] opacity-70">N/A</span>}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

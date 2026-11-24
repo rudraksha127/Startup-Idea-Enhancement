@@ -26,13 +26,21 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_API_URL ||
     "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
 
-  // 1. Try AppSail backend search first
+  // 1. Try AppSail backend search first with propagated session credentials
   try {
+    const session = await getCurrentUser();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const headers: Record<string, string> = {};
+    const cookieHeader = request.headers.get("cookie");
+    if (cookieHeader) headers["cookie"] = cookieHeader;
+    const authHeader = request.headers.get("authorization");
+    if (authHeader) headers["authorization"] = authHeader;
+    if (session?.organizationId) headers["x-organization-id"] = session.organizationId;
+
     const backendRes = await fetch(
       `${backendApiUrl}/search?q=${encodeURIComponent(q)}`,
-      { signal: controller.signal }
+      { signal: controller.signal, headers }
     );
     clearTimeout(timeoutId);
 
@@ -49,18 +57,16 @@ export async function GET(request: Request) {
   try {
     await connectToDatabase();
     const session = await getCurrentUser();
-    let orgId = session?.organizationId;
+    const orgId = session?.organizationId;
 
+    // Reject unauthenticated requests to prevent unauthorized access to tenant records
     if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
+      return NextResponse.json({ results: [] }, { status: 401 });
     }
 
-    if (!orgId) {
-      return NextResponse.json({ results: [] });
-    }
-
-    const regex = new RegExp(q, "i");
+    // Escape regex metacharacters so literal characters like C++ don't cause syntax errors
+    const escapedQuery = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escapedQuery, "i");
 
     const [leads, clients, projects] = await Promise.all([
       Lead.find({

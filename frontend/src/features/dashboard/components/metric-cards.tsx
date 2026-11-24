@@ -7,6 +7,9 @@ interface MetricCardsProps {
     qualifiedLeads?: number;
     activeOutreaches?: number;
     convertedClients?: number;
+    contacted?: number;
+    replies?: number;
+    activeProjects?: number;
     leadsTrend?: string;
     qualifiedTrend?: string;
     outreachTrend?: string;
@@ -28,7 +31,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
     },
     {
       title: "Leads Contacted",
-      value: (metrics?.qualifiedLeads ?? 0).toLocaleString(),
+      value: (metrics?.contacted ?? metrics?.qualifiedLeads ?? 0).toLocaleString(),
       trend: metrics?.qualifiedTrend || "No prior period",
       icon: PhoneCall,
       color: "text-sky-600 dark:text-sky-400",
@@ -38,7 +41,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
     },
     {
       title: "Positive Responses",
-      value: (metrics?.activeOutreaches ?? 0).toLocaleString(),
+      value: (metrics?.replies ?? metrics?.activeOutreaches ?? 0).toLocaleString(),
       trend: metrics?.outreachTrend || "No prior period",
       icon: MessageCircle,
       color: "text-emerald-600 dark:text-emerald-400",
@@ -48,7 +51,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
     },
     {
       title: "Active Clients",
-      value: (metrics?.convertedClients ?? 0).toLocaleString(),
+      value: (metrics?.activeProjects ?? metrics?.convertedClients ?? 0).toLocaleString(),
       trend: metrics?.convertedTrend || "No prior period",
       icon: Briefcase,
       color: "text-indigo-600 dark:text-indigo-400",
@@ -62,7 +65,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card) => {
         const Icon = card.icon;
-        const isCleanBaseline = card.trend.includes("No prior") || card.value === "0";
+        const isCleanBaseline = !card.trend || card.trend.includes("No prior") || card.trend === "Unavailable";
 
         return (
           <Link
