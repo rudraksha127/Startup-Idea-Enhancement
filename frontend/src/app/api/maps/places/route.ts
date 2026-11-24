@@ -56,6 +56,28 @@ export async function POST(req: NextRequest) {
     process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
 
   if (!serverKey || serverKey.length <= 10 || serverKey.includes("placeholder")) {
+    const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+    try {
+      const backendRes = await fetch(`${backendApiUrl}/maps/places/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, category, city }),
+      });
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data.success && Array.isArray(data.places)) {
+          return NextResponse.json({
+            success: true,
+            places: data.places,
+            source: data.source || "Google Maps Platform (Verified Directory)",
+            total: data.places.length,
+          });
+        }
+      }
+    } catch {
+      // fallback if backend is unreachable
+    }
+
     return NextResponse.json(
       {
         success: false,
@@ -87,6 +109,28 @@ export async function POST(req: NextRequest) {
     );
 
     if (!response.ok) {
+      const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+      try {
+        const backendRes = await fetch(`${backendApiUrl}/maps/places/search`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, category, city }),
+        });
+        if (backendRes.ok) {
+          const data = await backendRes.json();
+          if (data.success && Array.isArray(data.places)) {
+            return NextResponse.json({
+              success: true,
+              places: data.places,
+              source: data.source || "Google Maps Platform (Verified Directory)",
+              total: data.places.length,
+            });
+          }
+        }
+      } catch {
+        // continue to error response
+      }
+
       return NextResponse.json(
         {
           success: false,

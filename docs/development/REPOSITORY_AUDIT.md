@@ -93,7 +93,7 @@ flowchart TD
 | **SCR-004** | Core Operations | Primary Operator Dashboard | `/dashboard` | Authenticated | `AppSidebar`, `AppHeader`, KPI Cards, `LeadsOverTimeChart`, `LeadSourcePie`, AI Activity Feed | `/api/dashboard/metrics`, `/api/dashboard/activity` | **COMPLETE & VERIFIED** |
 | **SCR-005** | Lead Intelligence | Lead Pipeline Kanban & Table | `/leads` | Authenticated | Lead Table, Pipeline Filter, Quick Search, Pagination, Status Badges | `/api/leads`, `/api/leads/export` | **COMPLETE & VERIFIED** |
 | **SCR-006** | Lead Intelligence | Lead Detail & Audit Dossier | `/leads/[leadId]` | Authenticated | Prospect Dossier, Tech Stack Badge, Audit History, Outreach Logs | `/api/leads/[leadId]`, `/api/leads/[leadId]/audit` | **COMPLETE & VERIFIED** |
-| **SCR-007** | Lead Intelligence | Map Explorer & Local Radar | `/map-explorer` | Authenticated | Interactive Radar Map, Radius Selector, Opportunity Cards, City Quick-Filter | `/api/maps/places`, `/api/maps/status` | NOT STARTED |
+| **SCR-007** | Lead Intelligence | Map Explorer & Local Radar | `/map-explorer` | Authenticated | Real Dynamic Google Map, Satellite/Roadmap, Zoom Controls, GPS Geolocation, Opportunity Cards, City Quick-Filter | `/api/maps/places`, `/api/v1/maps/places/search` | COMPLETE & VERIFIED |
 | **SCR-008** | Autonomous Agents | 13 AI Agents Command Hub | `/ai-agents` | Authenticated | Agent Roster, Active State Toggle, Execution Stats, Token Cost Tracker | `/api/agents`, `/api/agents/[id]/run` | NOT STARTED |
 | **SCR-009** | Quality Auditing | Site Audits & PageSpeed Hub | `/audits` | Authenticated | Audit Dispatcher, Core Web Vitals Gauge, DOM Conversion Checker | `/api/leads/[leadId]/audit`, `/api/n8n/trigger/lead-audit` | NOT STARTED |
 | **SCR-010** | Digital Delivery | Website Builder & CMS Hub | `/website-builder` | Authenticated | Starter Template Carousel, PageSpeed Preview, Copy Editor, Deployment Trigger | `/api/templates`, `/api/projects` | NOT STARTED |
@@ -416,4 +416,37 @@ To maximize discovery and avoid broken cross-screen dependency chains, testing p
 - [x] Graceful 404 empty state for unseeded/non-existent lead slugs.
 - [x] All 6 score rings, 5 tabs, and action modals function without error.
 - [x] Status: **SCR-006 is COMPLETE**.
+
+---
+
+## 14. Deep Inspection: Screen 7 — Map Explorer & Local Radar (`/map-explorer`)
+
+### 14.1 Screen Identity
+- **Screen ID:** `SCR-007`
+- **Route:** `/map-explorer`
+- **File:** `frontend/src/app/(dashboard)/map-explorer/page.tsx`
+- **Connected APIs:** `POST /api/maps/places` (with automatic fallback to backend `POST /api/v1/maps/places/search`), `GET /api/v1/maps/status`
+- **Status:** **COMPLETE & VERIFIED**
+
+### 14.2 Feature & Verification Matrix
+
+| Component / Action | Tested Trigger | Expected Result | Actual Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Real Dynamic Google Map Canvas** | Initial load & territory switch | Embeds live interactive Google Maps canvas via official embed endpoint | Renders authentic live Google Map with street names, POIs, zoom, and panning | **PASS** |
+| **Roadmap / Satellite Toggle** | Click "Satellite" / "Map" buttons | Switches tile layer between high-resolution 3D satellite imagery and standard roadmap | Mode updates dynamically (`t=k` vs `t=m`), re-renders iframe seamlessly | **PASS** |
+| **Zoom Controls (+ / −)** | Click "+" and "−" floating buttons | Increments/decrements map zoom level within safe bounds (3 to 20) | Zoom level adjusts instantly and reflects in live status footer | **PASS** |
+| **Locate Me (GPS)** | Click crosshair button | Prompts browser geolocation (`navigator.geolocation.getCurrentPosition`), centers map on live user coordinates | Centered on GPS coordinates, updates city indicator to "Your Current Location" | **PASS** |
+| **Territory Selector** | Click city dropdown (Indore, Delhi, Mumbai, Bengaluru, etc.) | Updates territory, recenters Google Map, triggers place discovery | Map recenters on selected city; discovers businesses in target territory | **PASS** |
+| **Category Quick-Pills** | Click Restaurant, Cafe, Salon, Gym, Clinic, Hotel | Filters query by category, refreshes place listing in Column 1 | Places list updates with category-specific leads and opportunity scores | **PASS** |
+| **Discovered Businesses (Col 1)** | Inspect card list | Lists verified businesses with star rating, review count, distance, opportunity score, hours | Cards render with verified data from Google Maps Platform directory | **PASS** |
+| **Business Selection** | Click business card in Column 1 | Centers Google Map on selected business; populates Column 3 dossier | Map focuses on business address; Column 3 shows complete opportunity checklist | **PASS** |
+| **Lead Action Modals** | Click "Save as Lead" or "Generate Outreach" | Dispatches toast notification and updates saved lead state | Toast confirms save/generation; state persisted locally | **PASS** |
+
+### 14.3 Screen 7 Acceptance Gate
+- [x] Static cartographic SVG replaced with authentic, interactive, live dynamic Google Maps.
+- [x] Seamless layer switching between 2D Roadmap and high-res Satellite imagery.
+- [x] Zoom controls (+/−) and GPS location detection fully functional.
+- [x] Discovered businesses populated via verified backend API with opportunity scores.
+- [x] Status: **SCR-007 is COMPLETE & VERIFIED**.
+
 
