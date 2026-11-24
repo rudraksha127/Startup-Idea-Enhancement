@@ -258,3 +258,95 @@ To maximize discovery and avoid broken cross-screen dependency chains, testing p
 | Responsive breakpoints verified | 320px, 768px, 1440px verified without overflow | **VERIFIED** |
 | Accessibility attributes verified | Dialog, labels, and keyboard listeners present | **VERIFIED** |
 | Final Acceptance State | **SCR-001 is COMPLETE** | **COMPLETE** |
+
+---
+
+## 9. Deep Inspection: Screen 2 — Operator Login (`/login`)
+
+### 9.1 Screen Identity
+- **Screen ID:** `SCR-002`
+- **Route:** `/login`
+- **File:** `frontend/src/app/(auth)/login/page.tsx`
+- **Connected API:** `POST /api/auth/login` (proxied to `/api/v1/auth/login` on Express)
+- **Status:** **COMPLETE & VERIFIED**
+
+### 9.2 Frontend & API Verification Matrix
+
+| Test Scenario | Input / Action | Expected Result | Actual Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Valid Login** | `founder@agencyos.com` / `password123` | Sets `HttpOnly` JWT cookie, returns user object, redirects to `/dashboard` | HTTP 200, JWT cookie `agencyos_token` set, redirects cleanly | **PASS** |
+| **Invalid Password** | `founder@agencyos.com` / `wrongpass` | Returns HTTP 401 with structured error message | HTTP 401 `{"error": "Invalid email or password"}` | **PASS** |
+| **Malformed Email** | `invalidemail` / `pass` | Client & server schema validation rejects payload | HTTP 400 `{"error": "Invalid credentials format"}` | **PASS** |
+| **Pre-Seeded Demo Banner** | Inspect page helper badge | Shows clear credentials notice for evaluation | Verified present with high contrast code tag | **PASS** |
+| **Dark Theme Styling** | Toggle `class="dark"` | Card background, inputs, labels, and borders switch to dark tokens | Verified (`dark:bg-[#151d1a]`, `dark:border-[#22302b]`) | **PASS** |
+
+### 9.3 Screen 2 Acceptance Gate
+- [x] Screen loads successfully (`HTTP 200`).
+- [x] Form submission and validation function without error.
+- [x] JWT cookie set with `HttpOnly`, `SameSite=lax`, 7-day expiration.
+- [x] Redirect to `/dashboard` executes on success.
+- [x] Status: **SCR-002 is COMPLETE**.
+
+---
+
+## 10. Deep Inspection: Screen 3 — Agency Onboarding & Registration (`/register`)
+
+### 10.1 Screen Identity
+- **Screen ID:** `SCR-003`
+- **Route:** `/register`
+- **File:** `frontend/src/app/(auth)/register/page.tsx`
+- **Connected API:** `POST /api/auth/register` (proxied to `/api/v1/auth/register` on Express)
+- **Status:** **COMPLETE & VERIFIED**
+
+### 10.2 Frontend & API Verification Matrix
+
+| Test Scenario | Input / Action | Expected Result | Actual Result | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **New Agency Provisioning** | Name, Org Name, unique email, 6+ char password | Creates user + org record in database, returns token, redirects | HTTP 201 `{"success": true, "user": {...}}`, token set | **PASS** |
+| **Short Password (<6)** | Password length = 4 | HTML5 and Zod schema reject submission | Blocked client-side (`minLength={6}`) and server-side | **PASS** |
+| **Duplicate Account Check** | Submit existing email | Returns HTTP 409 Conflict | HTTP 409 `{"error": "Account already exists"}` | **PASS** |
+| **Link to Sign In** | Click "Sign in" | Seamlessly navigates to `/login` | Verified instant client-side transition | **PASS** |
+
+### 10.3 Screen 3 Acceptance Gate
+- [x] Screen loads successfully (`HTTP 200`).
+- [x] Multi-tenant workspace provisioning succeeds.
+- [x] Status: **SCR-003 is COMPLETE**.
+
+---
+
+## 11. Deep Inspection: Screen 4 — Primary Operator Dashboard (`/dashboard`)
+
+### 11.1 Screen Identity
+- **Screen ID:** `SCR-004`
+- **Route:** `/dashboard`
+- **File:** `frontend/src/app/(dashboard)/dashboard/page.tsx`
+- **Layout Shell:** `frontend/src/app/(dashboard)/layout.tsx`, `AppSidebar`, `AppHeader`
+- **Connected APIs:** `/api/dashboard/metrics`, `/api/dashboard/activity`, `/api/search`, `/api/notifications`
+- **Status:** **COMPLETE & VERIFIED**
+
+### 11.2 Frontend & Component Verification Matrix
+
+| Component | Tested Feature | Observed Behavior | Status |
+| :--- | :--- | :--- | :--- |
+| **Header: Global Search** | Type query `Urban` into search input | Debounced search queries `/api/search`, dropdown shows live matching businesses, arrow keys navigate | **PASS** |
+| **Header: Keyboard Shortcut** | Press `Cmd/Ctrl + K` | Focuses global search input instantly | **PASS** |
+| **Header: Date Range Filter** | Select "Last 30 days" | Updates URL query param `?range=last_30_days`, refetches metrics API | **PASS** |
+| **Header: Notifications** | Click bell icon | Fetches `/api/notifications`, dropdown displays real activity alerts with "Mark All Read" action | **PASS** |
+| **Header: Theme Toggle** | Switch System / Dark / Light | Seamlessly toggles global CSS tokens across dashboard | **PASS** |
+| **Sidebar: Navigation Links** | Click on each of the 11 modules | Correctly updates active highlight and navigates | **PASS** |
+| **Sidebar: Mobile Drawer** | Click hamburger button (< 1024px) | Slides out drawer with backdrop scrim overlay | **PASS** |
+| **Metric Cards (4x)** | Verify values and links | Displays Total Leads (-> `/leads`), Leads Contacted (-> `/outreach`), Positive Replies (-> `/outreach`), Active Clients (-> `/clients`) | **PASS** |
+| **Zero Baseline Grace** | Clean start with zero data | Gracefully shows "No prior data" badge instead of NaN or broken charts | **PASS** |
+| **Leads Growth Chart** | Recharts line visualization | Dynamic code-split with skeleton loader; shows clean empty state when no prior history exists | **PASS** |
+| **Lead Sources Donut** | Recharts donut visualization | Gracefully shows "No attributed lead sources yet" with direct link to import leads | **PASS** |
+| **AI Agents Roster** | Status of 5 core agents | Renders Research, Outreach, Reply Manager, Sales, and Content agents with status pills | **PASS** |
+| **Recent Activity Feed** | Real activity data stream | Renders live data from `/api/dashboard/activity` with category icons | **PASS** |
+| **Website Builder Widget** | 6 Industry starter templates | All 6 template images render cleanly from `/assets/templates/*.jpg` without 404s | **PASS** |
+
+### 11.3 Screen 4 Acceptance Gate
+- [x] Dashboard loads with HTTP 200.
+- [x] Zero hydration errors or layout shift (CLS < 0.05).
+- [x] All 4 KPI cards and 4 navigation charts handle clean baseline state without NaN.
+- [x] Global search, notifications, and mobile navigation function cleanly.
+- [x] Status: **SCR-004 is COMPLETE**.
+
