@@ -38,7 +38,7 @@
 | **Priority** | `CRITICAL` |
 | **Branch** | `agent/antigravity/setup-collaboration` |
 | **PR Reference** | `https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1` |
-| **Current Inspection Gate** | **Screen 1 (`SCR-001: /`) VERIFIED & COMPLETE** → Proceeding to Screen 2 (`/login`) & Screen 3 (`/register`) |
+| **Current Inspection Gate** | **Screens 1–4 (`SCR-001`, `SCR-002`, `SCR-003`, `SCR-004`) VERIFIED & COMPLETE** → Proceeding to Screen 5 (`/leads`) & Screen 6 (`/leads/[leadId]`) |
 
 ---
 
