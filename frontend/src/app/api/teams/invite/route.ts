@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { User } from "@/models/User";
-import { Organization } from "@/models/Organization";
+import { getAuthSession, hasAdminRole, normalizeRole } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getAuthSession(req);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized: authentication required" }, { status: 401 });
+    }
+
+    if (!hasAdminRole(session.role)) {
+      return NextResponse.json(
+        { error: "Forbidden: only Organization Owners or Admins can invite team members" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
-    const { name, email, role = "Operator" } = body;
+    const { name, email, role = "Member" } = body;
 
     if (!name || !email) {
       return NextResponse.json(
@@ -17,16 +29,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const matchedRole = normalizeRole(role) || "Member";
+
     try {
       await connectToDatabase();
-      if (mongoose.connection.readyState === 1) {
-        let org = await Organization.findOne({ slug: "agencyos-demo" });
-        if (!org) org = await Organization.findOne();
+      if (mongoose.connection.readyState === 1 && session.organizationId) {
+        const orgId = mongoose.isValidObjectId(session.organizationId) ? session.organizationId : undefined;
 
-        if (org) {
+        if (orgId) {
           const existing = await User.findOne({
             email: email.toLowerCase(),
-            organizationId: org._id,
+            organizationId: orgId,
           });
 
           if (existing) {
@@ -41,23 +54,26 @@ export async function POST(req: NextRequest) {
             name,
             email: email.toLowerCase(),
             passwordHash: tempPasswordHash,
-            role,
-            organizationId: org._id,
+            role: matchedRole,
+            organizationId: orgId,
             avatarInitials: name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase(),
           });
 
-          return NextResponse.json({
-            success: true,
-            member: {
-              id: newUser._id.toString(),
-              name: newUser.name,
-              email: newUser.email,
-              role: newUser.role,
-              twoFactor: false,
-              status: "Invited",
-              createdAt: newUser.createdAt,
+          return NextResponse.json(
+            {
+              success: true,
+              member: {
+                id: newUser._id.toString(),
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role,
+                twoFactor: false,
+                status: "Invited",
+                createdAt: newUser.createdAt,
+              },
             },
-          }, { status: 201 });
+            { status: 201 }
+          );
         }
       }
     } catch {
@@ -65,20 +81,22 @@ export async function POST(req: NextRequest) {
     }
 
     const mockId = "mem-" + Date.now().toString(36);
-    return NextResponse.json({
-      success: true,
-      member: {
-        id: mockId,
-        name,
-        email: email.toLowerCase(),
-        role,
-        twoFactor: false,
-        status: "Invited",
-        createdAt: new Date().toISOString(),
+    return NextResponse.json(
+      {
+        success: true,
+        member: {
+          id: mockId,
+          name,
+          email: email.toLowerCase(),
+          role: matchedRole,
+          twoFactor: false,
+          status: "Invited",
+          createdAt: new Date().toISOString(),
+        },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

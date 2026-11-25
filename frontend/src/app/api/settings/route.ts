@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
+import { getAuthSession, hasAdminRole } from "@/lib/auth/jwt";
 import { updateSettingsSchema } from "@agencyos/validation";
 import mongoose from "mongoose";
 
@@ -20,20 +21,34 @@ const DEFAULT_SETTINGS = {
   mapsConfigured: Boolean(process.env.GOOGLE_MAPS_SERVER_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY),
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const session = await getAuthSession(req);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized: authentication required" }, { status: 401 });
+    }
+
     await connectToDatabase();
     if (mongoose.connection.readyState !== 1) {
       return NextResponse.json({
         success: true,
-        data: DEFAULT_SETTINGS,
+        data: {
+          ...DEFAULT_SETTINGS,
+          founderName: session.name,
+          founderEmail: session.email,
+        },
       });
     }
 
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) org = await Organization.findOne();
+    let org: any = null;
+    if (session.organizationId && mongoose.isValidObjectId(session.organizationId)) {
+      org = await Organization.findById(session.organizationId);
+    }
+    if (!org) {
+      org = await Organization.findOne();
+    }
 
-    const user = await User.findOne({ email: "founder@agencyos.com" });
+    const user = await User.findById(session.userId);
 
     return NextResponse.json({
       success: true,
@@ -44,8 +59,8 @@ export async function GET() {
         credits: org?.credits || DEFAULT_SETTINGS.credits,
         currency: DEFAULT_SETTINGS.currency,
         timezone: DEFAULT_SETTINGS.timezone,
-        founderName: user?.name || DEFAULT_SETTINGS.founderName,
-        founderEmail: user?.email || DEFAULT_SETTINGS.founderEmail,
+        founderName: user?.name || session.name || DEFAULT_SETTINGS.founderName,
+        founderEmail: user?.email || session.email || DEFAULT_SETTINGS.founderEmail,
         geminiConfigured: DEFAULT_SETTINGS.geminiConfigured,
         openAiConfigured: DEFAULT_SETTINGS.openAiConfigured,
         resendConfigured: DEFAULT_SETTINGS.resendConfigured,
@@ -53,7 +68,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.warn("MongoDB offline in GET /api/settings, using default settings:", error);
     return NextResponse.json({
       success: true,
       data: DEFAULT_SETTINGS,
@@ -63,6 +77,18 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const session = await getAuthSession(req);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized: authentication required" }, { status: 401 });
+    }
+
+    if (!hasAdminRole(session.role)) {
+      return NextResponse.json(
+        { error: "Forbidden: only Organization Owners or Admins can update settings" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const parsed = updateSettingsSchema.safeParse(body);
 
@@ -74,13 +100,14 @@ export async function PATCH(req: NextRequest) {
     }
 
     await connectToDatabase();
-    if (mongoose.connection.readyState === 1) {
-      let org = await Organization.findOne({ slug: "agencyos-demo" });
-      if (!org) org = await Organization.findOne();
-
-      if (org && parsed.data.organizationName) {
-        org.name = parsed.data.organizationName;
-        await org.save();
+    if (mongoose.connection.readyState === 1 && session.organizationId) {
+      if (mongoose.isValidObjectId(session.organizationId)) {
+        await Organization.findByIdAndUpdate(session.organizationId, {
+          $set: {
+            name: parsed.data.organizationName,
+            updatedAt: new Date(),
+          },
+        });
       }
     }
 

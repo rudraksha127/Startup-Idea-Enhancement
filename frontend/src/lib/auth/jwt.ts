@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET || "agencyos-dev-jwt-super-secret-key-min-32-chars-long";
 const COOKIE_NAME = "agencyos_token";
@@ -11,6 +12,27 @@ export interface SessionUser {
   name: string;
   role: string;
   organizationId: string;
+}
+
+export const VALID_ROLES = ["Founder", "Admin", "Member"] as const;
+
+export type ValidRole = typeof VALID_ROLES[number];
+
+export function normalizeRole(role?: string): ValidRole | null {
+  if (!role) return null;
+  const r = role.trim().toLowerCase();
+  if (r.includes("founder") || r.includes("owner")) return "Founder";
+  if (r.includes("admin")) return "Admin";
+  if (r.includes("member") || r.includes("developer") || r.includes("outreach") || r.includes("success") || r.includes("operator")) {
+    return "Member";
+  }
+  return null;
+}
+
+export function hasAdminRole(role?: string): boolean {
+  if (!role) return false;
+  const r = role.toLowerCase();
+  return r.includes("owner") || r.includes("founder") || r.includes("admin");
 }
 
 export function signToken(user: SessionUser): string {
@@ -43,6 +65,24 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   } catch {
     return null;
   }
+}
+
+export async function getAuthSession(req?: NextRequest): Promise<SessionUser | null> {
+  if (req) {
+    const authHeader = req.headers.get("authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7).trim();
+      const user = verifyToken(token);
+      if (user) return user;
+    }
+    const cookieToken = req.cookies.get(COOKIE_NAME)?.value;
+    if (cookieToken) {
+      const user = verifyToken(cookieToken);
+      if (user) return user;
+    }
+  }
+
+  return getCurrentUser();
 }
 
 export { COOKIE_NAME };

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { signToken, verifyToken, hashPassword, comparePassword } from "@/lib/auth/jwt";
+import { signToken, verifyToken, hashPassword, comparePassword, hasAdminRole, VALID_ROLES } from "@/lib/auth/jwt";
 
 describe("Authentication & JWT Helpers", () => {
   it("hashes and correctly verifies passwords with bcryptjs", async () => {
@@ -40,6 +40,23 @@ describe("Authentication & JWT Helpers", () => {
   it("returns null for invalid or tampered tokens", () => {
     const result = verifyToken("invalid.tampered.token");
     expect(result).toBeNull();
+  });
+
+  it("evaluates admin roles accurately", () => {
+    expect(hasAdminRole("Founder")).toBe(true);
+    expect(hasAdminRole("Owner")).toBe(true);
+    expect(hasAdminRole("Admin")).toBe(true);
+    expect(hasAdminRole("Owner / Founder")).toBe(true);
+    expect(hasAdminRole("Lead Developer")).toBe(false);
+    expect(hasAdminRole("Member")).toBe(false);
+    expect(hasAdminRole("Operator")).toBe(false);
+    expect(hasAdminRole(undefined)).toBe(false);
+  });
+
+  it("validates recognized role taxonomy", () => {
+    expect(VALID_ROLES).toContain("Founder");
+    expect(VALID_ROLES).toContain("Admin");
+    expect(VALID_ROLES).toContain("Member");
   });
 });
 
