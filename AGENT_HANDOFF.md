@@ -9,6 +9,7 @@
 **Related Pull Requests:**
   - [PR #1](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1) (Merged)
   - [PR #2](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/2) (Complete Repository Audit, Open)
+  - [PR #3](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/3) (Security Hardening & CI Repair, Open)
 **Live Services Status:**
   - Backend Express API: `http://localhost:4000` (HEALTHY - HTTP 200)
   - Frontend Next.js 16: `http://localhost:3000` (OPERATIONAL - HTTP 200)  
