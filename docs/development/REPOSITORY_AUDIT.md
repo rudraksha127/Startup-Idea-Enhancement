@@ -353,49 +353,59 @@ To maximize discovery and avoid broken cross-screen dependency chains, testing p
 
 ---
 
+---
+
 ## 12. Independent QA Team Findings Consolidation
 
 Under the direction of the Principal Engineering Coordinator, seven specialist QA workstreams executed independent, empirical audits across the repository:
 
 1. **Frontend, UI/UX & Interaction QA:**
-   - Detailed report: [`docs/development/qa/FRONTEND_QA.md`](FRONTEND_QA.md)
+   - Detailed report: [`docs/development/qa/FRONTEND_QA.md`](qa/FRONTEND_QA.md)
    - Verified all 18 Next.js page route files exist and compile with Next.js 16.4.6 Turbopack.
    - Identified data-binding disconnect on `/audits`, `/website-builder`, and `/outreach` (mock data arrays).
    - Documented 2 Playwright E2E failures (DOM selector mismatch on `/map-explorer` and `/outreach`).
    - Documented Vitest failure in `components.test.tsx:36` (metric label expectation).
 
 2. **Backend & API Architecture QA:**
-   - Detailed report: [`docs/development/qa/BACKEND_API_QA.md`](BACKEND_API_QA.md)
+   - Detailed report: [`docs/development/qa/BACKEND_API_QA.md`](qa/BACKEND_API_QA.md)
    - Exposed architectural split: `catalyst.json` runs monolithic `backend/app.js` (1.8MB), while TypeScript development runs `backend/src/server.ts`.
+   - Exposed Express `authMiddleware` bypass: lines 34–37 call `next()` when no token is present, leaving unauthenticated requests to reach handlers that omit `requireAuth`.
    - Audited 42 Next.js API route handlers and 16 Express REST API modules.
    - Identified KPI calculation semantic conflation in `DashboardService`.
 
 3. **Application Security & Red-Team QA:**
-   - Detailed report: [`docs/development/qa/SECURITY_QA.md`](SECURITY_QA.md)
-   - Discovered **19 unprotected Next.js API route handlers** allowing unauthenticated access to teams, settings, clients, and invoices.
-   - Identified dangerous tenant resolution fallback using client-supplied `x-org-id` headers without JWT cross-referencing.
+   - Detailed report: [`docs/development/qa/SECURITY_QA.md`](qa/SECURITY_QA.md)
+   - Discovered **19 unprotected Next.js API route handlers**.
+   - Identified critical public role escalation in `frontend/src/app/api/teams/members/[id]/route.ts`: `PATCH` accepts `{ role }` and calls `User.findByIdAndUpdate` directly in MongoDB without any authentication or tenant scope check.
+   - Discovered hardcoded demo organization fallback in `/api/teams/members`: queries MongoDB for `{ slug: "agencyos-demo" }` or first org, falling back to static mock members.
    - Verified full compliance with Google Maps TOS Section 3.2.3 (zero scraping).
 
 4. **Database & Persistence QA:**
-   - Detailed report: [`docs/development/qa/DATABASE_QA.md`](DATABASE_QA.md)
-   - Exposed architectural contradiction: Specs document MongoDB 7.0 + Mongoose, but implementation uses Zoho Catalyst CloudScale Data Store client.
+   - Detailed report: [`docs/development/qa/DATABASE_QA.md`](qa/DATABASE_QA.md)
+   - Exposed architectural contradiction: `AGENTS.md` mandates **Supabase (PostgreSQL 16) with Row Level Security (RLS)** as the canonical production architecture. Both MongoDB and Zoho Catalyst represent intermediate architectural deviations.
    - Identified critical volatile fallback: In local/offline runs, `CatalystClient` uses in-memory Node.js `Map` storage, destroying all records on server restart.
+   - Exposed swallowed write errors: When live Catalyst writes fail, errors are caught with `console.warn` and written to local in-memory Map, returning false success.
+   - Documented hard deletion in `LeadsRepository.delete` (permanent removal, no soft delete).
+   - Reconciled actual table inventory: 18 tables in Catalyst manifest; no `Settings` table and no suppression list table.
 
 5. **AI Agent Governance & Orchestration QA:**
-   - Detailed report: [`docs/development/qa/AI_GOVERNANCE_QA.md`](AI_GOVERNANCE_QA.md)
+   - Detailed report: [`docs/development/qa/AI_GOVERNANCE_QA.md`](qa/AI_GOVERNANCE_QA.md)
    - Classified all 13 canonical system agents as **deterministic mocks** returning fixed sample JSON.
+   - Exposed concurrency race condition: Concurrent runs read the same credit balance and write stale `credits - 1`, bypassing credit limits.
+   - Exposed missing idempotency: `dispatchRun` creates random run IDs without idempotency checking, causing duplicate executions on network retries.
    - Verified robust deterministic state machine and human approval gate (`AWAITING_APPROVAL`).
    - Identified synthetic token/cost calculation (hardcoded 650 tokens, $0.0002).
 
 6. **DevOps, SRE & Repository Hygiene QA:**
-   - Detailed report: [`docs/development/qa/PERFORMANCE_DEVOPS_QA.md`](PERFORMANCE_DEVOPS_QA.md)
+   - Detailed report: [`docs/development/qa/PERFORMANCE_DEVOPS_QA.md`](qa/PERFORMANCE_DEVOPS_QA.md)
    - Discovered **1,514 tracked files under `backend/node_modules/`** in git repository history.
+   - Documented Cloudflare Preview Deployment failure (`Build: Failed ❌` on commit `77dd03f`).
    - Reconciled post-merge CI Run #45421145136 failure with local test results.
    - Documented `npm run lint` syntax error (`next lint frontend`).
 
 7. **Product Quality Architect & Traceability Lead:**
-   - Detailed report: [`docs/development/qa/77_SCREEN_TRACEABILITY.md`](77_SCREEN_TRACEABILITY.md)
-   - Reconciled all 11 core modules and 77 planned views: 44 Implemented (57.1%), 16 Partial (20.8%), 14 Mock (18.2%), 3 Placeholder (3.9%), 0 Missing.
+   - Detailed report: [`docs/development/qa/77_SCREEN_TRACEABILITY.md`](qa/77_SCREEN_TRACEABILITY.md)
+   - Reconciled all 11 core modules and 77 planned views: 16 Implemented (20.8%), 44 Partial (57.1%), 14 Mock (18.2%), 3 Placeholder (3.9%), 1 Defect (1.3%), 0 Missing.
 
 ---
 
@@ -403,9 +413,9 @@ Under the direction of the Principal Engineering Coordinator, seven specialist Q
 
 | Defect ID | Severity | Category | Title & Summary | Affected Files | Reproduction Command / Steps | Proposed Correction | Implementation Risk |
 |---|---|---|---|---|---|---|---|
-| **DEF-001** | **P0** | Security | 19 Unprotected Next.js API Route Handlers | `frontend/src/app/api/teams/*`, `/settings`, `/billing/invoices`, `/clients/*`, `/outreach/*` | `curl -X GET http://localhost:3000/api/teams/members` without cookies | Wrap all private handlers with `requireAuth()` helper | Low (Auth hardening) |
+| **DEF-001** | **P0** | Security | 19 Unprotected Next.js Routes & Public Role Escalation | `frontend/src/app/api/teams/*`, `/settings`, `/billing/invoices`, `/clients/*`, `/outreach/*` | `curl -X PATCH http://localhost:3000/api/teams/members/:id -d '{"role":"Owner"}'` without cookies | Wrap all private handlers with `requireAuth()` and verify Admin/Owner authorization | Low (Auth hardening) |
 | **DEF-002** | **P0** | Database | Volatile In-Memory Fallback Persistence | `backend/src/infrastructure/persistence/zoho-catalyst/catalyst.client.ts` | Start server, create lead via API, restart server (`npm run dev:api`), query leads -> array is empty | Implement SQLite / embedded file persistence for local runs | Medium (Storage adapter) |
-| **DEF-003** | **P0** | Architecture | Architecture Contradiction: MongoDB vs Zoho Catalyst | `docs/architecture/DATABASE_DESIGN.md`, `package.json`, `backend/src/infrastructure/persistence/` | Inspect `package.json` vs `backend/src/` imports | Formulate ADR-007 cementing Zoho Catalyst; remove unused `mongoose` | Low (Doc & cleanup) |
+| **DEF-003** | **P0** | Architecture | Architecture Contradiction: Supabase vs Catalyst vs MongoDB | `AGENTS.md`, `docs/architecture/DATABASE_DESIGN.md`, `package.json`, `backend/src/infrastructure/persistence/` | Inspect `AGENTS.md` vs `package.json` vs `backend/src/` imports | Formulate ADR-007 converging on canonical Supabase PostgreSQL 16; remove legacy deviations | Medium (Architecture convergence) |
 | **DEF-004** | **P1** | CI / Tests | Post-Merge CI Failure on `components.test.tsx:36` | `tests/unit/components.test.tsx`, `metric-cards.tsx` | `npm test` -> fails expecting "Qualified Leads" | Reconcile card title in component and test assertion | Low (String alignment) |
 | **DEF-005** | **P1** | DevOps | 1,514 Tracked Files in `backend/node_modules/` | `backend/node_modules/**` | `git ls-files backend/node_modules \| wc -l` -> 1514 | Execute `git rm -r --cached backend/node_modules/` in separate PR | Medium (Requires clean PR) |
 | **DEF-006** | **P1** | DevOps | Monolithic `backend/app.js` vs Modular `backend/src/` Split | `catalyst.json`, `backend/app.js`, `backend/src/server.ts` | Inspect `catalyst.json` entrypoint vs `npm run dev:api` | Update `catalyst.json` to execute `node dist/server.js` | Medium (AppSail config) |
@@ -415,20 +425,24 @@ Under the direction of the Principal Engineering Coordinator, seven specialist Q
 | **DEF-010** | **P2** | AI Systems | Synthetic Agent Execution & Hardcoded Token Metering | `backend/src/modules/agents/definitions/index.ts`, `agent-orchestrator.ts` | Trigger agent run -> inspect response: 650 tokens, fixed sample object | Connect multi-provider LLM gateway in subsequent milestone | High (LLM integration) |
 | **DEF-011** | **P2** | Backend | Conflated Dashboard KPI Calculations in `DashboardService` | `backend/src/modules/dashboard/dashboard.service.ts` | Inspect `qualifiedLeads` and `convertedClients` queries | Separate Contacted vs Qualified leads, decouple projects from clients | Low (Query refactor) |
 | **DEF-012** | **P2** | CI / Security| Security Audit Failure Masked via `continue-on-error` | `.github/workflows/ci.yml` | Inspect CI logs -> exit code 1 treated as success | Set `continue-on-error: false` for high/critical security vulnerabilities | Low (Workflow config) |
+| **DEF-013** | **P0** | AI Systems | Concurrency Race Condition in Credit Deductions | `backend/src/modules/agents/agent-orchestrator.ts:105-115, 210-213` | Dispatch 2 concurrent requests with 1 credit remaining -> both complete, only 1 credit deducted | Use atomic conditional database decrement before run execution | Medium (Transaction logic) |
+| **DEF-014** | **P1** | AI Systems | Missing Idempotency in Agent Execution Dispatch | `backend/src/modules/agents/agent-orchestrator.ts` | Client retries execution request after network timeout -> fresh run executed, extra credit deducted | Accept `idempotencyKey` parameter and return cached run record | Medium (Idempotency cache) |
+| **DEF-015** | **P0** | Database | Swallowed Live Write Errors in `CatalystClient` | `backend/src/infrastructure/persistence/zoho-catalyst/catalyst.client.ts:178, 214` | Trigger live write failure in Catalyst -> error caught, local Map updated, caller receives success | Propagate database write errors to caller; eliminate false success | Low (Error propagation) |
+| **DEF-016** | **P1** | DevOps | Cloudflare Pages Preview Build Failure | `.open-next/`, Cloudflare Pages CI | Inspect PR #2 Cloudflare bot deployment -> `Build: Failed ❌` | Reconcile Cloudflare Pages build script and OpenNext worker bundle sizing | Medium (Cloudflare config) |
 
 ---
 
 ## 14. Baseline QA Test Execution Evidence
 
-| Test Suite / Command | Scope | Local Result (Commit 3be5222) | Canonical CI Result (Run #45421145136) | Divergence Analysis |
-|---|---|---|---|---|
-| `npm run typecheck:all` | TypeScript Strict Check | **0 (PASS)** | **PASS** | Identical: 0 type errors across frontend and backend. |
-| `npm run lint` | ESLint Linting | **1 (FAIL)** | **Annotated Exit 1 (Non-blocking)** | Identical: CLI directory misparse in Next.js 16. |
-| `npm run test` | Vitest Unit & Integration (16 suites, 72 tests) | **1 (FAIL: 15 passed, 1 failed)** | **FAIL** | Identical: `components.test.tsx:36` failed on "Qualified Leads". |
-| `npm run n8n:validate` | Workflow JSON Schemas (25 workflows) | **0 (PASS: 25 valid)** | **SKIPPED** | CI skipped because earlier `test` job failed. |
-| `npm run build:api` | Backend Express Compilation | **0 (PASS)** | **SKIPPED** | CI skipped because earlier `test` job failed. |
-| `npm run build` | Next.js 16 + OpenNext Cloudflare | **0 (PASS: 53 routes)** | **SKIPPED** | CI skipped because earlier `test` job failed. |
-| `npm run test:e2e` | Playwright Chromium (11 routes) | **1 (FAIL: 9 passed, 2 failed)** | **NOT RUN** | E2E not currently wired into GitHub Actions workflow. |
+| Test Suite / Command | Scope | Local Result (Commit 3be5222) | Canonical CI Result (Run #45421145136) | Cloudflare Deployment | Divergence Analysis |
+|---|---|---|---|---|---|
+| `npm run typecheck:all` | TypeScript Strict Check | **0 (PASS)** | **PASS** | - | Identical: 0 type errors across frontend and backend. |
+| `npm run lint` | ESLint Linting | **1 (FAIL)** | **Annotated Exit 1 (Non-blocking)** | - | Identical: CLI directory misparse in Next.js 16. |
+| `npm run test` | Vitest Unit & Integration (16 suites, 72 tests) | **1 (FAIL: 15 passed, 1 failed)** | **FAIL** | - | Identical: `components.test.tsx:36` failed on "Qualified Leads". |
+| `npm run n8n:validate` | Workflow JSON Schemas (25 workflows) | **0 (PASS: 25 valid)** | **SKIPPED** | - | CI skipped because earlier `test` job failed. |
+| `npm run build:api` | Backend Express Compilation | **0 (PASS)** | **SKIPPED** | - | CI skipped because earlier `test` job failed. |
+| `npm run build` | Next.js 16 + OpenNext Cloudflare | **0 (PASS: 53 routes)** | **SKIPPED** | **Build: Failed ❌** | Local: 53 routes built. Cloudflare Preview: Build failed. |
+| `npm run test:e2e` | Playwright Chromium (11 routes) | **1 (FAIL: 9 passed, 2 failed)** | **NOT RUN** | - | E2E not currently wired into GitHub Actions workflow. |
 
 ---
 
@@ -437,13 +451,14 @@ Under the direction of the Principal Engineering Coordinator, seven specialist Q
 Per task governance instructions, `AGENCYOS-001` is strictly an **evidence-based engineering audit**. No architectural mutations, database migrations, or code rewrites were executed.
 
 ### Phased Remediation Tasks:
-- **`TASK-AUDIT-01` (P0 — Security):** Add `requireAuth()` middleware wrapper to all 19 unprotected Next.js route handlers and eliminate `x-org-id` spoofing.
-- **`TASK-AUDIT-02` (P0 — Database):** Formulate ADR-007 establishing Zoho Catalyst Data Store as canonical; implement SQLite persistence adapter for local/offline runs.
-- **`TASK-AUDIT-03` (P1 — CI/CD):** Fix `tests/unit/components.test.tsx` metric card label to restore green baseline on GitHub Actions `main`.
-- **`TASK-AUDIT-04` (P1 — Hygiene):** Execute `git rm -r --cached backend/node_modules/` in a dedicated cleanup branch.
-- **`TASK-AUDIT-05` (P1 — DevOps):** Update `catalyst.json` to execute `node dist/server.js` and fix `npm run lint` script.
-- **`TASK-AUDIT-06` (P2 — E2E):** Reconcile Playwright locators for `/map-explorer` and `/outreach`.
-- **`TASK-AUDIT-07` (P2 — AI Gateway):** Integrate multi-provider LLM gateway (OpenAI, Anthropic, Gemini) with dynamic token metering.
+- **`TASK-AUDIT-01` (P0 — Security):** Add `requireAuth()` middleware wrapper to all 19 unprotected Next.js route handlers, eliminate public role mutation in `/api/teams/members/[id]`, and remove demo organization fallbacks.
+- **`TASK-AUDIT-02` (P0 — Database):** Formulate ADR-007 converging on canonical Supabase (PostgreSQL 16) with RLS; fix swallowed write errors in `CatalystClient`.
+- **`TASK-AUDIT-03` (P0 — AI Systems):** Implement atomic conditional credit deduction and idempotency key caching in `AgentOrchestrator.dispatchRun`.
+- **`TASK-AUDIT-04` (P1 — CI/CD):** Fix `tests/unit/components.test.tsx` metric card label to restore green baseline on GitHub Actions `main`.
+- **`TASK-AUDIT-05` (P1 — Hygiene):** Execute `git rm -r --cached backend/node_modules/` in a dedicated cleanup branch.
+- **`TASK-AUDIT-06` (P1 — DevOps):** Update `catalyst.json` to execute `node dist/server.js`, fix `npm run lint` script, and fix Cloudflare Pages build configuration.
+- **`TASK-AUDIT-07` (P2 — E2E):** Reconcile Playwright locators for `/map-explorer` and `/outreach`.
+- **`TASK-AUDIT-08` (P2 — AI Gateway):** Integrate multi-provider LLM gateway (OpenAI, Anthropic, Gemini) with dynamic token metering.
 
 ---
 
@@ -452,11 +467,11 @@ Per task governance instructions, `AGENCYOS-001` is strictly an **evidence-based
 | Verification Criteria | Required Evidence | Audit Result | Status |
 | :--- | :--- | :--- | :--- |
 | 1. All 18 actual page routes inventoried | Screen table in Section 3 & `FRONTEND_QA.md` | 18 routes inventoried with lines, mode, and connectivity | **SATISFIED** |
-| 2. All 77 planned views traced | Comprehensive matrix in `77_SCREEN_TRACEABILITY.md` | 77 views cataloged: 44 Implemented, 16 Partial, 14 Mock, 3 Placeholder | **SATISFIED** |
+| 2. All 77 planned views traced | Comprehensive matrix in `77_SCREEN_TRACEABILITY.md` | 77 views cataloged: 16 Implemented, 44 Partial, 14 Mock, 3 Placeholder, 1 Defect | **SATISFIED** |
 | 3. All 7 QA workstreams documented | 7 standalone reports in `docs/development/qa/` | Frontend, Backend, Security, DB, AI, DevOps, Traceability | **SATISFIED** |
-| 4. CI failures reconciled with local tests | Baseline evidence table in Section 14 | Exact CI Run #45421145136 matched with local execution | **SATISFIED** |
-| 5. Prioritized Defect Register | Defect matrix in Section 13 | 12 defects cataloged with reproduction, severity, and fixes | **SATISFIED** |
-| 6. Architecture contradictions identified | Sections 12 & 13 | MongoDB vs Catalyst and `app.js` vs `backend/src/` documented | **SATISFIED** |
+| 4. CI failures reconciled with local tests | Baseline evidence table in Section 14 | Exact CI Run #45421145136 and Cloudflare Preview build matched | **SATISFIED** |
+| 5. Prioritized Defect Register | Defect matrix in Section 13 | 16 defects cataloged with reproduction, severity, and fixes | **SATISFIED** |
+| 6. Architecture contradictions identified | Sections 12 & 13 | Supabase vs Catalyst vs MongoDB documented as deviations from `AGENTS.md` | **SATISFIED** |
 | 7. Unexecuted checks marked NOT RUN | E2E and CI skipped jobs marked explicitly | All tests classified honestly | **SATISFIED** |
-| 8. Audit committed in dedicated branch | Dedicated branch `agent/antigravity/audit-repository` | Ready for commit and push | **PENDING PUSH** |
-| 9. Pull request opened for review | GitHub PR targeting `main` | Ready for PR submission | **PENDING PUSH** |
+| 8. Audit committed in dedicated branch | Dedicated branch `agent/antigravity/audit-repository` | Committed on dedicated branch | **SATISFIED** |
+| 9. Pull request opened for review | GitHub PR #2 targeting `main` | Open for review on PR #2 | **IN_REVIEW** |

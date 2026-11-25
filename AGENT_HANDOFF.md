@@ -19,11 +19,11 @@
 - **Product Name:** Autonomous Agency OS (AgencyOS)
 - **Target Scale:** 11 Core Navigation Modules, 77 Planned Interactive Views.
 - **Master Screen Inventory:** 18 active routes cataloged in `docs/development/REPOSITORY_AUDIT.md`.
-- **Approved Topology (ADR-005):**
+- **Approved Canonical Topology (`AGENTS.md`):**
   - **Frontend:** Next.js 15/16 (App Router), React 19, Tailwind CSS, Radix UI. Deployed to **Cloudflare Pages** (Static Export / Edge).
-  - **Backend:** Node.js + Express.js + TypeScript REST API (`/api/v1/*`). Deployed to **Zoho Cloud (Catalyst AppSail)**.
-  - **Database:** Zoho Catalyst CloudScale Data Store (ZCQL) with in-memory fallback. Note: Architectural contradiction with documented MongoDB/Mongoose flagged in DEF-003.
+  - **Backend & Database:** **Supabase (PostgreSQL 16)** with Row Level Security (RLS) on all tables, Supabase Auth, and Edge Functions.
   - **Automation:** External managed **n8n** for scheduled scrapers and webhooks (25 validated workflows).
+  - **Current-State Architectural Deviations:** Zoho Catalyst CloudScale Data Store (ZCQL) in Express and legacy MongoDB queries in `/api/teams/*` are cataloged in DEF-003 for convergence onto Supabase.
   - **Preserved Invariants:** Official Google Maps API compliance (zero scraping per TOS 3.2.3, DPDP Act 2023), dry-run defaults for outbound connectors, emergency kill switch.
 
 ---
