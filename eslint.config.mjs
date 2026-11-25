@@ -43,6 +43,7 @@ export default [
       "no-console": "off",
       "no-case-declarations": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
     },
     linterOptions: {
