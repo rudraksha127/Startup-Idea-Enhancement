@@ -15,6 +15,9 @@ execSync("npx opennextjs-cloudflare build", {
 
 console.log("[Build] Syncing .open-next output to project root for Cloudflare deployment...");
 if (fs.existsSync(srcOpenNext)) {
+  if (fs.existsSync(destOpenNext)) {
+    fs.rmSync(destOpenNext, { recursive: true, force: true });
+  }
   fs.cpSync(srcOpenNext, destOpenNext, { recursive: true, force: true });
   console.log("✓ OpenNext worker and assets successfully staged in root `.open-next`.");
 } else {

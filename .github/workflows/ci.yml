@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
   NEXT_TELEMETRY_DISABLED: 1
 
 jobs:
@@ -114,7 +114,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nextjs-build
-          path: .next/
+          path: |
+            .open-next/
+            frontend/.next/
+          if-no-files-found: warn
           retention-days: 3
 
   # ──────────────────────────────────────────────
@@ -149,14 +152,14 @@ jobs:
             -E "(password|secret|api_key|apikey|private_key)\s*=\s*['\"][^'\"]{8,}" \
             --exclude-dir=node_modules \
             --exclude-dir=.next \
+            --exclude-dir=.open-next \
             --exclude-dir=dist \
-            src/ apps/ 2>/dev/null | grep -v "test\|spec\|mock\|example\|placeholder\|process\.env"; then
+            frontend/src/ backend/src/ packages/ 2>/dev/null | grep -v "test\|spec\|mock\|example\|placeholder\|process\.env"; then
             echo "⚠ Potential hardcoded secrets found above"
             exit 1
           else
             echo "✓ No hardcoded secrets detected"
           fi
-        continue-on-error: true
 
       - name: Verify No .env Files Committed
         run: |
@@ -188,7 +191,6 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
 
   # ──────────────────────────────────────────────
   # 6. SUMMARY — Report final gate status
@@ -210,7 +212,7 @@ jobs:
           echo "| Security | ${{ needs.security.result }} |"
           echo "| Lint | ${{ needs.lint.result }} |"
 
-          if [[ "${{ needs.typecheck.result }}" == "failure" || "${{ needs.test.result }}" == "failure" || "${{ needs.build.result }}" == "failure" ]]; then
+          if [[ "${{ needs.typecheck.result }}" == "failure" || "${{ needs.test.result }}" == "failure" || "${{ needs.build.result }}" == "failure" || "${{ needs.lint.result }}" == "failure" ]]; then
             echo ""
             echo "❌ BLOCKING GATE FAILED — merge blocked"
             exit 1
