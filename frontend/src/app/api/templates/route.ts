@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Template } from "@/models/Template";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
 const DEFAULT_TEMPLATES = [
@@ -86,29 +85,28 @@ const DEFAULT_TEMPLATES = [
 ];
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
 
     try {
       await connectToDatabase();
-      if (mongoose.connection.readyState === 1) {
-        let org = await Organization.findOne({ slug: "agencyos-demo" });
-        if (!org) org = await Organization.findOne();
-        if (org) {
-          const count = await Template.countDocuments({ organizationId: org._id });
-          if (count === 0) {
-            await Template.insertMany(
-              DEFAULT_TEMPLATES.map((t) => ({ ...t, organizationId: org._id }))
-            );
-          }
-          const query: any = { organizationId: org._id };
-          if (category && category !== "All") {
-            query.category = { $regex: new RegExp(`^${category}$`, "i") };
-          }
-          const templates = await Template.find(query).sort({ createdAt: -1 }).lean();
-          return NextResponse.json({ success: true, templates });
+      if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(auth.session.organizationId)) {
+        const count = await Template.countDocuments({ organizationId: auth.session.organizationId });
+        if (count === 0) {
+          await Template.insertMany(
+            DEFAULT_TEMPLATES.map((t) => ({ ...t, organizationId: auth.session.organizationId }))
+          );
         }
+        const query: any = { organizationId: auth.session.organizationId };
+        if (category && category !== "All") {
+          query.category = { $regex: new RegExp(`^${category}$`, "i") };
+        }
+        const templates = await Template.find(query).sort({ createdAt: -1 }).lean();
+        return NextResponse.json({ success: true, templates });
       }
     } catch {
       // Offline fallback
@@ -128,21 +126,20 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     try {
       await connectToDatabase();
-      if (mongoose.connection.readyState === 1) {
-        let org = await Organization.findOne({ slug: "agencyos-demo" });
-        if (!org) org = await Organization.findOne();
-        if (org) {
-          const template = await Template.create({
-            ...body,
-            organizationId: org._id,
-            isCustom: true,
-          });
-          return NextResponse.json({ success: true, template }, { status: 201 });
-        }
+      if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(auth.session.organizationId)) {
+        const template = await Template.create({
+          ...body,
+          organizationId: auth.session.organizationId,
+          isCustom: true,
+        });
+        return NextResponse.json({ success: true, template }, { status: 201 });
       }
     } catch {
       // Offline fallback

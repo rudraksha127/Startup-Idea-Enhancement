@@ -486,7 +486,7 @@ export default function MapExplorerPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search business..."
+            placeholder="Search business by name, category, or city..."
             className="w-full h-8.5 pl-8 pr-7 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] text-xs text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black shadow-2xs"
           />
           {searchQuery && (

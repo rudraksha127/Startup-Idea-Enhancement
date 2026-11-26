@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Client } from "@/models/Client";
-import { Organization } from "@/models/Organization";
+import { requireApiAuth, forwardAuthHeaders } from "@/lib/auth/jwt";
 import { createClientSchema } from "@agencyos/validation";
+import mongoose from "mongoose";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const { searchParams } = new URL(req.url);
   const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
 
@@ -13,6 +17,7 @@ export async function GET(req: NextRequest) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
     const backendRes = await fetch(`${backendApiUrl}/clients?${searchParams.toString()}`, {
+      headers: forwardAuthHeaders(req),
       signal: controller.signal,
     });
     clearTimeout(timeout);
@@ -26,17 +31,14 @@ export async function GET(req: NextRequest) {
 
   try {
     await connectToDatabase();
-    const { searchParams } = new URL(req.url);
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(auth.session.organizationId)) {
+      return NextResponse.json({ success: true, data: [], total: 0 });
+    }
+
     const status = searchParams.get("status");
     const search = searchParams.get("search");
 
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) {
-      org = await Organization.findOne();
-    }
-
-    const query: Record<string, unknown> = {};
-    if (org) query.organizationId = org._id;
+    const query: Record<string, unknown> = { organizationId: auth.session.organizationId };
     if (status && status !== "All") query.status = status;
     if (search) {
       query.$or = [
@@ -64,6 +66,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
     const body = await req.json();
@@ -76,21 +81,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) {
-      org = await Organization.findOne();
-    }
-
-    if (!org) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(auth.session.organizationId)) {
       return NextResponse.json(
-        { success: false, error: "No organization found" },
-        { status: 400 }
+        { success: false, error: "Organization persistence unavailable" },
+        { status: 503 }
       );
     }
 
     const client = await Client.create({
       ...parsed.data,
-      organizationId: org._id,
+      organizationId: auth.session.organizationId,
       onboardedAt: new Date(),
     });
 

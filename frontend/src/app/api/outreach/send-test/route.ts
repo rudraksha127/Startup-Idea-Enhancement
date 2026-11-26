@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { OutreachMessage } from "@/models/OutreachMessage";
-import { Organization } from "@/models/Organization";
 import { Lead } from "@/models/Lead";
+import { requireApiAuth } from "@/lib/auth/jwt";
+import mongoose from "mongoose";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
     const body = await req.json();
@@ -17,29 +21,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) org = await Organization.findOne();
+    const orgId = auth.session.organizationId;
+    if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(orgId)) {
+      let targetLeadId = leadId;
+      if (!targetLeadId) {
+        const sampleLead = await Lead.findOne({ organizationId: orgId });
+        if (sampleLead) targetLeadId = sampleLead._id;
+      }
 
-    // Verify or find a sample lead if not provided
-    let targetLeadId = leadId;
-    if (!targetLeadId && org) {
-      const sampleLead = await Lead.findOne({ organizationId: org._id });
-      if (sampleLead) targetLeadId = sampleLead._id;
-    }
-
-    // Save outbound message event with dry-run status
-    if (org && targetLeadId) {
-      await OutreachMessage.create({
-        organizationId: org._id,
-        leadId: targetLeadId,
-        toEmail,
-        recipientName: "Test Recipient",
-        subject,
-        body: content || "AgencyOS Outreach Preview",
-        status: "Sent",
-        templateUsed: "Dry-Run Simulator",
-        sentAt: new Date(),
-      });
+      if (targetLeadId) {
+        await OutreachMessage.create({
+          organizationId: orgId,
+          leadId: targetLeadId,
+          toEmail,
+          recipientName: "Test Recipient",
+          subject,
+          body: content || "AgencyOS Outreach Preview",
+          status: "Sent",
+          templateUsed: "Dry-Run Simulator",
+          sentAt: new Date(),
+        });
+      }
     }
 
     return NextResponse.json({

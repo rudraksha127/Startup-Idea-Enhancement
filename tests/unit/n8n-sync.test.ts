@@ -18,7 +18,9 @@ describe("Milestone 4: Live n8n Bi-Directional Sync & Workflow Triggers", () => 
   );
 
   it("GET /api/v1/n8n/status returns synchronization engine status and registered workflows", async () => {
-    const res = await request(app).get("/api/v1/n8n/status");
+    const res = await request(app)
+      .get("/api/v1/n8n/status")
+      .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.engine).toBe("n8n Workflow Automation");

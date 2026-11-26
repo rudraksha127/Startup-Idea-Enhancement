@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { AgentConfig } from "@/models/AgentConfig";
-import { Organization } from "@/models/Organization";
 import { AgentExecution } from "@/models/AgentExecution";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
 // Canonical execution logic for all 13 agents
@@ -124,25 +124,25 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const { id } = await params;
     const body = await req.json().catch(() => ({}));
 
-    let orgId: string = "demo-org";
+    const orgId: string = auth.session.organizationId;
     let agentName: string = id;
     let agentType: string = "general";
     let isConnected = false;
 
     try {
       await connectToDatabase();
-      if (mongoose.connection.readyState === 1) {
+      if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(orgId)) {
         isConnected = true;
-        let org = await Organization.findOne({ slug: "agencyos-demo" });
-        if (!org) org = await Organization.findOne();
-        if (org) orgId = org._id.toString();
 
         if (mongoose.Types.ObjectId.isValid(id)) {
-          const dbAgent = await AgentConfig.findById(id);
+          const dbAgent = await AgentConfig.findOne({ _id: id, organizationId: orgId });
           if (dbAgent) {
             agentName = dbAgent.name;
             agentType = dbAgent.role;
@@ -165,39 +165,12 @@ export async function POST(
     const outputData = outputGenerator(agentName);
     const requiresApproval = Boolean(outputData.requiresApproval || outputData.approvalGateRequired);
 
-    // If prospect-discovery agent runs, persist discovered prospects as real leads to backend
-    if (lookupKey === "prospect-discovery" && Array.isArray(outputData.prospects)) {
-      const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
-      for (const p of outputData.prospects) {
-        try {
-          await fetch(`${backendApiUrl}/leads`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              businessName: p.name,
-              category: p.category || "General",
-              address: `${p.location || "Commercial District"}, India`,
-              city: p.location || "Indore",
-              phone: "+91 98260 " + Math.floor(10000 + Math.random() * 90000),
-              website: `https://${p.name.toLowerCase().replace(/[^a-z0-9]/g, "")}.in`,
-              rating: 4.5,
-              reviewCount: 140,
-              opportunityScore: Math.round((p.score || 8.5) * 10),
-              status: "New",
-              source: "AI Prospect Discovery Agent",
-            }),
-          });
-        } catch (leadSaveErr) {
-          console.warn("Could not persist agent lead to backend:", leadSaveErr);
-        }
-      }
-    }
-
     const runLog = {
       timestamp: new Date().toISOString(),
-      durationMs: 420,
-      tokensUsed: 650,
-      costUsd: 0.0001,
+      durationMs: 0,
+      tokensUsed: 0,
+      costUsd: 0,
+      isSimulated: true,
       status: requiresApproval ? "Awaiting Approval" : "Completed",
       logs: [
         { time: new Date().toISOString(), level: "info", msg: `Task dispatched to ${agentName}` },
@@ -223,9 +196,9 @@ export async function POST(
           ],
           inputPayload: body,
           outputPayload: outputData,
-          tokensUsed: 650,
-          durationMs: 420,
-          costEstimatedUsd: 0.0001,
+          tokensUsed: 0,
+          durationMs: 0,
+          costEstimatedUsd: 0,
           autonomyLevel: requiresApproval ? "Supervised" : "Autonomous",
           requiresApproval,
           approvalStatus: requiresApproval ? "PENDING" : undefined,

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth, forwardAuthHeaders } from "@/lib/auth/jwt";
 import { createLeadSchema } from "@/lib/validations/lead";
-import { FilterQuery } from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
@@ -23,6 +25,7 @@ export async function GET(req: NextRequest) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
     const backendRes = await fetch(`${backendApiUrl}/leads?${searchParams.toString()}`, {
+      headers: forwardAuthHeaders(req),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -45,10 +48,6 @@ export async function GET(req: NextRequest) {
             Converted: data.leads.filter((l: any) => l.status === "Converted" || l.qualificationStatus === "Converted").length,
             Archived: data.leads.filter((l: any) => l.status === "Archived" || l.qualificationStatus === "Archived").length,
           },
-        }, {
-          headers: {
-            "Cache-Control": "private, max-age=5, stale-while-revalidate=29",
-          },
         });
       }
     }
@@ -59,15 +58,9 @@ export async function GET(req: NextRequest) {
   // 2. Try MongoDB if available
   try {
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      let defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      if (defaultOrg) orgId = defaultOrg._id.toString();
-    }
-
-    if (!orgId) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
       return NextResponse.json({
         leads: [],
         total: 0,
@@ -156,6 +149,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     const result = createLeadSchema.safeParse(body);
@@ -168,7 +164,7 @@ export async function POST(req: NextRequest) {
     try {
       const backendRes = await fetch(`${backendApiUrl}/leads`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: forwardAuthHeaders(req, { "Content-Type": "application/json" }),
         body: JSON.stringify(result.data),
       });
       if (backendRes.ok) {
@@ -180,16 +176,10 @@ export async function POST(req: NextRequest) {
     }
 
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      let defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      if (defaultOrg) orgId = defaultOrg._id.toString();
-    }
-
-    if (!orgId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
+      return NextResponse.json({ error: "Organization persistence unavailable" }, { status: 503 });
     }
 
     const slug =

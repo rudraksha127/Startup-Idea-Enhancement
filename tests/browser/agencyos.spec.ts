@@ -1,6 +1,22 @@
 import { test, expect } from "@playwright/test";
 
+test.describe("AgencyOS Security Gate — Unauthenticated Requests", () => {
+  test("0. Unauthenticated /dashboard redirects to /login and private /api/leads returns 401", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/.*login/);
+
+    const apiRes = await page.request.get("/api/leads");
+    expect(apiRes.status()).toBe(401);
+  });
+});
+
 test.describe("AgencyOS Production SaaS — Headless Chromium Verification (11 Routes)", () => {
+  test.beforeEach(async ({ page }) => {
+    const loginRes = await page.request.post("/api/auth/login", {
+      data: { email: "founder@agencyos.com", password: "password123" },
+    });
+    expect(loginRes.ok()).toBe(true);
+  });
   // Test 1: Operations Dashboard
   test("1. Route /dashboard displays executive KPI cards, charts, and system status", async ({ page }) => {
     await page.goto("/dashboard");

@@ -222,10 +222,10 @@ export default function OutreachPage() {
                 &lt; Outreach &gt; Sequence Builder
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
-                Sequence Builder
+                Outreach Campaigns
               </h1>
               <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
-                Create multi-step, multi-channel outreach sequences with personalized content and smart automation.
+                Sequence Builder — create multi-step, multi-channel outreach sequences with personalized content and smart automation.
               </p>
             </div>
 

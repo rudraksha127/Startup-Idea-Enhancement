@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
 import { AgentExecution } from "@/models/AgentExecution";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import { DEFAULT_LEADS } from "@/lib/data/default-leads";
 import mongoose from "mongoose";
 
@@ -12,23 +11,19 @@ interface RouteContext {
 }
 
 export async function POST(req: NextRequest, context: RouteContext) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const startTime = Date.now();
   try {
     const { leadId } = await context.params;
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId && mongoose.connection.readyState === 1) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    // Try finding lead in DB first
+    // Try finding lead in DB first scoped strictly to caller organization
     let lead: any = null;
-    if (mongoose.connection.readyState === 1) {
-      const query: any = {};
-      if (orgId) query.organizationId = orgId;
+    if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(orgId)) {
+      const query: any = { organizationId: orgId };
 
       if (mongoose.Types.ObjectId.isValid(leadId)) {
         query.$or = [{ _id: leadId }, { slug: leadId }];
@@ -36,10 +31,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
         query.slug = leadId;
       }
       lead = await Lead.findOne(query);
-    }
-
-    // If not found in DB, check DEFAULT_LEADS
-    if (!lead) {
+    } else {
+      // Only permit DEFAULT_LEADS lookup when DB is offline in local dev
       const defaultMatch = DEFAULT_LEADS.find(
         (l) =>
           l.slug === leadId ||

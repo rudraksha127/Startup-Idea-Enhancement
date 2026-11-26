@@ -7,6 +7,7 @@ import {
   COOKIE_NAME,
   SessionUser,
 } from "@/lib/auth/jwt";
+import { verifyTokenEdge } from "@/lib/auth/edge-jwt";
 
 describe("Security & RBAC Hardening (TASK-AUDIT-01)", () => {
   const founderUser: SessionUser = {
@@ -63,15 +64,21 @@ describe("Security & RBAC Hardening (TASK-AUDIT-01)", () => {
     expect(VALID_ROLES).toContain("Member");
   });
 
-  it("creates and decodes valid cryptographic tokens with multi-tenant claims", () => {
+  it("creates and decodes valid cryptographic tokens with multi-tenant claims", async () => {
     const token = signToken(founderUser);
     const decoded = verifyToken(token);
+    const edgeDecoded = await verifyTokenEdge(token);
 
     expect(decoded).not.toBeNull();
     expect(decoded?.userId).toBe(founderUser.userId);
     expect(decoded?.email).toBe(founderUser.email);
     expect(decoded?.role).toBe(founderUser.role);
     expect(decoded?.organizationId).toBe(founderUser.organizationId);
+
+    expect(edgeDecoded).not.toBeNull();
+    expect(edgeDecoded?.userId).toBe(founderUser.userId);
+    expect(edgeDecoded?.organizationId).toBe(founderUser.organizationId);
+    expect(await verifyTokenEdge(`${token}tampered`)).toBeNull();
   });
 
   it("rejects unauthorized role modifications by unprivileged members", () => {

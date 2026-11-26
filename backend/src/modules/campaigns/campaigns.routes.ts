@@ -5,11 +5,13 @@ import { requireAuth } from "../../middleware/auth.js";
 
 export const campaignsRouter = Router();
 
+campaignsRouter.use(requireAuth);
+
 campaignsRouter.get("/", asyncHandler(CampaignsController.getCampaigns));
-campaignsRouter.post("/", requireAuth, asyncHandler(CampaignsController.createCampaign));
+campaignsRouter.post("/", asyncHandler(CampaignsController.createCampaign));
 campaignsRouter.get("/messages", asyncHandler(CampaignsController.getOutreachMessages));
-campaignsRouter.post("/messages", requireAuth, asyncHandler(CampaignsController.createOutreachMessage));
+campaignsRouter.post("/messages", asyncHandler(CampaignsController.createOutreachMessage));
 campaignsRouter.get("/:id", asyncHandler(CampaignsController.getCampaignById));
-campaignsRouter.patch("/:id", requireAuth, asyncHandler(CampaignsController.updateCampaign));
-campaignsRouter.delete("/:id", requireAuth, asyncHandler(CampaignsController.deleteCampaign));
+campaignsRouter.patch("/:id", asyncHandler(CampaignsController.updateCampaign));
+campaignsRouter.delete("/:id", asyncHandler(CampaignsController.deleteCampaign));
 

@@ -1,4 +1,9 @@
+import path from "path";
 import { defineConfig, devices } from "@playwright/test";
+
+const e2ePort = process.env.E2E_PORT || "3100";
+const baseURL = process.env.BASE_URL || `http://localhost:${e2ePort}`;
+const rootDir = path.resolve(process.cwd());
 
 export default defineConfig({
   testDir: "./browser",
@@ -8,7 +13,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: process.env.BASE_URL || "http://localhost:3000",
+    baseURL,
     trace: "on-first-retry",
     headless: true,
   },
@@ -19,9 +24,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    command: `npm run dev -- --port ${e2ePort}`,
+    cwd: rootDir,
+    url: baseURL,
+    reuseExistingServer: !process.env.CI && Boolean(process.env.BASE_URL),
     timeout: 120 * 1000,
   },
 });

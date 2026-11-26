@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/auth/jwt";
 
 interface NotificationItem {
   id: string;
@@ -13,7 +14,10 @@ interface NotificationItem {
 // In-memory / session store for notification acknowledgement in current runtime
 let runtimeNotifications: NotificationItem[] = [];
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const unreadCount = runtimeNotifications.filter((n) => n.unread).length;
   return NextResponse.json({
     notifications: runtimeNotifications,
@@ -21,7 +25,10 @@ export async function GET() {
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const auth = await requireApiAuth(request);
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     if (body.action === "mark-all-read") {

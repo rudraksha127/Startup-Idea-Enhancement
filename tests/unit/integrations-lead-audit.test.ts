@@ -39,7 +39,9 @@ describe("Integrations, Lead Audit & Outreach Capabilities", () => {
   });
 
   it("GET /api/v1/integrations returns provider status inventory with all active providers", async () => {
-    const res = await request(app).get("/api/v1/integrations");
+    const res = await request(app)
+      .get("/api/v1/integrations")
+      .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
@@ -47,7 +49,9 @@ describe("Integrations, Lead Audit & Outreach Capabilities", () => {
   });
 
   it("GET /api/v1/integrations/diagnostics returns comprehensive diagnostics and webhook inventory", async () => {
-    const res = await request(app).get("/api/v1/integrations/diagnostics");
+    const res = await request(app)
+      .get("/api/v1/integrations/diagnostics")
+      .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.healthScore).toBeDefined();

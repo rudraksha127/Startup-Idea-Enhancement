@@ -5,6 +5,8 @@ import { requireAuth } from "../../middleware/auth.js";
 
 export const settingsRouter = Router();
 
+settingsRouter.use(requireAuth);
+
 settingsRouter.get("/", asyncHandler(SettingsController.getSettings));
-settingsRouter.patch("/", requireAuth, asyncHandler(SettingsController.updateSettings));
+settingsRouter.patch("/", asyncHandler(SettingsController.updateSettings));
 

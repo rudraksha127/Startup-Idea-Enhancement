@@ -1,11 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
-import { Organization } from "@/models/Organization";
 import { AgentConfig } from "@/models/AgentConfig";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth, forwardAuthHeaders } from "@/lib/auth/jwt";
+import mongoose from "mongoose";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
 
   // 1. Try Zoho Catalyst AppSail backend first with 4s timeout
@@ -13,6 +16,7 @@ export async function GET() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
     const backendRes = await fetch(`${backendApiUrl}/dashboard/metrics`, {
+      headers: forwardAuthHeaders(req),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -45,10 +49,6 @@ export async function GET() {
             monthly: [],
           },
           agents: Array.isArray(data.agents) ? data.agents : [],
-        }, {
-          headers: {
-            "Cache-Control": "public, s-maxage=10, stale-while-revalidate=59",
-          },
         });
       }
     }
@@ -59,13 +59,7 @@ export async function GET() {
   // 2. Try MongoDB if available
   try {
     await connectToDatabase();
-    const session = await getCurrentUser();
-
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
+    const orgId = auth.session.organizationId;
 
     const defaultAgents = [
       { name: "Research Agent", role: "Scanning locations", status: "Idle", processedToday: 0, dailyTarget: 50 },
@@ -75,7 +69,7 @@ export async function GET() {
       { name: "Content Agent", role: "Creating content", status: "Idle", processedToday: 0, dailyTarget: 15 },
     ];
 
-    if (!orgId) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
       return NextResponse.json({
         metrics: {
           totalLeads: 0,

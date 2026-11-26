@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
 import { LeadNote } from "@/models/LeadNote";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
 interface RouteContext {
@@ -11,19 +10,16 @@ interface RouteContext {
 }
 
 export async function GET(req: NextRequest, context: RouteContext) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const { leadId } = await context.params;
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    if (!orgId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
+      return NextResponse.json({ notes: [] });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,22 +45,18 @@ export async function GET(req: NextRequest, context: RouteContext) {
 }
 
 export async function POST(req: NextRequest, context: RouteContext) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const { leadId } = await context.params;
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
+    const authorName = auth.session.name || "Agency Member";
+    const authorRole = auth.session.role || "Member";
 
-    let orgId = session?.organizationId;
-    let authorName = session?.name || "Rudraksh";
-    let authorRole = session?.role || "Founder";
-
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    if (!orgId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
+      return NextResponse.json({ error: "Organization persistence unavailable" }, { status: 503 });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

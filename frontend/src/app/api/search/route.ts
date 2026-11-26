@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
 import { Client } from "@/models/Client";
 import { Project } from "@/models/Project";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth, forwardAuthHeaders } from "@/lib/auth/jwt";
+import mongoose from "mongoose";
 
 export interface SearchResultItem {
   id: string;
@@ -14,7 +14,10 @@ export interface SearchResultItem {
   href: string;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const auth = await requireApiAuth(request);
+  if (auth.error) return auth.error;
+
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() || "";
 
@@ -32,7 +35,7 @@ export async function GET(request: Request) {
     const timeoutId = setTimeout(() => controller.abort(), 3000);
     const backendRes = await fetch(
       `${backendApiUrl}/search?q=${encodeURIComponent(q)}`,
-      { signal: controller.signal }
+      { headers: forwardAuthHeaders(request), signal: controller.signal }
     );
     clearTimeout(timeoutId);
 
@@ -48,15 +51,9 @@ export async function GET(request: Request) {
 
   try {
     await connectToDatabase();
-    const session = await getCurrentUser();
-    let orgId = session?.organizationId;
+    const orgId = auth.session.organizationId;
 
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    if (!orgId) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
       return NextResponse.json({ results: [] });
     }
 

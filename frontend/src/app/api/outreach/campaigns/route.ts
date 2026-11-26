@@ -1,19 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Campaign } from "@/models/Campaign";
-import { Organization } from "@/models/Organization";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import { createCampaignSchema } from "@agencyos/validation";
+import mongoose from "mongoose";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) org = await Organization.findOne();
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(auth.session.organizationId)) {
+      return NextResponse.json({ success: true, data: [], total: 0 });
+    }
 
-    const query: Record<string, unknown> = {};
-    if (org) query.organizationId = org._id;
-
-    const campaigns = await Campaign.find(query).sort({ updatedAt: -1 }).lean();
+    const campaigns = await Campaign.find({ organizationId: auth.session.organizationId })
+      .sort({ updatedAt: -1 })
+      .lean();
 
     return NextResponse.json({
       success: true,
@@ -30,6 +34,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
     const body = await req.json();
@@ -42,19 +49,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) org = await Organization.findOne();
-
-    if (!org) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(auth.session.organizationId)) {
       return NextResponse.json(
-        { success: false, error: "No organization found" },
-        { status: 400 }
+        { success: false, error: "Organization persistence unavailable" },
+        { status: 503 }
       );
     }
 
     const campaign = await Campaign.create({
       ...parsed.data,
-      organizationId: org._id,
+      organizationId: auth.session.organizationId,
       leadsTargeted: 25,
       sentCount: 0,
       openedCount: 0,

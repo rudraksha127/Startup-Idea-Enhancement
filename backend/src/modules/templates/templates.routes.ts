@@ -5,8 +5,10 @@ import { requireAuth } from "../../middleware/auth.js";
 
 export const templatesRouter = Router();
 
+templatesRouter.use(requireAuth);
+
 templatesRouter.get("/", asyncHandler(TemplatesController.listTemplates));
 templatesRouter.get("/:id", asyncHandler(TemplatesController.getTemplateById));
-templatesRouter.post("/", requireAuth, asyncHandler(TemplatesController.createTemplate));
-templatesRouter.post("/:id/apply", requireAuth, asyncHandler(TemplatesController.applyTemplate));
+templatesRouter.post("/", asyncHandler(TemplatesController.createTemplate));
+templatesRouter.post("/:id/apply", asyncHandler(TemplatesController.applyTemplate));
 

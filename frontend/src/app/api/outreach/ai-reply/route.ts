@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/auth/jwt";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     const { senderName = "Prospect", company = "Business", lastMessage = "", intent = "INTERESTED" } = body;

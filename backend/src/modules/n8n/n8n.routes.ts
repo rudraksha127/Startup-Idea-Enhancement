@@ -6,7 +6,7 @@ import { requireAuth } from "../../middleware/auth.js";
 export const n8nRouter = Router();
 
 // Status probe
-n8nRouter.get("/status", asyncHandler(N8nController.getSyncStatus));
+n8nRouter.get("/status", requireAuth, asyncHandler(N8nController.getSyncStatus));
 
 // Inbound webhooks from n8n (secured via HMAC or webhook secret)
 n8nRouter.post("/webhook/lead-audit", asyncHandler(N8nController.handleLeadAuditWebhook));
