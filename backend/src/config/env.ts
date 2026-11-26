@@ -22,7 +22,13 @@ export const ENV = {
     process.env.ENVIRONMENT ||
     process.env.CATALYST_ENVIRONMENT ||
     "development",
-  JWT_SECRET: process.env.JWT_SECRET || "agencyos-dev-jwt-super-secret-key-min-32-chars-long",
+  JWT_SECRET:
+    process.env.JWT_SECRET ||
+    (process.env.NODE_ENV === "production"
+      ? (() => {
+          throw new Error("FATAL: JWT_SECRET environment variable must be set in production");
+        })()
+      : "agencyos-dev-jwt-super-secret-key-min-32-chars-long"),
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(",")
     : [

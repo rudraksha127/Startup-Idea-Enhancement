@@ -18,7 +18,9 @@ const authHeader = `Bearer ${jwt.sign(
 
 describe("Billing & Website Templates Modules", () => {
   it("GET /api/v1/billing/invoices returns collection of invoices", async () => {
-    const res = await request(app).get("/api/v1/billing/invoices");
+    const res = await request(app)
+      .get("/api/v1/billing/invoices")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.invoices)).toBe(true);
@@ -45,7 +47,9 @@ describe("Billing & Website Templates Modules", () => {
   });
 
   it("GET /api/v1/billing/metrics aggregates total billed and paid amounts", async () => {
-    const res = await request(app).get("/api/v1/billing/metrics");
+    const res = await request(app)
+      .get("/api/v1/billing/metrics")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.metrics.totalBilled).toBeGreaterThan(0);
@@ -53,7 +57,9 @@ describe("Billing & Website Templates Modules", () => {
   });
 
   it("GET /api/v1/templates returns industry website templates", async () => {
-    const res = await request(app).get("/api/v1/templates");
+    const res = await request(app)
+      .get("/api/v1/templates")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.templates)).toBe(true);

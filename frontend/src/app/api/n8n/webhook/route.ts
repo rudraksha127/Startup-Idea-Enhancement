@@ -5,6 +5,19 @@ import mongoose from "mongoose";
 
 export async function POST(req: NextRequest) {
   try {
+    const webhookSecret = process.env.N8N_WEBHOOK_SECRET;
+    const providedSecret = req.headers.get("x-n8n-secret") || req.headers.get("x-webhook-secret");
+
+    if (webhookSecret && providedSecret !== webhookSecret) {
+      return NextResponse.json({ error: "Unauthorized: invalid webhook secret" }, { status: 401 });
+    }
+    if (!webhookSecret && process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Webhook verification not configured in production" },
+        { status: 503 }
+      );
+    }
+
     const body = await req.json();
     const { type, leadId, website, businessName, opportunityScore, websiteScore, auditSummary } = body;
 

@@ -1,6 +1,15 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("AgencyOS SaaS End-to-End Workflows", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (!testInfo.title.startsWith("1. Login flow")) {
+      const loginRes = await page.request.post("/api/auth/login", {
+        data: { email: "founder@agencyos.com", password: "password123" },
+      });
+      expect(loginRes.ok()).toBe(true);
+    }
+  });
+
   test("1. Login flow authenticates founder user and redirects to dashboard", async ({ page }) => {
     await page.goto("/login");
     await expect(page.locator("h2")).toContainText("Sign in to your agency");

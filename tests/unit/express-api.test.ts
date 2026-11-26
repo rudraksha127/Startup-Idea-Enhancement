@@ -1,6 +1,20 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
+import jwt from "jsonwebtoken";
 import { app } from "../../backend/src/app";
+import { ENV } from "../../backend/src/config/env";
+
+const authHeader = `Bearer ${jwt.sign(
+  {
+    userId: "test-user-id",
+    email: "founder@agencyos.io",
+    name: "Test Founder",
+    role: "Founder",
+    organizationId: "507f191e810c19729de860ea",
+  },
+  ENV.JWT_SECRET,
+  { expiresIn: "1h" }
+)}`;
 
 describe("Express REST API (/api/v1/*)", () => {
   it("GET / returns service health status and API version", async () => {
@@ -45,6 +59,7 @@ describe("Express REST API (/api/v1/*)", () => {
   it("POST /api/v1/leads validates required businessName and category", async () => {
     const res = await request(app)
       .post("/api/v1/leads")
+      .set("Authorization", authHeader)
       .send({ location: "Indore" });
 
     expect(res.status).toBe(400);

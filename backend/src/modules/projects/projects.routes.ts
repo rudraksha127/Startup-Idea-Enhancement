@@ -5,8 +5,10 @@ import { requireAuth } from "../../middleware/auth.js";
 
 export const projectsRouter = Router();
 
+projectsRouter.use(requireAuth);
+
 projectsRouter.get("/", asyncHandler(ProjectsController.getProjects));
-projectsRouter.post("/", requireAuth, asyncHandler(ProjectsController.createProject));
+projectsRouter.post("/", asyncHandler(ProjectsController.createProject));
 projectsRouter.get("/:id", asyncHandler(ProjectsController.getProjectById));
-projectsRouter.patch("/:id", requireAuth, asyncHandler(ProjectsController.updateProject));
+projectsRouter.patch("/:id", asyncHandler(ProjectsController.updateProject));
 

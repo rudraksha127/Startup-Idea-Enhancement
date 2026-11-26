@@ -18,22 +18,22 @@ export interface PlaceResult {
   location?: { lat: number; lng: number };
 }
 
-const VERIFIED_DIRECTORY_FALLBACK: PlaceResult[] = [
-  { id: "dir-1", name: "The Urban Kitchen", rating: 4.4, reviews: 1234, category: "Restaurant", distance: "0.8 km", address: "Connaught Place, New Delhi 110001", phone: "+91 98765 43210", website: "https://theurbankitchen.in", img: "/assets/urban-kitchen.jpg", opportunityScore: 8.5, hours: "Open • Closes 11:00 PM", priceRange: "₹₹ (Moderate)", source: "Local Verified Registry", location: { lat: 28.6304, lng: 77.2177 } },
-  { id: "dir-2", name: "Spice Junction", rating: 4.6, reviews: 892, category: "Restaurant", distance: "1.2 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 11223", website: "https://spicejunction.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.2, hours: "Open • Closes 10:30 PM", priceRange: "₹₹ (Moderate)", source: "Local Verified Registry", location: { lat: 22.7533, lng: 75.8937 } },
-  { id: "dir-3", name: "Flavors of India", rating: 4.3, reviews: 764, category: "Restaurant", distance: "1.4 km", address: "South Extension, New Delhi", phone: "+91 98111 22334", website: "https://flavorsofindia.example", img: "/assets/urban-kitchen.jpg", opportunityScore: 7.9, hours: "Open • Closes 11:30 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Verified Registry", location: { lat: 28.5714, lng: 77.2215 } },
-  { id: "dir-4", name: "Tandoori Nights", rating: 4.1, reviews: 986, category: "Restaurant", distance: "1.8 km", address: "Hauz Khas, New Delhi", phone: "+91 98765 00112", website: "https://tandoorinights.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.7, hours: "Open • Closes 12:00 AM", priceRange: "₹₹ (Moderate)", source: "Local Verified Registry", location: { lat: 28.5494, lng: 77.2001 } },
-  { id: "dir-5", name: "Café Central", rating: 4.5, reviews: 632, category: "Cafe", distance: "2.1 km", address: "Palasia, Indore, MP", phone: "+91 98261 44556", website: "https://cafecentral.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 7.8, hours: "Open • Closes 9:00 PM", priceRange: "₹ (Budget)", source: "Local Verified Registry", location: { lat: 22.7244, lng: 75.8839 } },
-  { id: "dir-6", name: "Luxe Glow Salon & Spa", rating: 4.7, reviews: 340, category: "Salon", distance: "1.1 km", address: "Saket Nagar, Indore, MP", phone: "+91 98260 45678", website: "", img: "/assets/templates/salon.jpg", opportunityScore: 9.3, hours: "Open • Closes 8:30 PM", priceRange: "₹₹ (Moderate)", source: "Local Verified Registry", location: { lat: 22.7196, lng: 75.8977 } },
-  { id: "dir-7", name: "Iron & Pulse Fitness Club", rating: 4.8, reviews: 450, category: "Gym", distance: "1.9 km", address: "AB Road, Indore, MP", phone: "+91 98260 99887", website: "", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.9, hours: "Open • Closes 10:00 PM", priceRange: "₹₹ (Moderate)", source: "Local Verified Registry", location: { lat: 22.7445, lng: 75.8912 } },
-  { id: "dir-8", name: "City Care Specialty Clinic", rating: 4.6, reviews: 620, category: "Clinic", distance: "2.8 km", address: "Old Palasia, Indore, MP", phone: "+91 98260 77889", website: "https://citycare.example", img: "/assets/templates/clinic.jpg", opportunityScore: 8.6, hours: "Open • Closes 8:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Verified Registry", location: { lat: 22.7291, lng: 75.8885 } },
-  { id: "dir-9", name: "Hotel Grand Plaza", rating: 4.4, reviews: 512, category: "Hotel", distance: "2.5 km", address: "Aerocity, New Delhi", phone: "+91 98990 12345", website: "https://grandplaza.example", img: "/assets/templates/hotel.jpg", opportunityScore: 9.1, hours: "Open 24 Hours", priceRange: "₹₹₹₹ (Luxury)", source: "Local Verified Registry", location: { lat: 28.5529, lng: 77.1219 } },
-  { id: "dir-10", name: "Apex Coding Academy", rating: 4.9, reviews: 510, category: "Education", distance: "0.6 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 22331", website: "https://apexcoding.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 9.0, hours: "Open • Closes 7:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Local Verified Registry", location: { lat: 22.7562, lng: 75.8974 } },
+const SAMPLE_DIRECTORY_FALLBACK: PlaceResult[] = [
+  { id: "dir-1", name: "The Urban Kitchen", rating: 4.4, reviews: 1234, category: "Restaurant", distance: "0.8 km", address: "Connaught Place, New Delhi 110001", phone: "+91 98765 43210", website: "https://theurbankitchen.in", img: "/assets/urban-kitchen.jpg", opportunityScore: 8.5, hours: "Open • Closes 11:00 PM", priceRange: "₹₹ (Moderate)", source: "Sample Directory Fallback (Unverified)", location: { lat: 28.6304, lng: 77.2177 } },
+  { id: "dir-2", name: "Spice Junction", rating: 4.6, reviews: 892, category: "Restaurant", distance: "1.2 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 11223", website: "https://spicejunction.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.2, hours: "Open • Closes 10:30 PM", priceRange: "₹₹ (Moderate)", source: "Sample Directory Fallback (Unverified)", location: { lat: 22.7533, lng: 75.8937 } },
+  { id: "dir-3", name: "Flavors of India", rating: 4.3, reviews: 764, category: "Restaurant", distance: "1.4 km", address: "South Extension, New Delhi", phone: "+91 98111 22334", website: "https://flavorsofindia.example", img: "/assets/urban-kitchen.jpg", opportunityScore: 7.9, hours: "Open • Closes 11:30 PM", priceRange: "₹₹₹ (Upscale)", source: "Sample Directory Fallback (Unverified)", location: { lat: 28.5714, lng: 77.2215 } },
+  { id: "dir-4", name: "Tandoori Nights", rating: 4.1, reviews: 986, category: "Restaurant", distance: "1.8 km", address: "Hauz Khas, New Delhi", phone: "+91 98765 00112", website: "https://tandoorinights.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.7, hours: "Open • Closes 12:00 AM", priceRange: "₹₹ (Moderate)", source: "Sample Directory Fallback (Unverified)", location: { lat: 28.5494, lng: 77.2001 } },
+  { id: "dir-5", name: "Café Central", rating: 4.5, reviews: 632, category: "Cafe", distance: "2.1 km", address: "Palasia, Indore, MP", phone: "+91 98261 44556", website: "https://cafecentral.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 7.8, hours: "Open • Closes 9:00 PM", priceRange: "₹ (Budget)", source: "Sample Directory Fallback (Unverified)", location: { lat: 22.7244, lng: 75.8839 } },
+  { id: "dir-6", name: "Luxe Glow Salon & Spa", rating: 4.7, reviews: 340, category: "Salon", distance: "1.1 km", address: "Saket Nagar, Indore, MP", phone: "+91 98260 45678", website: "", img: "/assets/templates/salon.jpg", opportunityScore: 9.3, hours: "Open • Closes 8:30 PM", priceRange: "₹₹ (Moderate)", source: "Sample Directory Fallback (Unverified)", location: { lat: 22.7196, lng: 75.8977 } },
+  { id: "dir-7", name: "Iron & Pulse Fitness Club", rating: 4.8, reviews: 450, category: "Gym", distance: "1.9 km", address: "AB Road, Indore, MP", phone: "+91 98260 99887", website: "", img: "/assets/templates/restaurant.jpg", opportunityScore: 8.9, hours: "Open • Closes 10:00 PM", priceRange: "₹₹ (Moderate)", source: "Sample Directory Fallback (Unverified)", location: { lat: 22.7445, lng: 75.8912 } },
+  { id: "dir-8", name: "City Care Specialty Clinic", rating: 4.6, reviews: 620, category: "Clinic", distance: "2.8 km", address: "Old Palasia, Indore, MP", phone: "+91 98260 77889", website: "https://citycare.example", img: "/assets/templates/clinic.jpg", opportunityScore: 8.6, hours: "Open • Closes 8:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Sample Directory Fallback (Unverified)", location: { lat: 22.7291, lng: 75.8885 } },
+  { id: "dir-9", name: "Hotel Grand Plaza", rating: 4.4, reviews: 512, category: "Hotel", distance: "2.5 km", address: "Aerocity, New Delhi", phone: "+91 98990 12345", website: "https://grandplaza.example", img: "/assets/templates/hotel.jpg", opportunityScore: 9.1, hours: "Open 24 Hours", priceRange: "₹₹₹₹ (Luxury)", source: "Sample Directory Fallback (Unverified)", location: { lat: 28.5529, lng: 77.1219 } },
+  { id: "dir-10", name: "Apex Coding Academy", rating: 4.9, reviews: 510, category: "Education", distance: "0.6 km", address: "Vijay Nagar, Indore, MP", phone: "+91 98260 22331", website: "https://apexcoding.example", img: "/assets/templates/restaurant.jpg", opportunityScore: 9.0, hours: "Open • Closes 7:00 PM", priceRange: "₹₹₹ (Upscale)", source: "Sample Directory Fallback (Unverified)", location: { lat: 22.7562, lng: 75.8974 } },
 ];
 
 export class MapsService {
   // In-memory bounded TTL cache for place searches (adheres to Google Maps caching policies)
-  private static searchCache: Map<string, { data: { places: PlaceResult[]; source: string; total: number }; expiresAt: number }> = new Map();
+  private static searchCache: Map<string, { data: { places: PlaceResult[]; source: string; total: number; isFallback?: boolean }; expiresAt: number }> = new Map();
 
   /**
    * Verifies Google Maps Platform configuration and credential status.
@@ -70,7 +70,7 @@ export class MapsService {
     category?: string;
     city?: string;
     radiusMeters?: number;
-  }): Promise<{ places: PlaceResult[]; source: string; total: number }> {
+  }): Promise<{ places: PlaceResult[]; source: string; total: number; isFallback?: boolean }> {
     const serverKey = process.env.GOOGLE_MAPS_SERVER_KEY || process.env.GOOGLE_MAPS_API_KEY;
     const query = params.query || "";
     const category = params.category || "";
@@ -83,7 +83,7 @@ export class MapsService {
     }
 
     // Helper to store in bounded cache
-    const saveToCache = (data: { places: PlaceResult[]; source: string; total: number }) => {
+    const saveToCache = (data: { places: PlaceResult[]; source: string; total: number; isFallback?: boolean }) => {
       if (MapsService.searchCache.size >= 200) {
         const firstKey = MapsService.searchCache.keys().next().value;
         if (firstKey) MapsService.searchCache.delete(firstKey);
@@ -142,8 +142,8 @@ export class MapsService {
       }
     }
 
-    // 2. Verified fallback registry (deterministic, TOS-compliant)
-    let filtered = [...VERIFIED_DIRECTORY_FALLBACK];
+    // 2. Static sample fallback (explicitly marked unverified; live discovery requires GOOGLE_MAPS_SERVER_KEY)
+    let filtered = [...SAMPLE_DIRECTORY_FALLBACK];
     if (category && category !== "All" && category !== "More") {
       filtered = filtered.filter(
         (p) => p.category.toLowerCase() === category.toLowerCase()
@@ -161,7 +161,8 @@ export class MapsService {
 
     return saveToCache({
       places: filtered,
-      source: "Verified Business Registry (Google Maps Key Pending)",
+      source: "Sample Directory Fallback (Unverified — Set GOOGLE_MAPS_SERVER_KEY)",
+      isFallback: true,
       total: filtered.length,
     });
   }
@@ -194,7 +195,7 @@ export class MapsService {
     }
 
     // Fallback autocomplete
-    return VERIFIED_DIRECTORY_FALLBACK.filter((b) =>
+    return SAMPLE_DIRECTORY_FALLBACK.filter((b) =>
       b.name.toLowerCase().includes(input.toLowerCase())
     ).map((b) => ({
       placeId: b.id,
@@ -206,24 +207,25 @@ export class MapsService {
    * Fetches place details for a given place ID.
    */
   static async getPlaceDetails(placeId: string) {
-    const found = VERIFIED_DIRECTORY_FALLBACK.find((p) => p.id === placeId);
+    const found = SAMPLE_DIRECTORY_FALLBACK.find((p) => p.id === placeId);
     if (found) return found;
 
     return {
       id: placeId,
-      name: "Business Details",
-      rating: 4.5,
-      reviews: 240,
-      category: "Restaurant",
-      distance: "1.0 km",
-      address: "Indore, MP",
-      phone: "+91 98765 00000",
-      website: "https://example.com",
+      name: "Unavailable (Configure GOOGLE_MAPS_SERVER_KEY)",
+      rating: 0,
+      reviews: 0,
+      category: "Unknown",
+      distance: "—",
+      address: "Address unavailable without live Places API",
+      phone: "",
+      website: "",
       img: "/assets/urban-kitchen.jpg",
-      opportunityScore: 8.4,
-      hours: "Open Now",
-      priceRange: "₹₹ (Moderate)",
-      source: "Google Places API (New)",
+      opportunityScore: 0,
+      hours: "Unavailable",
+      priceRange: "Unavailable",
+      source: "Sample Directory Fallback (Unverified — Set GOOGLE_MAPS_SERVER_KEY)",
+      isFallback: true,
     };
   }
 }

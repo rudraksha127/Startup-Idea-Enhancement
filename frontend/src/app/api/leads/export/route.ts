@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth } from "@/lib/auth/jwt";
+import mongoose from "mongoose";
 import Papa from "papaparse";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    if (!orgId) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
+      return new NextResponse("Business Name,Category,Status\n", {
+        headers: { "Content-Type": "text/csv; charset=utf-8" },
+      });
     }
 
     const { searchParams } = new URL(req.url);

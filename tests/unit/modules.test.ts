@@ -1,7 +1,21 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
+import jwt from "jsonwebtoken";
 import { app } from "../../backend/src/app";
+import { ENV } from "../../backend/src/config/env";
 import { activeModules, getModule } from "../../backend/src/modules/index";
+
+const authHeader = `Bearer ${jwt.sign(
+  {
+    userId: "test-user-id",
+    email: "founder@agencyos.io",
+    name: "Test Founder",
+    role: "Founder",
+    organizationId: "507f191e810c19729de860ea",
+  },
+  ENV.JWT_SECRET,
+  { expiresIn: "1h" }
+)}`;
 
 describe("Backend Modular Architecture & Registry", () => {
   it("registers all core vertical slice modules", () => {
@@ -34,7 +48,9 @@ describe("Backend Modular Architecture & Registry", () => {
   });
 
   it("GET /api/v1/analytics returns structured analytics overview", async () => {
-    const res = await request(app).get("/api/v1/analytics");
+    const res = await request(app)
+      .get("/api/v1/analytics")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.kpis).toBeDefined();
@@ -43,7 +59,9 @@ describe("Backend Modular Architecture & Registry", () => {
   });
 
   it("GET /api/v1/settings returns system configuration & compliance status", async () => {
-    const res = await request(app).get("/api/v1/settings");
+    const res = await request(app)
+      .get("/api/v1/settings")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.compliance.dpdpActCompliant).toBe(true);
@@ -52,7 +70,9 @@ describe("Backend Modular Architecture & Registry", () => {
   });
 
   it("GET /api/v1/campaigns returns campaigns collection", async () => {
-    const res = await request(app).get("/api/v1/campaigns");
+    const res = await request(app)
+      .get("/api/v1/campaigns")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeDefined();

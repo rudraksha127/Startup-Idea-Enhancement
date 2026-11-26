@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { AgentConfig } from "@/models/AgentConfig";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
 const CANONICAL_13_AGENTS = [
@@ -21,27 +20,24 @@ const CANONICAL_13_AGENTS = [
   { agentId: "maintenance-monitoring", name: "Maintenance & Monitoring Agent", category: "Reliability", role: "24/7 client uptime watchdog, SSL expiry alerts, and renewal tracking.", dailyTarget: 100, confidenceThreshold: 98, model: "gemini-2.0-flash", autonomy: "Autonomous" },
 ];
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
-    let orgId: string | null = null;
     let isConnected = false;
+    const orgId = auth.session.organizationId;
 
     try {
       await connectToDatabase();
-      if (mongoose.connection.readyState === 1) {
+      if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(orgId)) {
         isConnected = true;
-        const session = await getCurrentUser();
-        orgId = session?.organizationId || null;
-        if (!orgId) {
-          const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-          orgId = defaultOrg?._id.toString() || null;
-        }
       }
     } catch {
       // Offline fallback
     }
 
-    if (!isConnected || !orgId) {
+    if (!isConnected) {
       return NextResponse.json({
         agents: CANONICAL_13_AGENTS.map((a, idx) => ({
           _id: (idx + 1).toString(),

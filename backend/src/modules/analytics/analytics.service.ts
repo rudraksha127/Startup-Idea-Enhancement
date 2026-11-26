@@ -19,26 +19,36 @@ export class AnalyticsService {
 
     const conversionRate = totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) : "0.0";
 
+    const emailCampaigns = campaigns.filter((c) => !c.channel || c.channel === "Email");
+    const whatsappCampaigns = campaigns.filter((c) => c.channel === "WhatsApp");
+    const sumStats = (list: typeof campaigns) => ({
+      sent: list.reduce((sum, c) => sum + (c.sentCount || 0), 0),
+      opened: list.reduce((sum, c) => sum + (c.openedCount || 0), 0),
+      replied: list.reduce((sum, c) => sum + (c.repliedCount || 0), 0),
+    });
+    const emailStats = sumStats(emailCampaigns);
+    const whatsappStats = sumStats(whatsappCampaigns);
+
     return {
       kpis: {
         totalLeads,
         conversionRate: `${conversionRate}%`,
         activeClients: clients.length,
         activeCampaigns: campaigns.length,
-        mrr: `₹${(clients.reduce((acc, c) => acc + (c.totalValue || 0), 0) / 12).toLocaleString("en-IN")}`,
+        mrr: `₹${Math.round(clients.reduce((acc, c) => acc + (c.totalValue || 0), 0) / 12).toLocaleString("en-IN")}`,
         arr: `₹${clients.reduce((acc, c) => acc + (c.totalValue || 0), 0).toLocaleString("en-IN")}`,
       },
       funnel: [
-        { stage: "Discovered", count: totalLeads, percentage: 100 },
+        { stage: "Discovered", count: totalLeads, percentage: totalLeads > 0 ? 100 : 0 },
         { stage: "Audited", count: qualifiedLeads, percentage: totalLeads > 0 ? Math.round((qualifiedLeads / totalLeads) * 100) : 0 },
         { stage: "Contacted", count: contactedLeads, percentage: totalLeads > 0 ? Math.round((contactedLeads / totalLeads) * 100) : 0 },
         { stage: "Meeting Booked", count: proposalLeads, percentage: totalLeads > 0 ? Math.round((proposalLeads / totalLeads) * 100) : 0 },
         { stage: "Closed Won", count: convertedLeads, percentage: totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0 },
       ],
       channelPerformance: [
-        { channel: "Email Outreach", sent: 1240, opened: 580, replied: 84, converted: 18, roi: "340%" },
-        { channel: "WhatsApp Direct", sent: 820, opened: 760, replied: 142, converted: 26, roi: "490%" },
-        { channel: "Google Maps Discovery", sent: 480, opened: 310, replied: 62, converted: 12, roi: "280%" },
+        { channel: "Email Outreach", sent: emailStats.sent, opened: emailStats.opened, replied: emailStats.replied, converted: 0, roi: "0%" },
+        { channel: "WhatsApp Direct", sent: whatsappStats.sent, opened: whatsappStats.opened, replied: whatsappStats.replied, converted: 0, roi: "0%" },
+        { channel: "Google Maps Discovery", sent: totalLeads, opened: qualifiedLeads, replied: contactedLeads, converted: convertedLeads, roi: "0%" },
       ],
       timeRange,
     };

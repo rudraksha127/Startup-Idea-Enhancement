@@ -5,9 +5,9 @@ import { requireAuth } from "../../middleware/auth.js";
 
 export const billingRouter = Router();
 
-billingRouter.get("/invoices", asyncHandler(BillingController.listInvoices));
+billingRouter.get("/invoices", requireAuth, asyncHandler(BillingController.listInvoices));
 billingRouter.post("/invoices", requireAuth, asyncHandler(BillingController.createInvoice));
 billingRouter.patch("/invoices/:id", requireAuth, asyncHandler(BillingController.updateInvoiceStatus));
-billingRouter.get("/metrics", asyncHandler(BillingController.getMetrics));
+billingRouter.get("/metrics", requireAuth, asyncHandler(BillingController.getMetrics));
 billingRouter.post("/invoices/:id/checkout", requireAuth, asyncHandler(BillingController.createCheckout));
 billingRouter.post("/webhook", asyncHandler(BillingController.handleWebhook));

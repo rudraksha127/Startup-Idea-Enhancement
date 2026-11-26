@@ -1,10 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { LeadNote } from "@/models/LeadNote";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth, forwardAuthHeaders } from "@/lib/auth/jwt";
+import mongoose from "mongoose";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://agencyos-api-50046975560.development.catalystappsail.in/api/v1";
 
   // 1. Try Zoho Catalyst AppSail backend first
@@ -12,6 +15,7 @@ export async function GET() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
     const backendRes = await fetch(`${backendApiUrl}/dashboard/activities`, {
+      headers: forwardAuthHeaders(req),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -19,11 +23,7 @@ export async function GET() {
     if (backendRes.ok) {
       const data = await backendRes.json();
       if (data && Array.isArray(data.activities)) {
-        return NextResponse.json(data, {
-          headers: {
-            "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
-          },
-        });
+        return NextResponse.json(data);
       }
     }
   } catch (backendErr) {
@@ -32,15 +32,9 @@ export async function GET() {
 
   try {
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    if (!orgId) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
       return NextResponse.json({ activities: [] });
     }
 

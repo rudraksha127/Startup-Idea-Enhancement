@@ -1,6 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/auth/jwt";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
   const isConfigured = Boolean(n8nWebhookUrl && n8nWebhookUrl.startsWith("http"));
 

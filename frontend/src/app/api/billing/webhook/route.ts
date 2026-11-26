@@ -8,6 +8,22 @@ const processedWebhookEvents = new Set<string>();
 
 export async function POST(req: NextRequest) {
   try {
+    const stripeSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const stripeSig = req.headers.get("stripe-signature");
+
+    if (stripeSecret && !stripeSig) {
+      return NextResponse.json(
+        { error: "Unauthorized: missing Stripe webhook signature" },
+        { status: 401 }
+      );
+    }
+    if (!stripeSecret && process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Billing webhook secret not configured in production" },
+        { status: 503 }
+      );
+    }
+
     const body = await req.json();
     const { id, type, data } = body;
 

@@ -7,8 +7,22 @@ describe("Security Architecture & Tenant Boundary Gates", () => {
     const endpoints = [
       { method: "get", path: "/api/v1/teams/members" },
       { method: "post", path: "/api/v1/teams/invite" },
+      { method: "get", path: "/api/v1/leads" },
+      { method: "post", path: "/api/v1/leads" },
+      { method: "get", path: "/api/v1/clients" },
+      { method: "get", path: "/api/v1/projects" },
+      { method: "get", path: "/api/v1/campaigns" },
+      { method: "get", path: "/api/v1/agents" },
+      { method: "get", path: "/api/v1/analytics" },
+      { method: "get", path: "/api/v1/billing/invoices" },
+      { method: "get", path: "/api/v1/settings" },
+      { method: "get", path: "/api/v1/templates" },
+      { method: "get", path: "/api/v1/integrations" },
+      { method: "get", path: "/api/v1/n8n/status" },
       { method: "post", path: "/api/v1/n8n/trigger/lead-audit" },
       { method: "post", path: "/api/v1/integrations/test" },
+      { method: "get", path: "/api/v1/maps/status" },
+      { method: "get", path: "/api/v1/dashboard/metrics" },
     ];
 
     for (const ep of endpoints) {

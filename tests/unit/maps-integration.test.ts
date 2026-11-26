@@ -1,11 +1,26 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
+import jwt from "jsonwebtoken";
 import { app } from "../../backend/src/app.js";
-import { MapsService } from "../../backend/src/modules/maps/maps.service.js";
+import { ENV } from "../../backend/src/config/env.js";
+
+const authHeader = `Bearer ${jwt.sign(
+  {
+    userId: "test-user-id",
+    email: "founder@agencyos.io",
+    name: "Test Founder",
+    role: "Founder",
+    organizationId: "507f191e810c19729de860ea",
+  },
+  ENV.JWT_SECRET,
+  { expiresIn: "1h" }
+)}`;
 
 describe("Google Maps Platform Integration & Location Intelligence", () => {
   it("GET /api/v1/maps/status returns provider attribution and TOS compliance metadata", async () => {
-    const res = await request(app).get("/api/v1/maps/status");
+    const res = await request(app)
+      .get("/api/v1/maps/status")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.provider).toBe("Google Maps Platform");
@@ -16,6 +31,7 @@ describe("Google Maps Platform Integration & Location Intelligence", () => {
   it("POST /api/v1/maps/places/search discovers businesses with category filter", async () => {
     const res = await request(app)
       .post("/api/v1/maps/places/search")
+      .set("Authorization", authHeader)
       .send({ category: "Restaurant", city: "Indore" });
 
     expect(res.status).toBe(200);
@@ -33,6 +49,7 @@ describe("Google Maps Platform Integration & Location Intelligence", () => {
   it("POST /api/v1/maps/places/search filters by text query", async () => {
     const res = await request(app)
       .post("/api/v1/maps/places/search")
+      .set("Authorization", authHeader)
       .send({ query: "Urban Kitchen" });
 
     expect(res.status).toBe(200);
@@ -43,6 +60,7 @@ describe("Google Maps Platform Integration & Location Intelligence", () => {
   it("GET /api/v1/maps/places/autocomplete returns search suggestions", async () => {
     const res = await request(app)
       .get("/api/v1/maps/places/autocomplete")
+      .set("Authorization", authHeader)
       .query({ input: "Spice" });
 
     expect(res.status).toBe(200);
@@ -51,7 +69,9 @@ describe("Google Maps Platform Integration & Location Intelligence", () => {
   });
 
   it("GET /api/v1/maps/places/:id returns business details with opportunity score", async () => {
-    const res = await request(app).get("/api/v1/maps/places/dir-1");
+    const res = await request(app)
+      .get("/api/v1/maps/places/dir-1")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.place.name).toBe("The Urban Kitchen");

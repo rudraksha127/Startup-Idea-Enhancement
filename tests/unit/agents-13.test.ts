@@ -1,8 +1,22 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
+import jwt from "jsonwebtoken";
 import { app } from "../../backend/src/app.js";
+import { ENV } from "../../backend/src/config/env.js";
 import { AgentOrchestrator } from "../../backend/src/modules/agents/agent-orchestrator.js";
 import { CANONICAL_AGENTS } from "../../backend/src/modules/agents/definitions/index.js";
+
+const authHeader = `Bearer ${jwt.sign(
+  {
+    userId: "test-user-id",
+    email: "founder@agencyos.io",
+    name: "Test Founder",
+    role: "Founder",
+    organizationId: "507f191e810c19729de860ea",
+  },
+  ENV.JWT_SECRET,
+  { expiresIn: "1h" }
+)}`;
 
 describe("13 Canonical AI Agents & Orchestrator", () => {
   it("registers exactly 13 canonical system agents with valid definitions", () => {
@@ -86,7 +100,9 @@ describe("13 Canonical AI Agents & Orchestrator", () => {
   });
 
   it("GET /api/v1/agents returns all 13 system agents via REST API", async () => {
-    const res = await request(app).get("/api/v1/agents");
+    const res = await request(app)
+      .get("/api/v1/agents")
+      .set("Authorization", authHeader);
     expect(res.status).toBe(200);
     expect(res.body.agents).toBeDefined();
     expect(res.body.agents.length).toBe(13);

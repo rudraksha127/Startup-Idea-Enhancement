@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
-import { Organization } from "@/models/Organization";
-import { getCurrentUser } from "@/lib/auth/jwt";
+import { requireApiAuth } from "@/lib/auth/jwt";
+import mongoose from "mongoose";
 import Papa from "papaparse";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
-    const session = await getCurrentUser();
+    const orgId = auth.session.organizationId;
 
-    let orgId = session?.organizationId;
-    if (!orgId) {
-      const defaultOrg = await Organization.findOne({ slug: "agencyos-demo" });
-      orgId = defaultOrg?._id.toString();
-    }
-
-    if (!orgId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(orgId)) {
+      return NextResponse.json({ error: "Organization persistence unavailable" }, { status: 503 });
     }
 
     const formData = await req.formData();

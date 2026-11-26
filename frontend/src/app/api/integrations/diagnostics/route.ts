@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdminAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAdminAuth(req);
+  if (auth.error) return auth.error;
+
   const isDbConnected = mongoose.connection.readyState === 1;
 
   const providers = [

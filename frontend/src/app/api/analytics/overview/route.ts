@@ -1,63 +1,45 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
 import { Client } from "@/models/Client";
 import { Project } from "@/models/Project";
 import { Campaign } from "@/models/Campaign";
 import { OutreachMessage } from "@/models/OutreachMessage";
-import { Organization } from "@/models/Organization";
+import { requireApiAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
-const DETERMINISTIC_ANALYTICS_FALLBACK = {
+const EMPTY_ANALYTICS = {
   kpis: {
-    totalLeads: 2847,
-    activeClients: 48,
-    totalProjects: 14,
-    activeCampaigns: 8,
-    emailsSent: 1420,
-    repliesReceived: 348,
-    meetingsBooked: 142,
-    conversionRate: "4.9%",
-    mrr: "₹1,85,000",
-    arr: "₹1,10,20,000",
+    totalLeads: 0,
+    activeClients: 0,
+    totalProjects: 0,
+    activeCampaigns: 0,
+    emailsSent: 0,
+    repliesReceived: 0,
+    meetingsBooked: 0,
+    conversionRate: "0.0%",
+    mrr: "₹0",
+    arr: "₹0",
   },
-  funnel: [
-    { stage: "Discovered", count: 2847, percentage: 100 },
-    { stage: "Audited", count: 2050, percentage: 72 },
-    { stage: "Contacted", count: 1281, percentage: 45 },
-    { stage: "Meeting Booked", count: 341, percentage: 12 },
-    { stage: "Proposal Sent", count: 227, percentage: 8 },
-    { stage: "Closed Won", count: 136, percentage: 4.8 },
-  ],
-  channelPerformance: [
-    { channel: "Google Maps Discovery", sent: 1240, opened: 580, replied: 84, converted: 18, roi: "340%" },
-    { channel: "Cold Email Outreach", sent: 820, opened: 760, replied: 142, converted: 26, roi: "490%" },
-    { channel: "Website Inbound", sent: 480, opened: 310, replied: 62, converted: 12, roi: "280%" },
-  ],
-  recentActivity: [
-    { text: "Lead discovered: Spice Junction (Restaurant)", time: "12 mins ago", type: "lead" },
-    { text: "Rahul Sharma replied: The Urban Kitchen", time: "1 hour ago", type: "reply" },
-    { text: "Meeting booked with The Urban Kitchen", time: "3 hours ago", type: "meeting" },
-    { text: "Project completed: Café Central Website", time: "5 hours ago", type: "project" },
-    { text: "New client converted: FitLife Gym", time: "1 day ago", type: "client" },
-  ],
+  funnel: [],
+  channelPerformance: [],
+  recentActivity: [],
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     await connectToDatabase();
-    if (mongoose.connection.readyState !== 1) {
+    if (mongoose.connection.readyState !== 1 || !mongoose.isValidObjectId(auth.session.organizationId)) {
       return NextResponse.json({
         success: true,
-        data: DETERMINISTIC_ANALYTICS_FALLBACK,
+        data: EMPTY_ANALYTICS,
       });
     }
 
-    let org = await Organization.findOne({ slug: "agencyos-demo" });
-    if (!org) org = await Organization.findOne();
-
-    const query: Record<string, unknown> = {};
-    if (org) query.organizationId = org._id;
+    const query: Record<string, unknown> = { organizationId: auth.session.organizationId };
 
     const [
       totalLeads,
@@ -77,8 +59,8 @@ export async function GET() {
       Campaign.find(query).lean(),
     ]);
 
-    const totalEmailsSent = campaignsList.reduce((acc, c) => acc + (c.sentCount || 0), totalMessages || 1420);
-    const totalReplies = campaignsList.reduce((acc, c) => acc + (c.repliedCount || 0), 142);
+    const totalEmailsSent = campaignsList.reduce((acc, c) => acc + (c.sentCount || 0), totalMessages || 0);
+    const totalReplies = campaignsList.reduce((acc, c) => acc + (c.repliedCount || 0), 0);
 
     const activities = recentLeads.length > 0
       ? recentLeads.map((l: any) => ({
@@ -86,33 +68,33 @@ export async function GET() {
           time: l.createdAt ? new Date(l.createdAt).toLocaleDateString() : "Recently",
           type: "lead",
         }))
-      : DETERMINISTIC_ANALYTICS_FALLBACK.recentActivity;
+      : EMPTY_ANALYTICS.recentActivity;
 
     return NextResponse.json({
       success: true,
       data: {
         kpis: {
-          totalLeads: Math.max(totalLeads, 27),
-          activeClients: Math.max(totalClients, 6),
-          totalProjects: Math.max(totalProjects, 3),
-          activeCampaigns: Math.max(totalCampaigns, 2),
+          totalLeads,
+          activeClients: totalClients,
+          totalProjects,
+          activeCampaigns: totalCampaigns,
           emailsSent: totalEmailsSent,
           repliesReceived: totalReplies,
-          meetingsBooked: Math.round(totalReplies * 0.4) || 28,
-          conversionRate: totalEmailsSent > 0 ? ((totalReplies / totalEmailsSent) * 100).toFixed(1) + "%" : "4.9%",
-          mrr: "₹1,85,000",
-          arr: "₹1,10,20,000",
+          meetingsBooked: 0,
+          conversionRate: totalEmailsSent > 0 ? ((totalReplies / totalEmailsSent) * 100).toFixed(1) + "%" : "0.0%",
+          mrr: "₹0",
+          arr: "₹0",
         },
-        funnel: DETERMINISTIC_ANALYTICS_FALLBACK.funnel,
-        channelPerformance: DETERMINISTIC_ANALYTICS_FALLBACK.channelPerformance,
+        funnel: EMPTY_ANALYTICS.funnel,
+        channelPerformance: EMPTY_ANALYTICS.channelPerformance,
         recentActivity: activities,
       },
     });
   } catch (error) {
-    console.warn("MongoDB offline in GET /api/analytics/overview, using deterministic fallback:", error);
+    console.warn("MongoDB offline in GET /api/analytics/overview, returning empty analytics:", error);
     return NextResponse.json({
       success: true,
-      data: DETERMINISTIC_ANALYTICS_FALLBACK,
+      data: EMPTY_ANALYTICS,
     });
   }
 }

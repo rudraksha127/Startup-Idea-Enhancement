@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdminAuth } from "@/lib/auth/jwt";
 import mongoose from "mongoose";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAdminAuth(req);
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json().catch(() => ({}));
     const provider = body.provider || "all";
