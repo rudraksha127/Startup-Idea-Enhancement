@@ -1,5 +1,6 @@
 # Dependencies
-/node_modules
+node_modules/
+**/node_modules/
 /.pnp
 .pnp.js
 
@@ -45,6 +46,7 @@ frontend/.wrangler/
 .idea/
 .agent/
 .agents/
+frontend/AGENTS.md
 
 # TypeScript cache & OS Files
 *.tsbuildinfo

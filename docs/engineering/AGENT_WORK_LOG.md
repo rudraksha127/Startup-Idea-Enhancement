@@ -123,3 +123,43 @@
 - **Errors / Limitations Encountered:**
   - Chrome DevTools subagent reported Chrome was not running with `--remote-debugging-port=9222`. Live verification was completed via direct HTTP runtime probing.
 - **Next Action:** Open `http://localhost:3000` in user's browser, or proceed to `AGENCYOS-001` engineering audit.
+
+### Entry #005 — TASK-AUDIT-01 Security Hardening & TASK-AUDIT-04 CI Baseline Repair
+- **Timestamp:** 2026-11-25T14:20:00+05:30
+- **Agent Identity:** Antigravity (Application Security Lead & QA Automation Lead)
+- **Task IDs:** `TASK-AUDIT-01` (Security Remediation) & `TASK-AUDIT-04` (CI Baseline Repair)
+- **Work Performed:**
+  - Hardened Next.js App Router API route handlers against unauthenticated access and privilege escalation.
+  - Implemented `getAuthSession(req)`, `hasAdminRole(role)`, and `VALID_ROLES` in `frontend/src/lib/auth/jwt.ts`.
+  - Fixed P0 vulnerability DEF-001: Protected `frontend/src/app/api/teams/members/[id]/route.ts`:
+    - Enforced authentication: unauthenticated requests rejected with HTTP 401.
+    - Enforced RBAC: only Organization Owners or Admins can modify member roles or remove members (HTTP 403).
+    - Enforced role validation against `VALID_ROLES` (HTTP 400).
+    - Enforced multi-tenant isolation: prevented mutations across different organization boundaries.
+  - Protected `frontend/src/app/api/teams/members/route.ts`: scoped queries strictly to authenticated `organizationId`, eliminated hardcoded `{ slug: "agencyos-demo" }`.
+  - Protected `frontend/src/app/api/teams/invite/route.ts`: required admin role and scoped created user to caller's organization.
+  - Protected `frontend/src/app/api/settings/route.ts`: required authentication and admin role for updates.
+  - Fixed Vitest failure in `tests/unit/components.test.tsx` (DEF-004): reconciled `MetricCards` label assertions with current UI tokens ("Total Leads", "Leads Contacted", "Positive Responses", "Active Clients").
+  - Configured ESLint 9 flat configuration in `eslint.config.mjs` with `@typescript-eslint/parser` and `@typescript-eslint/eslint-plugin`, fixing DEF-007.
+  - Authored comprehensive test suite `tests/unit/security-auth.test.ts` covering token validation, role boundaries, and admin privilege verification.
+- **Files Modified / Created:**
+  - `frontend/src/lib/auth/jwt.ts` (Modified)
+  - `frontend/src/app/api/teams/members/[id]/route.ts` (Modified)
+  - `frontend/src/app/api/teams/members/route.ts` (Modified)
+  - `frontend/src/app/api/teams/invite/route.ts` (Modified)
+  - `frontend/src/app/api/settings/route.ts` (Modified)
+  - `tests/unit/components.test.tsx` (Modified)
+  - `tests/unit/auth.test.ts` (Modified)
+  - `package.json` (Modified)
+  - `eslint.config.mjs` (Created)
+  - `tests/unit/security-auth.test.ts` (Created)
+  - `docs/engineering/WORK_QUEUE.md` (Updated)
+  - `AGENT_HANDOFF.md` (Updated)
+  - `docs/engineering/AGENT_WORK_LOG.md` (Updated)
+- **Commands Executed:**
+  - `npm run typecheck:all` (0 errors — PASS)
+  - `npm run lint` (0 errors — PASS)
+  - `vitest run` (17 test files passed, 79 tests passed — 100% PASS)
+  - `npm run n8n:validate` (25 valid workflows — PASS)
+- **Verification Result:** ALL RELEASE GATES PASSED (Exit code 0).
+- **Next Action:** Commit changes, push to GitHub on dedicated branch `agent/antigravity/security-hardening-ci-repair`, and open Pull Request for ChatGPT & Rudraksh review.

@@ -12,8 +12,10 @@
 | Task ID | Task Title | Priority | Assignee | Reviewer | Status | Branch | PR Ref |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **AGENCYOS-000** | Multi-Agent Collaboration Infrastructure Setup | **CRITICAL** | Antigravity | ChatGPT / Rudraksh | `DONE` | `agent/antigravity/setup-collaboration` | [#1](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1) |
-| **AGENCYOS-001** | Complete Repository Engineering Audit | **CRITICAL** | Antigravity | ChatGPT | `IN_PROGRESS` | `agent/antigravity/setup-collaboration` | [#1](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/1) |
-| **AGENCYOS-002** | 77-Screen Blueprint Alignment & Route Inventory | **P1** | Antigravity | ChatGPT | `BACKLOG` | `feature/blueprint-alignment` | - |
+| **AGENCYOS-001** | Complete Repository Engineering Audit | **CRITICAL** | Antigravity | ChatGPT / Rudraksh | `IN_REVIEW` | `agent/antigravity/audit-repository` | [#2](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/2) |
+| **TASK-AUDIT-01** | Route Protection, RBAC & Role Escalation Hardening | **P0** | Antigravity | ChatGPT / Rudraksh | `IN_REVIEW` | `agent/antigravity/security-hardening-ci-repair` | [#3](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/3) |
+| **TASK-AUDIT-04** | CI Baseline Repair (Vitest + ESLint Flat Config) | **P1** | Antigravity | ChatGPT / Rudraksh | `IN_REVIEW` | `agent/antigravity/security-hardening-ci-repair` | [#3](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/3) |
+| **AGENCYOS-002** | 77-Screen Blueprint Alignment & Route Inventory | **P1** | Antigravity | ChatGPT | `READY` | `feature/blueprint-alignment` | - |
 | **AGENCYOS-003** | Cloudflare Pages Static Export Optimization & Route Audit | **P1** | Antigravity | ChatGPT | `feature/cloudflare-pages-export` | - |
 | **AGENCYOS-004** | Zoho Catalyst AppSail Express API Contract Harmonization | **P1** | Antigravity | ChatGPT | `feature/catalyst-api-harmonization` | - |
 | **AGENCYOS-005** | Multi-Tenant Data Store Isolation & Policy Hardening | **P0** | Antigravity | ChatGPT | `feature/datastore-isolation` | - |
