@@ -33,6 +33,7 @@ import {
   Check,
   Share2,
 } from "lucide-react";
+import { LiveInteractiveMap } from "@/components/maps/LiveInteractiveMap";
 
 interface BusinessResult {
   id: string;
@@ -53,7 +54,8 @@ interface BusinessResult {
   potential: "High Potential" | "Medium Potential" | "Low Potential";
   oppChecklist: string[];
   pinColor: "red" | "orange" | "yellow" | "green" | "blue" | "gray";
-  mapCoord: { x: number; y: number }; // Percentage on map canvas
+  mapCoord: { x: number; y: number }; // Percentage fallback on map canvas
+  location?: { lat: number; lng: number };
 }
 
 // 10 Detailed realistic businesses matching the design screenshot
@@ -335,17 +337,6 @@ const REALISTIC_BUSINESSES: BusinessResult[] = [
   },
 ];
 
-// Cluster definitions matching the screenshot
-const MAP_CLUSTERS = [
-  { id: "c1", label: "28", x: 50, y: 46, color: "bg-[#EA4335]", size: "w-8 h-8", text: "text-white" },
-  { id: "c2", label: "24", x: 58, y: 77, color: "bg-[#EA4335]", size: "w-8 h-8", text: "text-white" },
-  { id: "c3", label: "12", x: 45, y: 40, color: "bg-[#4285F4]", size: "w-7 h-7", text: "text-white" },
-  { id: "c4", label: "15", x: 58, y: 63, color: "bg-[#4285F4]", size: "w-7 h-7", text: "text-white" },
-  { id: "c5", label: "8", x: 65, y: 42, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
-  { id: "c6", label: "6", x: 44, y: 73, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
-  { id: "c7", label: "10", x: 63, y: 82, color: "bg-[#4285F4]", size: "w-6 h-6", text: "text-white" },
-];
-
 const CATEGORY_PILLS = [
   { name: "Restaurant", icon: "🍴" },
   { name: "Cafe", icon: "☕" },
@@ -435,6 +426,7 @@ export default function MapExplorerPage() {
             x: 25 + ((idx * 17) % 55),
             y: 22 + ((idx * 21) % 58),
           },
+          location: p.location,
         }));
 
         setBusinesses(mapped);
@@ -753,352 +745,24 @@ export default function MapExplorerPage() {
           </div>
         </div>
 
-        {/* COLUMN 2: Center Realistic Map View */}
-        <div className="xl:col-span-5 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] overflow-hidden shadow-xs relative flex flex-col h-[690px]">
-          {/* Map Layer Switcher (Top Left) */}
-          <div className="absolute top-3 left-3 z-30 flex items-center gap-1 p-0.5 bg-white/95 dark:bg-[#151D1A]/95 rounded-lg border border-gray-200/90 shadow-md backdrop-blur">
-            <button
-              onClick={() => setMapMode("map")}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
-                mapMode === "map"
-                  ? "bg-[#171918] text-white shadow-xs"
-                  : "text-gray-600 dark:text-gray-400 hover:text-black"
-              }`}
-            >
-              Map
-            </button>
-            <button
-              onClick={() => setMapMode("satellite")}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
-                mapMode === "satellite"
-                  ? "bg-[#171918] text-white shadow-xs"
-                  : "text-gray-600 dark:text-gray-400 hover:text-black"
-              }`}
-            >
-              Satellite
-            </button>
-          </div>
-
-          {/* Floating Action Buttons (Top Center-Right) */}
-          <div className="absolute top-3 right-3 z-30 flex items-center gap-2">
-            <button
-              onClick={() => {
-                setSearchInArea(!searchInArea);
-                showToast(searchInArea ? "Auto-viewport scan disabled" : "Scanning places in current viewport");
-              }}
-              className="h-7.5 px-3 rounded-lg bg-white/95 dark:bg-[#151D1A]/95 text-gray-800 dark:text-gray-200 text-xs font-medium border border-gray-200/90 shadow-md backdrop-blur inline-flex items-center gap-1.5 hover:bg-white"
-            >
-              <input
-                type="checkbox"
-                checked={searchInArea}
-                onChange={() => {}}
-                className="w-3.5 h-3.5 rounded text-blue-600 focus:ring-0 cursor-pointer"
-              />
-              <span>Search in this area</span>
-            </button>
-
-            <button
-              onClick={() => showToast("Draw Polygon: Click on map to create boundary")}
-              className="h-7.5 px-3 rounded-lg bg-white/95 dark:bg-[#151D1A]/95 text-gray-800 dark:text-gray-200 text-xs font-medium border border-gray-200/90 shadow-md backdrop-blur inline-flex items-center gap-1.5 hover:bg-white"
-            >
-              <Layers size={13} className="text-gray-600" />
-              <span>Draw Area</span>
-            </button>
-          </div>
-
-          {/* REALISTIC HIGH-FIDELITY MAP CANVAS */}
-          <div
-            className={`flex-1 relative overflow-hidden transition-colors ${
-              mapMode === "satellite" ? "bg-[#131D24]" : "bg-[#ECEEE6]"
-            }`}
-          >
-            {/* SVG Cartographic Layer: Styled Road Networks & Geographic Landmarks */}
-            <svg
-              className="absolute inset-0 w-full h-full select-none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                transformOrigin: "center center",
-                transition: "transform 0.2s ease-out",
-              }}
-            >
-              <defs>
-                <pattern id="roadPattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 0 20 L 40 20" stroke={mapMode === "satellite" ? "#1e293b" : "#E2E4DC"} strokeWidth="1" />
-                </pattern>
-              </defs>
-
-              <rect width="100%" height="100%" fill="url(#roadPattern)" />
-
-              {/* Water Bodies & Lake Reservoirs */}
-              <path
-                d="M 500,260 Q 520,300 480,340 T 490,400 T 520,440"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#0F324D" : "#C4E0E5"}
-                strokeWidth="18"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 580,180 Q 610,230 600,290"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#0F324D" : "#C4E0E5"}
-                strokeWidth="12"
-                strokeLinecap="round"
-              />
-
-              {/* Green Parks / Landscape */}
-              <circle cx="360" cy="420" r="55" fill={mapMode === "satellite" ? "#14281E" : "#DDE9DC"} />
-              <rect x="240" y="220" width="70" height="45" rx="12" fill={mapMode === "satellite" ? "#14281E" : "#DDE9DC"} />
-              <circle cx="560" cy="520" r="48" fill={mapMode === "satellite" ? "#14281E" : "#DDE9DC"} />
-
-              {/* Airport Runway & Zone */}
-              <g transform="translate(480, 160)">
-                <rect x="0" y="0" width="110" height="70" rx="10" fill={mapMode === "satellite" ? "#1A252E" : "#E1E5DC"} />
-                <line x1="20" y1="20" x2="90" y2="50" stroke="#FFFFFF" strokeWidth="4" strokeDasharray="6,4" />
-                <text x="35" y="62" fontSize="9" fontWeight="bold" fill="#6B7280">
-                  IDR RUNWAY
-                </text>
-              </g>
-
-              {/* Major Highway Artery Networks (Bypass, AB Road, Ring Road) */}
-              <path
-                d="M 50,320 C 180,340 320,380 440,360 S 650,340 780,380"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#2B3C4E" : "#FAF8F2"}
-                strokeWidth="14"
-              />
-              <path
-                d="M 50,320 C 180,340 320,380 440,360 S 650,340 780,380"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#384F66" : "#FCE8B2"}
-                strokeWidth="6"
-              />
-
-              <path
-                d="M 380,80 C 400,200 420,350 430,550 S 450,680 480,780"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#2B3C4E" : "#FAF8F2"}
-                strokeWidth="12"
-              />
-              <path
-                d="M 380,80 C 400,200 420,350 430,550 S 450,680 480,780"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#384F66" : "#FCE8B2"}
-                strokeWidth="5"
-              />
-
-              {/* Ring Road Oval Highway */}
-              <ellipse
-                cx="430"
-                cy="370"
-                rx="210"
-                ry="170"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#2B3C4E" : "#FAF8F2"}
-                strokeWidth="10"
-              />
-              <ellipse
-                cx="430"
-                cy="370"
-                rx="210"
-                ry="170"
-                fill="none"
-                stroke={mapMode === "satellite" ? "#384F66" : "#FBE0A4"}
-                strokeWidth="4"
-              />
-
-              {/* Secondary Arterial Roads */}
-              <path d="M 280,180 L 580,560" stroke={mapMode === "satellite" ? "#263545" : "#FFFFFF"} strokeWidth="5" />
-              <path d="M 580,200 L 260,540" stroke={mapMode === "satellite" ? "#263545" : "#FFFFFF"} strokeWidth="5" />
-              <path d="M 200,300 L 650,420" stroke={mapMode === "satellite" ? "#263545" : "#FFFFFF"} strokeWidth="4" />
-              <path d="M 320,490 L 600,490" stroke={mapMode === "satellite" ? "#263545" : "#FFFFFF"} strokeWidth="4" />
-
-              {/* Geographic Labels Matching Screenshot */}
-              <g className="font-sans select-none pointer-events-none">
-                {/* Central Indore Marker Label */}
-                <text
-                  x="430"
-                  y="385"
-                  textAnchor="middle"
-                  fontSize="22"
-                  fontWeight="800"
-                  fill={mapMode === "satellite" ? "#F8FAFC" : "#1F2937"}
-                  letterSpacing="1"
-                >
-                  Indore
-                </text>
-                <text
-                  x="430"
-                  y="405"
-                  textAnchor="middle"
-                  fontSize="13"
-                  fontWeight="600"
-                  fill={mapMode === "satellite" ? "#94A3B8" : "#4B5563"}
-                >
-                  इंदौर
-                </text>
-
-                {/* Devi Ahilya Bai Holkar Airport */}
-                <text
-                  x="535"
-                  y="150"
-                  textAnchor="middle"
-                  fontSize="10"
-                  fontWeight="700"
-                  fill="#1E40AF"
-                >
-                  Devi Ahilya Bai
-                </text>
-                <text
-                  x="535"
-                  y="162"
-                  textAnchor="middle"
-                  fontSize="9.5"
-                  fontWeight="600"
-                  fill="#1E40AF"
-                >
-                  Holkar Airport (IDR) ✈
-                </text>
-
-                {/* Suburbs & Localities */}
-                <text x="290" y="270" fontSize="10" fontWeight="700" fill="#6B7280">
-                  Pipliyahana
-                </text>
-                <text x="510" y="375" fontSize="10" fontWeight="700" fill="#6B7280">
-                  Palasia
-                </text>
-                <text x="525" y="540" fontSize="10" fontWeight="700" fill="#6B7280">
-                  Chhatripura
-                </text>
-                <text x="290" y="540" fontSize="10" fontWeight="700" fill="#6B7280">
-                  Scheme Nagar
-                </text>
-                <text x="310" y="700" fontSize="10" fontWeight="700" fill="#9CA3AF">
-                  Beda Bangarda
-                </text>
-                <text x="520" y="270" fontSize="10" fontWeight="700" fill="#9CA3AF">
-                  Bhanwarkuan
-                </text>
-              </g>
-            </svg>
-
-            {/* CLUSTERS OVERLAY (Matching screenshot circles 28, 24, 12, 15, 8, 6, 10) */}
-            {MAP_CLUSTERS.map((cl) => (
-              <div
-                key={cl.id}
-                style={{ left: `${cl.x}%`, top: `${cl.y}%` }}
-                onClick={() => showToast(`Cluster: ${cl.label} businesses discovered here`)}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 ${cl.size} ${cl.color} ${cl.text} rounded-full font-bold text-xs flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-900 cursor-pointer transition-transform hover:scale-125 z-20`}
-              >
-                {cl.label}
-              </div>
-            ))}
-
-            {/* INDIVIDUAL TEARDROP PINS (Matching screenshot) */}
-            {businesses.map((biz) => {
-              const isSelected = selectedBusiness?.id === biz.id;
-
-              // Color classes for map pins
-              const pinColorMap = {
-                red: "bg-[#EA4335]",
-                orange: "bg-[#F97316]",
-                yellow: "bg-[#EAB308]",
-                green: "bg-[#10B981]",
-                blue: "bg-[#3B82F6]",
-                gray: "bg-[#6B7280]",
-              };
-
-              return (
-                <div
-                  key={biz.id}
-                  style={{ left: `${biz.mapCoord.x}%`, top: `${biz.mapCoord.y}%` }}
-                  onClick={() => handleSelectBusiness(biz)}
-                  className={`absolute -translate-x-1/2 -translate-y-full cursor-pointer z-25 group transition-transform ${
-                    isSelected ? "scale-125 z-40" : "hover:scale-115"
-                  }`}
-                >
-                  {/* Pin Teardrop Shape */}
-                  <div className="relative flex flex-col items-center">
-                    <div
-                      className={`w-5.5 h-7 rounded-t-full rounded-b-none ${
-                        pinColorMap[biz.pinColor]
-                      } border border-white shadow-md flex items-center justify-center text-[9px] text-white font-bold transition-all ${
-                        isSelected ? "ring-4 ring-amber-300 ring-offset-1 scale-110" : ""
-                      }`}
-                      style={{
-                        clipPath: "polygon(50% 100%, 0% 40%, 0% 0%, 100% 0%, 100% 40%)",
-                      }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-white mb-2" />
-                    </div>
-
-                    {/* Tooltip on hover / selection */}
-                    <div
-                      className={`absolute bottom-full mb-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap shadow-md pointer-events-none transition-all ${
-                        isSelected
-                          ? "bg-[#171918] text-white opacity-100 ring-1 ring-white"
-                          : "bg-white text-gray-800 opacity-0 group-hover:opacity-100 border border-gray-200"
-                      }`}
-                    >
-                      {biz.name}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Right Map Zoom & Locate Controls */}
-            <div className="absolute right-3.5 bottom-12 flex flex-col gap-2 z-30">
-              <button
-                onClick={() => showToast("Recycled to current coordinates")}
-                className="w-8 h-8 rounded-lg bg-white dark:bg-[#151D1A] border border-gray-200 dark:border-[#22302B] shadow-md flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50"
-                title="Locate Me"
-              >
-                <Crosshair size={14} />
-              </button>
-
-              <div className="flex flex-col rounded-lg bg-white dark:bg-[#151D1A] border border-gray-200 dark:border-[#22302B] shadow-md overflow-hidden text-xs">
-                <button
-                  onClick={() => setZoomLevel((z) => Math.min(1.6, z + 0.15))}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 font-bold text-gray-700 dark:text-gray-200"
-                  title="Zoom In"
-                >
-                  +
-                </button>
-                <div className="h-px bg-gray-200 dark:bg-[#22302B]" />
-                <button
-                  onClick={() => setZoomLevel((z) => Math.max(0.85, z - 0.15))}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 font-bold text-gray-700 dark:text-gray-200"
-                  title="Zoom Out"
-                >
-                  −
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* BOTTOM PIN LEGEND (Matching screenshot exactly) */}
-          <div className="p-2.5 bg-white dark:bg-[#151D1A] border-t border-gray-100 dark:border-[#22302B] flex flex-wrap items-center justify-center gap-4 text-xs text-gray-600 dark:text-gray-400 px-4 select-none">
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#EA4335]" /> Restaurant
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F97316]" /> Cafe
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#EAB308]" /> Salon
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" /> Gym
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]" /> Hotel
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#6B7280]" /> Other
-            </span>
-          </div>
-        </div>
+        {/* COLUMN 2: Real Interactive Live Map (Google Maps JS SDK / Slippy OpenStreetMap & Satellite) */}
+        <LiveInteractiveMap
+          businesses={businesses}
+          selectedBusiness={selectedBusiness}
+          city={selectedCity}
+          mapMode={mapMode}
+          onMapModeChange={setMapMode}
+          searchInArea={searchInArea}
+          onToggleSearchInArea={() => {
+            setSearchInArea((prev) => !prev);
+            showToast(searchInArea ? "Auto-viewport scan disabled" : "Scanning places in current viewport");
+          }}
+          onSelectBusiness={(bizId) => {
+            const match = businesses.find((b) => b.id === bizId);
+            if (match) handleSelectBusiness(match);
+          }}
+          onDrawAreaClick={() => showToast("Territory selection active")}
+        />
 
         {/* COLUMN 3: Right Drawer (Selected Business Detail Panel) */}
         <div className="xl:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-4">

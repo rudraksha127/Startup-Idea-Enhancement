@@ -250,6 +250,7 @@ export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("Mar 1, 2024 - Mar 31, 2024");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [liveKpis, setLiveKpis] = useState<any>(null);
+  const [liveOverview, setLiveOverview] = useState<any>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -264,6 +265,7 @@ export default function AnalyticsPage() {
           const json = await res.json();
           if (json.success && json.data) {
             setLiveKpis(json.data.kpis);
+            setLiveOverview(json.data);
           }
         }
       } catch (e) {
@@ -276,12 +278,12 @@ export default function AnalyticsPage() {
   const handleExportReport = () => {
     const reportData = [
       ["Metric", "Value"],
-      ["Total Leads", liveKpis ? String(liveKpis.totalLeads) : "1,248"],
-      ["Emails Sent", liveKpis ? String(liveKpis.emailsSent) : "892"],
-      ["Replies Received", liveKpis ? String(liveKpis.repliesReceived) : "142"],
-      ["Meetings Booked", liveKpis ? String(liveKpis.meetingsBooked) : "38"],
-      ["Active Clients", liveKpis ? String(liveKpis.activeClients) : "48"],
-      ["Conversion Rate", liveKpis ? String(liveKpis.conversionRate) : "4.9%"],
+      ["Total Leads", String(liveKpis?.totalLeads ?? 0)],
+      ["Emails Sent", String(liveKpis?.emailsSent ?? 0)],
+      ["Replies Received", String(liveKpis?.repliesReceived ?? 0)],
+      ["Meetings Booked", String(liveKpis?.meetingsBooked ?? 0)],
+      ["Active Clients", String(liveKpis?.activeClients ?? 0)],
+      ["Conversion Rate", String(liveKpis?.conversionRate ?? "0.0%")],
       ["", ""],
       ["Lead Source", "Leads Count"],
       ...SOURCES_BAR_DATA.map((s) => [s.source, String(s.count)]),
@@ -362,12 +364,12 @@ export default function AnalyticsPage() {
           {/* 6 Top KPI Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             {[
-              { label: "Total Leads", value: liveKpis ? String(liveKpis.totalLeads) : "1,248", trend: "32%" },
-              { label: "Emails Sent", value: liveKpis ? String(liveKpis.emailsSent) : "892", trend: "28%" },
-              { label: "Replies Received", value: liveKpis ? String(liveKpis.repliesReceived) : "142", trend: "18%" },
-              { label: "Meetings Booked", value: liveKpis ? String(liveKpis.meetingsBooked) : "38", trend: "25%" },
-              { label: "Total Clients", value: liveKpis ? String(liveKpis.activeClients) : "48", trend: "20%" },
-              { label: "Total Revenue", value: "₹4.8L", trend: "42%" },
+              { label: "Total Leads", value: String(liveKpis?.totalLeads ?? 0) },
+              { label: "Emails Sent", value: String(liveKpis?.emailsSent ?? 0) },
+              { label: "Replies Received", value: String(liveKpis?.repliesReceived ?? 0) },
+              { label: "Meetings Booked", value: String(liveKpis?.meetingsBooked ?? 0) },
+              { label: "Total Clients", value: String(liveKpis?.activeClients ?? 0) },
+              { label: "Total MRR", value: String(liveKpis?.mrr ?? "₹0") },
             ].map((kpi) => (
               <div
                 key={kpi.label}
@@ -376,9 +378,6 @@ export default function AnalyticsPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold text-[#171918] tracking-tight">
                     {kpi.value}
-                  </span>
-                  <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                    ↑ {kpi.trend}
                   </span>
                 </div>
                 <div className="text-[11px] text-[#68717D] font-medium mt-1">
@@ -552,24 +551,24 @@ export default function AnalyticsPage() {
 
               <div className="space-y-2 pt-1 text-[11px]">
                 <div className="p-2 rounded-lg bg-blue-50 border border-blue-100 flex justify-between text-blue-900 font-medium">
-                  <span>1,248 Total Leads</span>
-                  <strong>100%</strong>
+                  <span>{liveKpis?.totalLeads ?? 0} Total Leads</span>
+                  <strong>{(liveKpis?.totalLeads ?? 0) > 0 ? "100%" : "0%"}</strong>
                 </div>
                 <div className="p-2 rounded-lg bg-sky-50 border border-sky-100 flex justify-between text-sky-900 font-medium">
-                  <span>892 Emails Sent</span>
-                  <strong>71%</strong>
+                  <span>{liveKpis?.emailsSent ?? 0} Emails Sent</span>
+                  <strong>{liveKpis?.totalLeads ? `${Math.round(((liveKpis?.emailsSent ?? 0) / liveKpis.totalLeads) * 100)}%` : "0%"}</strong>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-100 flex justify-between text-emerald-900 font-medium">
-                  <span>142 Replied</span>
-                  <strong>11%</strong>
+                  <span>{liveKpis?.repliesReceived ?? 0} Replied</span>
+                  <strong>{liveKpis?.conversionRate ?? "0.0%"}</strong>
                 </div>
                 <div className="p-2 rounded-lg bg-purple-50 border border-purple-100 flex justify-between text-purple-900 font-medium">
-                  <span>38 Meetings</span>
-                  <strong>3%</strong>
+                  <span>{liveKpis?.meetingsBooked ?? 0} Meetings</span>
+                  <strong>{liveKpis?.totalLeads ? `${Math.round(((liveKpis?.meetingsBooked ?? 0) / liveKpis.totalLeads) * 100)}%` : "0%"}</strong>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-100 border border-emerald-200 flex justify-between text-emerald-950 font-bold">
-                  <span>18 Clients Won</span>
-                  <strong>1.4%</strong>
+                  <span>{liveKpis?.activeClients ?? 0} Clients Won</span>
+                  <strong>{liveKpis?.totalLeads ? `${((liveKpis?.activeClients ?? 0) / liveKpis.totalLeads * 100).toFixed(1)}%` : "0%"}</strong>
                 </div>
               </div>
             </div>
@@ -656,19 +655,26 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
-              {OVERVIEW_RECENT_ACTIVITY.map((act, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-lg border border-[#E7E7E2] bg-[#F7F6F2]/40 text-xs space-y-1.5"
-                >
-                  <div className="flex items-center gap-1.5 text-[10px] text-[#68717D]">
-                    <Clock size={11} /> {act.time}
-                  </div>
-                  <div className="font-semibold text-[#171918] text-[11px] leading-snug">
-                    {act.text}
-                  </div>
+              {(liveOverview?.recentActivity?.length > 0 ? liveOverview.recentActivity : []).length === 0 ? (
+                <div className="col-span-full py-6 text-center text-xs text-gray-400">
+                  No pipeline activity events recorded yet.
                 </div>
-              ))}
+              ) : (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                liveOverview.recentActivity.map((act: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-lg border border-[#E7E7E2] bg-[#F7F6F2]/40 text-xs space-y-1.5"
+                  >
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#68717D]">
+                      <Clock size={11} /> {act.time}
+                    </div>
+                    <div className="font-semibold text-[#171918] text-[11px] leading-snug">
+                      {act.text}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

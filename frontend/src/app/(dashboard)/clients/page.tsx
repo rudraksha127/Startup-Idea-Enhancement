@@ -655,19 +655,16 @@ export default function ClientsPage() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Client Account Record Summary */}
           <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-[#22302B]">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-[#171918] dark:text-white">Recent Activity</span>
-              <span className="text-[10px] text-gray-400 hover:text-black cursor-pointer">View All →</span>
+              <span className="font-bold text-xs text-[#171918] dark:text-white">Account Timeline</span>
             </div>
             <div className="space-y-1.5 text-[11px]">
               {[
-                { action: "Replied to outreach email", time: "2 hours ago" },
-                { action: "Shared project proposal", time: "5 hours ago" },
-                { action: "Had a call with Rahul", time: "1 day ago" },
-                { action: "Website design approved", time: "2 days ago" },
-                { action: "Invoice sent (₹35,000)", time: "3 days ago" },
+                { action: `Status: ${selectedClient.status || "Active"}`, time: selectedClient.clientSince || "Onboarded" },
+                { action: `Category: ${selectedClient.type || "Website Services"}`, time: selectedClient.totalValue || "INR" },
+                { action: `Location: ${selectedClient.location || "—"}`, time: selectedClient.phone || "No phone" },
               ].map((act, i) => (
                 <div key={i} className="flex items-center justify-between py-0.5 text-gray-600">
                   <span className="truncate max-w-[200px]">{act.action}</span>
