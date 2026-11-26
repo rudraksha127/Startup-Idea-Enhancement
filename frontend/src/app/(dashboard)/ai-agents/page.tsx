@@ -517,18 +517,22 @@ export default function AIAgentsPage() {
   const handleRunAgent = async (agent: Agent) => {
     setRunningAgentId(agent._id);
     try {
+      const idempotencyKey = `ui_${agent.agentId || agent._id}_${Date.now()}`;
       const res = await fetch(`/api/agents/${agent.agentId || agent._id}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          businessName: "The Urban Kitchen",
-          url: "https://theurbankitchen.in",
-          category: "Restaurant",
+          businessName: `${testCategory} (${testLocation.split(",")[0]})`,
+          category: testCategory,
+          location: testLocation,
+          idempotencyKey,
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        showToast(`✓ Agent "${agent.name}" run finished (${data.runLog?.tokensUsed || 650} tokens, ${data.runLog?.durationMs || 420}ms)`);
+      if (res.ok && data.success) {
+        const tokens = data.runLog?.tokensUsed ?? 0;
+        const duration = data.runLog?.durationMs ?? 0;
+        showToast(`Agent "${agent.name}" finished (${tokens} tokens, ${duration}ms)`);
         setInspectionResult({
           agentName: agent.name,
           category: agent.category,
@@ -546,17 +550,17 @@ export default function AIAgentsPage() {
                   lastRun: "Last run just now",
                   metric1: {
                     ...a.metric1,
-                    value: (parseInt(a.metric1.value.replace(/,/g, "")) || 0 + 1).toLocaleString(),
+                    value: ((parseInt(a.metric1.value.replace(/,/g, ""), 10) || 0) + 1).toLocaleString(),
                   },
                 }
               : a
           )
         );
       } else {
-        showToast(`✓ Triggered run for "${agent.name}"`);
+        showToast(data?.error || `Execution blocked for "${agent.name}"`);
       }
     } catch {
-      showToast(`✓ Simulated deterministic run for "${agent.name}"`);
+      showToast(`Network error executing "${agent.name}"`);
     } finally {
       setRunningAgentId(null);
     }
@@ -573,39 +577,38 @@ export default function AIAgentsPage() {
           category: testCategory,
           location: testLocation,
           radius: testRadius,
+          idempotencyKey: `sim_${editedAgent.agentId || editedAgent._id}_${Date.now()}`,
         }),
       });
       const data = await res.json();
+      if (!res.ok || !data.success) {
+        setSimulationOutput({
+          status: `HTTP ${res.status} - Rejected`,
+          latency: "0 ms",
+          tokens: "0 tokens",
+          cost: "$0.00",
+          output: { error: data?.error || "Execution failed" },
+        });
+        showToast(data?.error || "Simulation rejected");
+        return;
+      }
       setSimulationOutput({
-        status: "200 OK - Finished",
-        latency: `${data.runLog?.durationMs || 420} ms`,
-        tokens: `${data.runLog?.tokensUsed || 650} tokens`,
-        cost: "$0.0001",
-        output: data.output || {
-          message: `Identified top commercial opportunities in ${testLocation}`,
-          sampleResult: {
-            businessName: "Spice Junction",
-            category: testCategory,
-            opportunityScore: 8.5,
-            identifiedGaps: ["Mobile navigation missing", "Page speed 54/100", "No online reservation"],
-          },
-        },
+        status: `${data.status || "Completed"} (${data.runLog?.mode || "deterministic"})`,
+        latency: `${data.runLog?.durationMs ?? 0} ms`,
+        tokens: `${data.runLog?.tokensUsed ?? 0} tokens`,
+        cost: `$${Number(data.runLog?.costUsd ?? 0).toFixed(6)}`,
+        output: data.output,
       });
-      showToast(`✓ Live test simulation completed for ${editedAgent.name}`);
+      showToast(`Execution completed for ${editedAgent.name}`);
     } catch {
       setSimulationOutput({
-        status: "200 OK (Deterministic Engine)",
-        latency: "410 ms",
-        tokens: "620 tokens",
-        cost: "$0.0001",
-        output: {
-          success: true,
-          agent: editedAgent.name,
-          query: `${testCategory} in ${testLocation}`,
-          insights: "Ready for live deployment. 100% compliant with autonomy constraints.",
-        },
+        status: "Network Error",
+        latency: "0 ms",
+        tokens: "0 tokens",
+        cost: "$0.00",
+        output: { error: "Unable to reach /api/agents execution endpoint" },
       });
-      showToast(`✓ Live test simulation completed`);
+      showToast("Failed to reach agent execution API");
     } finally {
       setIsSimulating(false);
     }

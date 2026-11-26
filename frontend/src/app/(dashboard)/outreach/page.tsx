@@ -63,15 +63,6 @@ import {
 } from "recharts";
 import { WHITE_TOOLTIP_STYLE } from "@/lib/chart-theme";
 
-// Outreach 30-Day Performance Data matching Image 2
-const SEQUENCE_PERFORMANCE_DATA = [
-  { day: "Mar 1", sent: 350, opened: 240, replied: 42, meetings: 14 },
-  { day: "Mar 7", sent: 580, opened: 410, replied: 68, meetings: 21 },
-  { day: "Mar 14", sent: 842, opened: 571, replied: 102, meetings: 41 },
-  { day: "Mar 21", sent: 980, opened: 680, replied: 115, meetings: 48 },
-  { day: "Mar 28", sent: 1120, opened: 790, replied: 138, meetings: 56 },
-];
-
 interface CampaignItem {
   id: string;
   name: string;
@@ -87,14 +78,16 @@ interface CampaignItem {
   createdAt: string;
 }
 
-const DEFAULT_CAMPAIGNS: CampaignItem[] = [
-  { id: "1", name: "Indore Restaurants", service: "Website Development", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Restaurants Indore", sent: 542, opens: "68%", replies: "12%", meetings: 28, status: "Active", createdAt: "12 Mar 2024" },
-  { id: "2", name: "Jaipur Cafes", service: "Website + SEO", type: "Email + Follow-up", typeBadgeBg: "bg-purple-50 text-purple-700", audience: "Cafes Jaipur", sent: 432, opens: "62%", replies: "10%", meetings: 18, status: "Active", createdAt: "10 Mar 2024" },
-  { id: "3", name: "Delhi Clinics", service: "Booking Website", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Clinics New Delhi", sent: 612, opens: "71%", replies: "14%", meetings: 32, status: "Active", createdAt: "8 Mar 2024" },
-  { id: "4", name: "Fitness Gyms", service: "Website Redesign", type: "LinkedIn + Email", typeBadgeBg: "bg-indigo-50 text-indigo-700", audience: "Gyms Indore", sent: 284, opens: "58%", replies: "8%", meetings: 12, status: "Paused", createdAt: "5 Mar 2024" },
-  { id: "5", name: "Fashion Stores", service: "Ecommerce", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Retail Stores Indore", sent: 468, opens: "66%", replies: "11%", meetings: 16, status: "Active", createdAt: "3 Mar 2024" },
-  { id: "6", name: "Hotels in MP", service: "Booking Website", type: "Cold Email", typeBadgeBg: "bg-blue-50 text-blue-700", audience: "Hotels Madhya Pradesh", sent: 320, opens: "64%", replies: "9%", meetings: 11, status: "Draft", createdAt: "28 Feb 2024" },
-];
+interface InboxThreadItem {
+  id: string;
+  name: string;
+  company: string;
+  email: string;
+  snippet: string;
+  time: string;
+  badge: string;
+  badgeColor: string;
+}
 
 export default function OutreachPage() {
   // Navigation tabs: Default to sequence builder as shown in screenshot
@@ -112,22 +105,65 @@ export default function OutreachPage() {
   const [sequenceName, setSequenceName] = useState("Local Business Outreach");
   const [targetAudience, setTargetAudience] = useState("Restaurants");
   const [sequenceDescription, setSequenceDescription] = useState(
-    "Multi-step outreach sequence to connect with local restaurants for website development and digital marketing services."
+    "Multi-step outreach sequence to connect with local businesses for website development and digital growth services."
   );
 
   // Email subject and body
   const [emailSubject, setEmailSubject] = useState("{{business_name}} – Quick idea to improve your online presence");
   const [emailBody, setEmailBody] = useState(
-    `Hi {{first_name}},\n\nI came across {{business_name}} and really like what you're doing. I noticed a few opportunities to improve your online presence and attract more customers from Google.\n\nWould you be open to a quick 5-minute call to discuss this?\n\nBest regards,\nRudraksh\nFounder, AgencyOS`
+    `Hi {{first_name}},\n\nI came across {{business_name}} and noticed concrete opportunities to speed up your mobile site and capture direct customer inquiries.\n\nWould you be open to a quick 5-minute call to discuss this?\n\nBest regards,\nAgencyOS Team`
   );
 
-  // Campaigns list state
-  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>(DEFAULT_CAMPAIGNS);
+  // Campaigns & inbox state (hydrated from live APIs; zero fabricated rows)
+  const [campaignsList, setCampaignsList] = useState<CampaignItem[]>([]);
   const [campaignSearch, setCampaignSearch] = useState("");
   const [activeCampaignFilter, setActiveCampaignFilter] = useState("All");
-
-  // Inbox & Replies state
+  const [inboxConversations, setInboxConversations] = useState<InboxThreadItem[]>([]);
   const [selectedInboxIndex, setSelectedInboxIndex] = useState(0);
+  const [replyDraft, setReplyDraft] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      fetch("/api/outreach/campaigns").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("/api/outreach/inbox").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([campData, inboxData]) => {
+      if (!active) return;
+      if (Array.isArray(campData?.campaigns)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setCampaignsList(campData.campaigns.map((c: any) => ({
+          id: String(c._id || c.id),
+          name: c.name || "Untitled Campaign",
+          service: c.service || "Website Development",
+          type: c.channel || c.type || "Cold Email",
+          typeBadgeBg: "bg-blue-50 text-blue-700",
+          audience: c.audience || targetAudience,
+          sent: Number(c.sentCount || c.sent || 0),
+          opens: c.sentCount ? `${Math.round(((c.openedCount || 0) / c.sentCount) * 100)}%` : "0%",
+          replies: c.sentCount ? `${Math.round(((c.repliedCount || 0) / c.sentCount) * 100)}%` : "0%",
+          meetings: Number(c.meetingsBooked || 0),
+          status: c.status || "Draft",
+          createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—",
+        })));
+      }
+      if (Array.isArray(inboxData?.messages)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setInboxConversations(inboxData.messages.map((m: any) => ({
+          id: String(m._id || m.id),
+          name: m.recipientName || m.toEmail || "Prospect",
+          company: m.company || m.recipientName || "Prospect",
+          email: m.toEmail || "",
+          snippet: m.body || m.subject || "",
+          time: m.sentAt ? new Date(m.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Recorded",
+          badge: m.status || "Draft",
+          badgeColor: m.status === "Replied" ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-600",
+        })));
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [targetAudience]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -141,19 +177,43 @@ export default function OutreachPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          recipient: "theurbankitchen.in@gmail.com",
+          toEmail: "founder@agencyos.com",
           subject: emailSubject,
-          channel: "Email",
-          leadName: "The Urban Kitchen",
+          content: emailBody,
+          dryRun: true,
         }),
       });
-      showToast("✓ Test sequence dispatched to theurbankitchen.in@gmail.com!");
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        showToast(data?.error || "Failed to dispatch dry-run sequence test");
+        return;
+      }
+      showToast(data.message || "Dry-run test sequence recorded safely.");
     } catch {
-      showToast("✓ Test sequence verified & preview rendered!");
+      showToast("Error connecting to outreach test endpoint.");
     } finally {
       setIsTestingSequence(false);
     }
   };
+
+  const sequenceChartData = campaignsList.slice(0, 6).map((c) => ({
+    day: c.name.slice(0, 12),
+    sent: c.sent,
+    opened: Math.round((c.sent * (parseInt(c.opens, 10) || 0)) / 100),
+    replied: Math.round((c.sent * (parseInt(c.replies, 10) || 0)) / 100),
+    meetings: c.meetings,
+  }));
+
+  const filteredCampaigns = campaignsList.filter((c) => {
+    const matchesFilter = activeCampaignFilter === "All" || c.status === activeCampaignFilter;
+    const matchesSearch =
+      !campaignSearch.trim() ||
+      c.name.toLowerCase().includes(campaignSearch.toLowerCase()) ||
+      c.audience.toLowerCase().includes(campaignSearch.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const activeThread = inboxConversations[selectedInboxIndex] || null;
 
   return (
     <div className="space-y-4">
@@ -201,7 +261,7 @@ export default function OutreachPage() {
             }`}
           >
             <MessageCircle size={13} className="text-emerald-600" />
-            <span>Inbox &amp; Replies (142)</span>
+            <span>Inbox &amp; Replies ({inboxConversations.length})</span>
           </button>
         </div>
 
@@ -929,18 +989,24 @@ export default function OutreachPage() {
 
               {/* Recharts Multi-Line Graph */}
               <div className="h-40 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={SEQUENCE_PERFORMANCE_DATA}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0EE" />
-                    <XAxis dataKey="day" tick={{ fontSize: 10, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-                    <Tooltip {...WHITE_TOOLTIP_STYLE} />
-                    <Line type="monotone" dataKey="sent" stroke="#3B82F6" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="opened" stroke="#10B981" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="replied" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="meetings" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+                {sequenceChartData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-gray-400">
+                    No campaign telemetry recorded yet. Create or run a sequence to see chart metrics.
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={sequenceChartData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0EE" />
+                      <XAxis dataKey="day" tick={{ fontSize: 10, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+                      <Tooltip {...WHITE_TOOLTIP_STYLE} />
+                      <Line type="monotone" dataKey="sent" stroke="#3B82F6" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="opened" stroke="#10B981" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="replied" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="meetings" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
           </div>
@@ -1020,43 +1086,51 @@ export default function OutreachPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E7E7E2] dark:divide-[#22302B]">
-                  {campaignsList.map((c) => (
-                    <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-[#1E2824] transition-colors">
-                      <td className="py-3 px-4 font-bold text-[#171918] dark:text-white">{c.name}</td>
-                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{c.service}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${c.typeBadgeBg}`}>
-                          {c.type}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-gray-500">{c.audience}</td>
-                      <td className="py-3 px-4 font-bold">{c.sent.toLocaleString()}</td>
-                      <td className="py-3 px-4 text-emerald-600 font-bold">{c.opens}</td>
-                      <td className="py-3 px-4 text-amber-600 font-bold">{c.replies}</td>
-                      <td className="py-3 px-4 font-bold">{c.meetings}</td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            c.status === "Active"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : c.status === "Paused"
-                              ? "bg-amber-50 text-amber-700 border border-amber-200"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {c.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => setViewMode("sequence")}
-                          className="px-2.5 py-1 rounded bg-[#171918] text-white text-[10px] font-bold hover:bg-black"
-                        >
-                          Open Builder
-                        </button>
+                  {filteredCampaigns.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="py-10 text-center text-xs text-gray-500">
+                        No outreach campaigns found yet. Create a sequence or launch a campaign from Leads.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredCampaigns.map((c) => (
+                      <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-[#1E2824] transition-colors">
+                        <td className="py-3 px-4 font-bold text-[#171918] dark:text-white">{c.name}</td>
+                        <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{c.service}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${c.typeBadgeBg}`}>
+                            {c.type}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-gray-500">{c.audience}</td>
+                        <td className="py-3 px-4 font-bold">{c.sent.toLocaleString()}</td>
+                        <td className="py-3 px-4 text-emerald-600 font-bold">{c.opens}</td>
+                        <td className="py-3 px-4 text-amber-600 font-bold">{c.replies}</td>
+                        <td className="py-3 px-4 font-bold">{c.meetings}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              c.status === "Active"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : c.status === "Paused"
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {c.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => setViewMode("sequence")}
+                            className="px-2.5 py-1 rounded bg-[#171918] text-white text-[10px] font-bold hover:bg-black"
+                          >
+                            Open Builder
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1100,137 +1174,145 @@ export default function OutreachPage() {
             {/* Pane 1: Conversations List (4 cols) */}
             <div className="lg:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] shadow-xs overflow-hidden text-xs">
               <div className="p-3 border-b border-gray-100 dark:border-[#22302B] flex items-center justify-between font-bold">
-                <span>All Conversations (142)</span>
+                <span>All Conversations ({inboxConversations.length})</span>
                 <span className="text-gray-400 text-[10px] font-normal">Sort: Latest ▾</span>
               </div>
 
               <div className="divide-y divide-gray-100 dark:divide-[#22302B] max-h-[620px] overflow-y-auto">
-                {[
-                  { name: "Rahul Sharma", company: "The Urban Kitchen", snippet: "Hi Rudraksh, this sounds interesting. Can you share the website prototype?", time: "10:24 AM", badge: "Interested", badgeColor: "bg-emerald-50 text-emerald-700" },
-                  { name: "Priya Mehta", company: "Spice Junction", snippet: "Thanks for reaching out! We are looking for online reservation portal.", time: "09:48 AM", badge: "Meeting", badgeColor: "bg-purple-50 text-purple-700" },
-                  { name: "Amit Verma", company: "Royal Dine", snippet: "Please share more details about the pricing package.", time: "08:32 AM", badge: "Follow-up", badgeColor: "bg-amber-50 text-amber-700" },
-                  { name: "Neha Gupta", company: "Flavors of India", snippet: "Can you send examples of previous restaurant sites?", time: "Yesterday", badge: "Interested", badgeColor: "bg-emerald-50 text-emerald-700" },
-                  { name: "Suresh Patel", company: "Café Central", snippet: "Our current site is very slow. Can you audit it?", time: "Yesterday", badge: "Follow-up", badgeColor: "bg-amber-50 text-amber-700" },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedInboxIndex(idx)}
-                    className={`p-3 cursor-pointer transition-colors ${
-                      selectedInboxIndex === idx
-                        ? "bg-blue-50/60 dark:bg-blue-900/20 border-l-4 border-blue-600"
-                        : "hover:bg-gray-50 dark:hover:bg-[#1E2824]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="font-bold text-[#171918] dark:text-white">{item.name}</span>
-                      <span className="text-[10px] text-gray-400">{item.time}</span>
-                    </div>
-                    <div className="text-[11px] text-gray-500 font-medium">{item.company}</div>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-300 line-clamp-1 mt-1">{item.snippet}</p>
-                    <div className="mt-2">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${item.badgeColor}`}>
-                        {item.badge}
-                      </span>
-                    </div>
+                {inboxConversations.length === 0 ? (
+                  <div className="p-8 text-center text-gray-400">
+                    No outreach conversations recorded yet.
                   </div>
-                ))}
+                ) : (
+                  inboxConversations.map((item, idx) => (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedInboxIndex(idx)}
+                      className={`p-3 cursor-pointer transition-colors ${
+                        selectedInboxIndex === idx
+                          ? "bg-blue-50/60 dark:bg-blue-900/20 border-l-4 border-blue-600"
+                          : "hover:bg-gray-50 dark:hover:bg-[#1E2824]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="font-bold text-[#171918] dark:text-white">{item.name}</span>
+                        <span className="text-[10px] text-gray-400">{item.time}</span>
+                      </div>
+                      <div className="text-[11px] text-gray-500 font-medium">{item.company}</div>
+                      <p className="text-[11px] text-gray-600 dark:text-gray-300 line-clamp-1 mt-1">{item.snippet}</p>
+                      <div className="mt-2">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${item.badgeColor}`}>
+                          {item.badge}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
             {/* Pane 2 & 3: Conversation Thread & AI Reply Composer (8 cols) */}
             <div className="lg:col-span-8 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
-                <div>
-                  <h3 className="font-bold text-sm text-[#171918] dark:text-white">The Urban Kitchen</h3>
-                  <div className="text-[11px] text-gray-400">
-                    From: Rahul Sharma &lt;theurbankitchen.in@gmail.com&gt;
-                  </div>
-                </div>
+              {activeThread ? (
+                <>
+                  <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-[#22302B]">
+                    <div>
+                      <h3 className="font-bold text-sm text-[#171918] dark:text-white">{activeThread.company}</h3>
+                      <div className="text-[11px] text-gray-400">
+                        {activeThread.name} {activeThread.email ? `<${activeThread.email}>` : ""}
+                      </div>
+                    </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                    Lead Score: 8.5/10
-                  </span>
-                  <Link
-                    href="/audits?url=theurbankitchen.in"
-                    className="h-7 px-2.5 rounded bg-gray-100 hover:bg-gray-200 text-[11px] font-semibold text-gray-700 flex items-center gap-1"
-                  >
-                    <FileText size={11} />
-                    <span>View Audit</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Message Thread */}
-              <div className="space-y-3 max-h-[300px] overflow-y-auto p-1">
-                {/* Outbound Email 1 */}
-                <div className="p-3 rounded-xl bg-gray-50 dark:bg-[#121816] border border-gray-200/60 dark:border-[#22302B] space-y-1 text-xs">
-                  <div className="flex items-center justify-between text-[11px] text-gray-500">
-                    <span className="font-bold text-gray-800 dark:text-gray-200">Rudraksh (You)</span>
-                    <span>12 Mar, 9:00 AM</span>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    Hi Rahul, I noticed a few opportunities to improve The Urban Kitchen&apos;s online presence and attract
-                    more table reservations from Google...
-                  </p>
-                </div>
-
-                {/* Inbound Reply */}
-                <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 space-y-1 text-xs">
-                  <div className="flex items-center justify-between text-[11px] text-blue-900 dark:text-blue-300 font-bold">
-                    <span>Rahul Sharma (Owner, The Urban Kitchen)</span>
-                    <span className="font-normal text-gray-400">10:24 AM Today</span>
-                  </div>
-                  <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
-                    Hi Rudraksh, thanks for reaching out. Yes, we are currently losing bookings on weekends because our menu
-                    is only on Instagram. Can you send over a prototype of what a new booking site would look like?
-                  </p>
-                </div>
-              </div>
-
-              {/* AI Reply Assistant Composer */}
-              <div className="p-3.5 rounded-xl bg-[#FAF9F6] dark:bg-[#121816] border border-[#E7E7E2] dark:border-[#22302B] space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#171918] dark:text-white">
-                    <Sparkles size={13} className="text-purple-600" />
-                    <span>AI One-Click Reply Assistant</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[10px]">
-                    <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-bold">Positive Intent</span>
-                  </div>
-                </div>
-
-                <textarea
-                  rows={4}
-                  defaultValue="Hi Rahul, thanks for getting back! I've already prepared a preliminary interactive prototype for The Urban Kitchen featuring a 1-tap table reservation widget and mobile food menu. Would 4:00 PM tomorrow work for a quick 10-minute walkthrough?"
-                  className="w-full p-2.5 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] text-xs text-gray-800 dark:text-white focus:outline-none leading-relaxed"
-                />
-
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => showToast("Attached prototype PDF")}
-                      className="px-2 py-1 rounded bg-white dark:bg-[#151D1A] border border-gray-200 text-[11px] font-semibold text-gray-600 hover:bg-gray-50 flex items-center gap-1"
-                    >
-                      <FileText size={11} /> Attach Prototype
-                    </button>
-                    <button
-                      onClick={() => showToast("Inserted Calendly booking link")}
-                      className="px-2 py-1 rounded bg-white dark:bg-[#151D1A] border border-gray-200 text-[11px] font-semibold text-gray-600 hover:bg-gray-50 flex items-center gap-1"
-                    >
-                      <Calendar size={11} /> Insert Calendar
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href="/audits"
+                        className="h-7 px-2.5 rounded bg-gray-100 hover:bg-gray-200 text-[11px] font-semibold text-gray-700 flex items-center gap-1"
+                      >
+                        <FileText size={11} />
+                        <span>View Audits</span>
+                      </Link>
+                    </div>
                   </div>
 
-                  <button
-                    onClick={() => showToast("✓ Reply sent to Rahul Sharma at The Urban Kitchen!")}
-                    className="h-8 px-4 rounded-lg bg-[#171918] hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
-                  >
-                    <Send size={12} />
-                    <span>Send Reply</span>
-                  </button>
+                  <div className="p-3 rounded-xl bg-gray-50 dark:bg-[#121816] border border-gray-200/60 dark:border-[#22302B] space-y-1 text-xs">
+                    <div className="flex items-center justify-between text-[11px] text-gray-500">
+                      <span className="font-bold text-gray-800 dark:text-gray-200">{activeThread.name}</span>
+                      <span>{activeThread.time}</span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{activeThread.snippet}</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-[#FAF9F6] dark:bg-[#121816] border border-[#E7E7E2] dark:border-[#22302B] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#171918] dark:text-white">
+                        <Sparkles size={13} className="text-purple-600" />
+                        <span>AI Reply Assistant (Approval Required)</span>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          const res = await fetch("/api/outreach/ai-reply", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              senderName: activeThread.name,
+                              company: activeThread.company,
+                              lastMessage: activeThread.snippet,
+                              contactEmail: activeThread.email,
+                            }),
+                          });
+                          const data = await res.json();
+                          if (res.ok && data?.replyText) {
+                            setReplyDraft(data.replyText);
+                            showToast(`Drafted reply (${data.detectedIntent || "READY"})`);
+                          }
+                        }}
+                        className="px-2.5 py-1 rounded bg-purple-50 text-purple-700 text-[10px] font-bold hover:bg-purple-100"
+                      >
+                        Draft with AI
+                      </button>
+                    </div>
+
+                    <textarea
+                      rows={4}
+                      value={replyDraft}
+                      onChange={(e) => setReplyDraft(e.target.value)}
+                      placeholder="Click 'Draft with AI' or write your reply..."
+                      className="w-full p-2.5 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] text-xs text-gray-800 dark:text-white focus:outline-none leading-relaxed"
+                    />
+
+                    <div className="flex items-center justify-end pt-1">
+                      <button
+                        onClick={async () => {
+                          if (!activeThread.email || !replyDraft.trim()) {
+                            showToast("Enter reply text and valid recipient email first.");
+                            return;
+                          }
+                          const res = await fetch("/api/outreach/send-test", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              toEmail: activeThread.email,
+                              subject: `Re: ${activeThread.company}`,
+                              content: replyDraft,
+                              dryRun: true,
+                            }),
+                          });
+                          const data = await res.json();
+                          showToast(data?.message || "Reply draft recorded (dry-run mode)");
+                        }}
+                        className="h-8 px-4 rounded-lg bg-[#171918] hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                      >
+                        <Send size={12} />
+                        <span>Send Reply (Safe Dry-Run)</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="py-20 text-center text-xs text-gray-400">
+                  Select a conversation thread on the left or dispatch a dry-run outreach test from the Sequence Builder.
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -14,4 +14,5 @@ leadsRouter.post("/", validateBody(createLeadSchema), asyncHandler(LeadsControll
 leadsRouter.get("/:leadId", asyncHandler(LeadsController.getLeadById));
 leadsRouter.patch("/:leadId", validateBody(updateLeadStatusSchema), asyncHandler(LeadsController.updateLeadStatus));
 leadsRouter.post("/:leadId/audit", asyncHandler(LeadsController.runLeadAudit));
+leadsRouter.post("/:leadId/convert", asyncHandler(LeadsController.convertLeadToClient));
 

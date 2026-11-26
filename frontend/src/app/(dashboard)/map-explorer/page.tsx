@@ -362,10 +362,13 @@ const CATEGORY_PILLS = [
 
 export default function MapExplorerPage() {
   const [businesses, setBusinesses] = useState<BusinessResult[]>(REALISTIC_BUSINESSES);
-  const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult>(REALISTIC_BUSINESSES[0]);
-  const [searchQuery, setSearchQuery] = useState("Restaurant");
+  const [selectedBusiness, setSelectedBusiness] = useState<BusinessResult | null>(REALISTIC_BUSINESSES[0]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Indore, Madhya Pradesh");
   const [activeCategoryPill, setActiveCategoryPill] = useState("Restaurant");
+  const [placesSource, setPlacesSource] = useState("Loading Places...");
+  const [isFallbackPlaces, setIsFallbackPlaces] = useState(false);
+  const [auditingBizId, setAuditingBizId] = useState<string | null>(null);
   const [mapMode, setMapMode] = useState<"map" | "satellite">("map");
   const [searchInArea, setSearchInArea] = useState(true);
   const [previewTab, setPreviewTab] = useState("Overview");
@@ -380,13 +383,111 @@ export default function MapExplorerPage() {
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
+
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch("/api/maps/places", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: searchQuery.trim(),
+            category: activeCategoryPill,
+            city: selectedCity.split(",")[0].trim(),
+          }),
+        });
+        const data = await res.json();
+        if (!active || !res.ok || !Array.isArray(data?.places)) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mapped: BusinessResult[] = data.places.map((p: any, idx: number) => ({
+          id: String(p.id || `place_${idx}`),
+          name: p.name || "Unknown Business",
+          rating: Number(p.rating ?? 0),
+          reviews: Number(p.reviews ?? 0),
+          category: p.category || activeCategoryPill || "Business",
+          distance: p.distance || "Nearby",
+          address: p.address || selectedCity,
+          phone: p.phone || "",
+          website: p.website || "",
+          img: p.img || "/assets/templates/restaurant.jpg",
+          gallery: [p.img || "/assets/templates/restaurant.jpg"],
+          opportunityScore: Number(p.opportunityScore ?? 0),
+          hours: p.hours || "Hours not listed",
+          priceRange: p.priceRange || "—",
+          source: data.source || p.source || "Maps API",
+          potential:
+            Number(p.opportunityScore ?? 0) >= 8.5
+              ? "High Potential"
+              : Number(p.opportunityScore ?? 0) >= 7
+              ? "Medium Potential"
+              : "Low Potential",
+          oppChecklist: [
+            p.website ? `Website detected: ${p.website}` : "No website listed — greenfield build candidate",
+            p.reviews ? `${Number(p.reviews).toLocaleString()} customer reviews on profile` : "Review profile pending",
+          ],
+          pinColor: p.category === "Restaurant" ? "orange" : "blue",
+          mapCoord: {
+            x: 25 + ((idx * 17) % 55),
+            y: 22 + ((idx * 21) % 58),
+          },
+        }));
+
+        setBusinesses(mapped);
+        setSelectedBusiness(mapped[0] || null);
+        setPlacesSource(data.source || "Google Places API");
+        setIsFallbackPlaces(Boolean(data.isFallback || String(data.source || "").toLowerCase().includes("fallback")));
+      } catch {
+        // Retain current state on transient network failure
+      } finally {
+        if (active) setIsSearching(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, activeCategoryPill, selectedCity]);
 
   // Switch selected business
   const handleSelectBusiness = (biz: BusinessResult) => {
     setSelectedBusiness(biz);
     setGalleryIndex(0);
+  };
+
+  const handleRunInstantAudit = async (biz: BusinessResult) => {
+    if (!biz.website) {
+      showToast(`"${biz.name}" has no listed website URL — high-opportunity greenfield lead.`);
+      return;
+    }
+    setAuditingBizId(biz.id);
+    try {
+      const res = await fetch("/api/audits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: biz.website,
+          businessName: biz.name,
+          category: biz.category,
+          location: biz.address,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.audit) {
+        showToast(data?.error || "Live audit failed or blocked");
+        return;
+      }
+      showToast(`Live audit complete for ${biz.name}: Overall ${data.audit.overallScore}/100 (${data.audit.dataMode})`);
+    } catch {
+      showToast("Failed to connect to live audit engine");
+    } finally {
+      setAuditingBizId(null);
+    }
   };
 
   const handleAddLead = async (biz: BusinessResult) => {
@@ -400,27 +501,25 @@ export default function MapExplorerPage() {
           businessName: biz.name,
           category: biz.category || "Restaurant",
           address: biz.address,
-          city: selectedCity.split(",")[0].trim(),
-          phone: biz.phone || "+91 98000 00000",
+          location: selectedCity.split(",")[0].trim(),
+          phone: biz.phone || "",
           website: biz.website || "",
-          rating: biz.rating || 4.2,
-          reviewCount: biz.reviews || 100,
-          opportunityScore: biz.opportunityScore || 8.0,
-          source: "Map Explorer",
+          rating: biz.rating || 0,
+          reviewCount: biz.reviews || 0,
+          opportunityScore: biz.opportunityScore ? Math.round(biz.opportunityScore * 10) : 0,
+          source: biz.source || "Map Explorer",
           status: "New",
         }),
       });
       const data = await res.json();
-      if (data.success || data.lead) {
-        setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
-        showToast(`✓ Added "${biz.name}" to Leads pipeline!`);
-      } else {
-        setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
-        showToast(`✓ Added "${biz.name}" to Leads pipeline!`);
+      if (!res.ok || (!data.success && !data.lead)) {
+        showToast(data?.error || `Failed to save "${biz.name}" to Leads`);
+        return;
       }
-    } catch {
       setSavedLeadMap((prev) => ({ ...prev, [biz.id]: true }));
-      showToast(`✓ Added "${biz.name}" to Leads pipeline!`);
+      showToast(`Added "${biz.name}" to Leads pipeline!`);
+    } catch {
+      showToast(`Network error while saving "${biz.name}"`);
     } finally {
       setAddingLead(false);
     }
@@ -561,13 +660,24 @@ export default function MapExplorerPage() {
         })}
       </div>
 
+      {isFallbackPlaces && (
+        <div className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between gap-2">
+          <span>
+            <strong>Data Provenance:</strong> {placesSource}. Configure{" "}
+            <code className="font-mono">GOOGLE_MAPS_SERVER_KEY</code> for live Google Places results.
+          </span>
+        </div>
+      )}
+
       {/* 3-COLUMN MAIN LAYOUT */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-3.5 items-start">
-        {/* COLUMN 1: Businesses Found (2,847) List */}
+        {/* COLUMN 1: Businesses Found List */}
         <div className="xl:col-span-3 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-3.5 space-y-3 shadow-xs">
           <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-[#22302B] text-xs">
-            <span className="font-bold text-[#171918] dark:text-white">Businesses Found (2,847)</span>
-            <div className="flex items-center gap-1 text-gray-400 text-[11px] cursor-pointer hover:text-black">
+            <span className="font-bold text-[#171918] dark:text-white">
+              Businesses Found ({businesses.length})
+            </span>
+            <div className="flex items-center gap-1 text-gray-400 text-[11px]">
               <span>Sort by: Relevance</span>
               <ChevronDown size={10} />
             </div>
@@ -636,35 +746,10 @@ export default function MapExplorerPage() {
             })}
           </div>
 
-          {/* Pagination bar matching screenshot */}
-          <div className="pt-2 border-t border-gray-100 dark:border-[#22302B] flex items-center justify-between text-xs">
-            <button className="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100">
-              <ChevronLeft size={13} />
-            </button>
-            <div className="flex items-center gap-1">
-              <button className="w-6 h-6 rounded bg-[#2563EB] text-white font-bold text-[11px] flex items-center justify-center">
-                1
-              </button>
-              <button className="w-6 h-6 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 text-[11px] flex items-center justify-center">
-                2
-              </button>
-              <button className="w-6 h-6 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 text-[11px] flex items-center justify-center">
-                3
-              </button>
-              <button className="w-6 h-6 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 text-[11px] flex items-center justify-center">
-                4
-              </button>
-              <button className="w-6 h-6 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 text-[11px] flex items-center justify-center">
-                5
-              </button>
-              <span className="text-gray-400 text-[10px]">...</span>
-              <button className="px-1.5 h-6 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 text-[11px] flex items-center justify-center">
-                285
-              </button>
-            </div>
-            <button className="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:bg-gray-100">
-              <ChevronRight size={13} />
-            </button>
+          {/* Honest pagination */}
+          <div className="pt-2 border-t border-gray-100 dark:border-[#22302B] flex items-center justify-between text-xs text-gray-500">
+            <span>Page 1 of 1</span>
+            <span>{businesses.length} loaded</span>
           </div>
         </div>
 
@@ -1015,8 +1100,10 @@ export default function MapExplorerPage() {
           </div>
         </div>
 
-        {/* COLUMN 3: Right Drawer (The Urban Kitchen Detail Panel) */}
+        {/* COLUMN 3: Right Drawer (Selected Business Detail Panel) */}
         <div className="xl:col-span-4 bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B] p-4 shadow-xs space-y-4">
+          {selectedBusiness ? (
+            <>
           {/* Top Hero Image Carousel */}
           <div className="relative h-44 rounded-xl overflow-hidden bg-gray-100 border border-gray-200/80">
             <Image
@@ -1263,20 +1350,28 @@ export default function MapExplorerPage() {
                 <span className="font-medium text-gray-700 dark:text-gray-300 truncate">Generate Outreach</span>
               </Link>
 
-              <Link
-                href={`/audits?url=${encodeURIComponent(selectedBusiness.website || "urban-kitchen.in")}`}
-                className="p-2 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-2xs"
+              <button
+                type="button"
+                onClick={() => handleRunInstantAudit(selectedBusiness)}
+                disabled={auditingBizId === selectedBusiness.id}
+                className="p-2 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-2xs disabled:opacity-60 text-left"
               >
-                <Globe size={13} className="text-emerald-600 shrink-0" />
-                <span className="font-medium text-gray-700 dark:text-gray-300 truncate">Run Website Audit</span>
-              </Link>
+                {auditingBizId === selectedBusiness.id ? (
+                  <Loader2 size={13} className="animate-spin text-emerald-600 shrink-0" />
+                ) : (
+                  <Globe size={13} className="text-emerald-600 shrink-0" />
+                )}
+                <span className="font-medium text-gray-700 dark:text-gray-300 truncate">
+                  {auditingBizId === selectedBusiness.id ? "Auditing..." : "Run Instant Audit"}
+                </span>
+              </button>
 
               <Link
-                href={`/website-builder?lead=${encodeURIComponent(selectedBusiness.name)}`}
+                href={selectedBusiness.website ? `/audits?url=${encodeURIComponent(selectedBusiness.website)}` : "/audits"}
                 className="p-2 rounded-lg border border-[#E7E7E2] dark:border-[#22302B] bg-white dark:bg-[#151D1A] hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-2xs"
               >
                 <FileText size={13} className="text-amber-600 shrink-0" />
-                <span className="font-medium text-gray-700 dark:text-gray-300 truncate">Cold Website Brief</span>
+                <span className="font-medium text-gray-700 dark:text-gray-300 truncate">Open Audit Hub</span>
               </Link>
 
               <Link
@@ -1288,6 +1383,12 @@ export default function MapExplorerPage() {
               </Link>
             </div>
           </div>
+            </>
+          ) : (
+            <div className="py-16 text-center text-xs text-gray-500">
+              No business selected. Search a city or category above to inspect businesses.
+            </div>
+          )}
         </div>
       </div>
     </div>

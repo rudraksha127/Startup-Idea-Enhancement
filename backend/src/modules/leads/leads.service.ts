@@ -1,4 +1,6 @@
 import { LeadsRepository } from "../../repositories/leads.repository.js";
+import { ClientsRepository } from "../../repositories/clients.repository.js";
+import { ProjectsRepository } from "../../repositories/projects.repository.js";
 import { CreateLeadInput } from "../../validators/lead.validator.js";
 import { LeadRecord } from "../../infrastructure/persistence/zoho-catalyst/catalyst.types.js";
 import { runBackendWebsiteAudit } from "./website-audit-engine.js";
@@ -149,5 +151,52 @@ export class LeadsService {
       audit: auditData,
       dataMode: result.dataMode,
     };
+  }
+
+  static async convertLeadToClient(
+    idOrSlug: string,
+    orgId: string,
+    options: { monthlyRetainer?: number; projectTitle?: string; createProject?: boolean } = {}
+  ) {
+    const lead = await this.getLeadById(idOrSlug, orgId);
+    if (!lead) return null;
+
+    const retainer = typeof options.monthlyRetainer === "number" ? options.monthlyRetainer : 25000;
+    const createProject = options.createProject !== false;
+    const client = await ClientsRepository.create({
+      clientId: `cli_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      organizationId: orgId,
+      name: lead.businessName,
+      domain: lead.website,
+      type: lead.category || "General",
+      location: lead.city || lead.address || "",
+      phone: lead.phone || "",
+      status: "Onboarding",
+      totalValue: retainer,
+      projectsCount: createProject ? 1 : 0,
+    });
+
+    let project = null;
+    if (createProject) {
+      project = await ProjectsRepository.create({
+        projectId: `prj_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        organizationId: orgId,
+        clientId: client.clientId,
+        clientName: client.name,
+        name: options.projectTitle || `${lead.businessName} — Website Modernization`,
+        type: lead.category || "Website Modernization",
+        status: "Active",
+        budget: retainer,
+        amountPaid: 0,
+        amountDue: retainer,
+        progress: 10,
+      });
+    }
+
+    const updatedLead = await LeadsRepository.update(lead.leadId, orgId, {
+      qualificationStatus: "Converted",
+    });
+
+    return { lead: updatedLead, client, project };
   }
 }

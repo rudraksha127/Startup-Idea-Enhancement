@@ -39,6 +39,7 @@ test.describe("AgencyOS Production SaaS — Headless Chromium Verification (11 R
     await expect(page).toHaveURL(/.*map-explorer/);
     await expect(page.locator("h1")).toContainText("Map Explorer");
     await expect(page.getByPlaceholder(/Search business by name/i)).toBeVisible();
+    await expect(page.getByText(/Businesses Found \(/i)).toBeVisible();
   });
 
   // Test 4: 13 Autonomous AI Agents
