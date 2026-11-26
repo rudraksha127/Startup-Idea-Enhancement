@@ -87,11 +87,14 @@ export default function WebsiteBuilderPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] font-bold mb-1">
+            Interactive Prospect Concept Preview (Non-Deployed)
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#171918] dark:text-white tracking-tight">
-            AI Website Generator
+            Pitch Mockup Preview
           </h1>
           <p className="text-xs text-[#68717D] dark:text-[#9AA29E] mt-0.5">
-            Turn prospects into clients with instant high-performance interactive website previews.
+            Generate client-facing visual concept previews to attach alongside live website audits.
           </p>
         </div>
 

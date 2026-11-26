@@ -1,6 +1,7 @@
 import { CANONICAL_AGENTS, getCanonicalAgent, AgentDefinition } from "./definitions/index.js";
 import { AgentsRepository } from "../../repositories/agents.repository.js";
 import { OrganizationsRepository } from "../../repositories/organizations.repository.js";
+import { estimateTokens } from "./llm-gateway.js";
 
 export type AgentExecutionStatus =
   | "CREATED"
@@ -18,6 +19,7 @@ export interface ExecutionRequest {
   userId?: string;
   inputPayload?: Record<string, unknown>;
   forceRun?: boolean;
+  idempotencyKey?: string;
 }
 
 export interface IAgentExecutionLog {
@@ -42,6 +44,26 @@ export interface ExecutionResult {
 
 export class AgentOrchestrator {
   private static registeredAgents: Map<string, AgentDefinition> = new Map();
+  private static idempotencyCache: Map<string, Promise<ExecutionResult>> = new Map();
+  private static creditLocks: Map<string, Promise<void>> = new Map();
+
+  private static async reserveCreditAtomically(orgId: string): Promise<boolean> {
+    const prev = this.creditLocks.get(orgId) || Promise.resolve();
+    let granted = true;
+    const next = prev.then(async () => {
+      const org = await OrganizationsRepository.findById(orgId);
+      if (org && org.credits !== undefined) {
+        if (org.credits <= 0) {
+          granted = false;
+          return;
+        }
+        await OrganizationsRepository.update(org.orgId, { credits: org.credits - 1 });
+      }
+    });
+    this.creditLocks.set(orgId, next.catch(() => {}));
+    await next;
+    return granted;
+  }
 
   static initialize() {
     CANONICAL_AGENTS.forEach((agent) => {
@@ -87,6 +109,23 @@ export class AgentOrchestrator {
    * CREATED → QUEUED → VALIDATING → RUNNING → AWAITING_APPROVAL / COMPLETED / FAILED
    */
   static async dispatchRun(req: ExecutionRequest): Promise<ExecutionResult> {
+    if (req.idempotencyKey) {
+      const cacheKey = `${req.organizationId}:${req.agentId}:${req.idempotencyKey}`;
+      const existing = this.idempotencyCache.get(cacheKey);
+      if (existing) return existing;
+      const promise = this.executeDispatchRun(req);
+      if (this.idempotencyCache.size >= 200) {
+        const oldest = this.idempotencyCache.keys().next().value;
+        if (oldest) this.idempotencyCache.delete(oldest);
+      }
+      this.idempotencyCache.set(cacheKey, promise);
+      promise.catch(() => this.idempotencyCache.delete(cacheKey));
+      return promise;
+    }
+    return this.executeDispatchRun(req);
+  }
+
+  private static async executeDispatchRun(req: ExecutionRequest): Promise<ExecutionResult> {
     const startTime = Date.now();
     const logs: IAgentExecutionLog[] = [];
     const statusHistory: Array<{ status: AgentExecutionStatus; timestamp: Date; reason?: string }> = [];
@@ -109,13 +148,9 @@ export class AgentOrchestrator {
     addStatusTransition("QUEUED", "Execution slot allocated");
     addLog("info", `Enqueued ${agentDef.name} [v${agentDef.version}] for execution`);
 
-    // 2. Budget & Permission Validation
-    addStatusTransition("VALIDATING", "Validating configuration & credit budget");
-    let hasSufficientCredits = true;
-    const org = await OrganizationsRepository.findById(req.organizationId);
-    if (org && org.credits !== undefined && org.credits <= 0) {
-      hasSufficientCredits = false;
-    }
+    // 2. Budget & Permission Validation (serialized per organization)
+    addStatusTransition("VALIDATING", "Validating configuration & reserving credit budget");
+    const hasSufficientCredits = await this.reserveCreditAtomically(req.organizationId);
 
     if (!hasSufficientCredits) {
       addStatusTransition("FAILED", "Insufficient organization credits");
@@ -142,20 +177,21 @@ export class AgentOrchestrator {
       addStatusTransition("AWAITING_APPROVAL", "Human approval required for supervised action");
       addLog("warn", "Execution paused: Awaiting founder/admin authorization sign-off");
 
+      const pendingPayload = {
+        requiresApproval: true,
+        prompt: `Approval requested for ${agentDef.name} execution.`,
+        pendingInput: validatedInput,
+      };
       const executionRecord = {
         runId,
         agentId: agentDef.id,
         agentName: agentDef.name,
         status: "AWAITING_APPROVAL" as AgentExecutionStatus,
-        outputPayload: {
-          requiresApproval: true,
-          prompt: `Approval requested for ${agentDef.name} execution.`,
-          pendingInput: validatedInput,
-        },
+        outputPayload: pendingPayload,
         requiresApproval: true,
-        tokensUsed: 120,
+        tokensUsed: 0,
         durationMs: Date.now() - startTime,
-        costEstimatedUsd: 0.0002,
+        costEstimatedUsd: 0,
         logs,
       };
 
@@ -166,7 +202,7 @@ export class AgentOrchestrator {
         status: "PAUSED",
         inputJson: JSON.stringify(validatedInput),
         outputJson: JSON.stringify(executionRecord.outputPayload),
-        tokenCount: executionRecord.tokensUsed,
+        tokenCount: 0,
         latencyMs: executionRecord.durationMs,
       });
 
@@ -175,7 +211,7 @@ export class AgentOrchestrator {
 
     // 5. Running
     addStatusTransition("RUNNING", "Agent executing business logic & tools");
-    addLog("info", `Executing autonomous logic with ${agentDef.tools.length} available tools`);
+    addLog("info", `Executing deterministic logic with ${agentDef.tools.length} available tools`);
 
     let outputResult: any;
     try {
@@ -195,12 +231,8 @@ export class AgentOrchestrator {
     }
 
     const durationMs = Date.now() - startTime;
-    const tokensUsed = 650;
-    const costEstimatedUsd = (tokensUsed / 1000000) * 0.15; // ~$0.15/1M tokens
-
-    if (org && org.credits > 0) {
-      await OrganizationsRepository.update(org.orgId, { credits: org.credits - 1 });
-    }
+    const tokensUsed = estimateTokens(JSON.stringify(validatedInput) + JSON.stringify(outputResult));
+    const costEstimatedUsd = 0; // $0 external API spend on deterministic execution
 
     await AgentsRepository.logExecution({
       executionId: runId,

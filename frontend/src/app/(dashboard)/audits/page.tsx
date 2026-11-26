@@ -36,6 +36,8 @@ interface AuditResult {
   location: string;
   overallScore: number;
   opportunityScore: number;
+  dataMode?: "live_pagespeed" | "live_html" | "no_website" | "unreachable";
+  detectedTech?: string[];
   performanceScores: {
     performance: number;
     mobile: number;
@@ -58,109 +60,15 @@ interface AuditResult {
   createdAt: string;
 }
 
-const INITIAL_AUDITS: AuditResult[] = [
-  {
-    id: "aud_1",
-    url: "https://theurbankitchen.in",
-    businessName: "The Urban Kitchen",
-    category: "Restaurant",
-    location: "Connaught Place, New Delhi",
-    overallScore: 62,
-    opportunityScore: 8.5,
-    performanceScores: {
-      performance: 42,
-      mobile: 38,
-      seo: 48,
-      accessibility: 71,
-      security: 85,
-    },
-    metrics: {
-      lcp: "4.8s",
-      fcp: "2.6s",
-      ttfb: "1.2s",
-      cls: "0.24",
-    },
-    findings: [
-      {
-        title: "No Responsive Mobile Viewport",
-        severity: "High",
-        description: "Viewport meta tag is unconfigured. Content spills horizontally on iOS and Android devices.",
-        impact: "-3.2 Opportunity Points",
-      },
-      {
-        title: "Slow Largest Contentful Paint (>4.5s)",
-        severity: "High",
-        description: "Heavy uncompressed hero banner causes mobile visitors to abandon within 3 seconds.",
-        impact: "-2.1 Opportunity Points",
-      },
-      {
-        title: "Missing Online Table Reservation CTA",
-        severity: "Medium",
-        description: "No direct booking portal or WhatsApp ordering button detected on the homepage.",
-        impact: "-1.8 Opportunity Points",
-      },
-      {
-        title: "Missing Local Business Schema Markup",
-        severity: "Medium",
-        description: "Missing JSON-LD Restaurant schema prevents Google rich results in local search.",
-        impact: "-1.4 Opportunity Points",
-      },
-      {
-        title: "High Google Review Demand (1,234 reviews)",
-        severity: "Low",
-        description: "Strong organic local reputation with 4.4 stars makes this a prime conversion target.",
-        impact: "+2.5 Conversion Boost",
-      },
-    ],
-    createdAt: "Today at 10:24 AM",
-  },
-  {
-    id: "aud_2",
-    url: "https://spicejunction.example",
-    businessName: "Spice Junction",
-    category: "Restaurant",
-    location: "Vijay Nagar, Indore, MP",
-    overallScore: 54,
-    opportunityScore: 8.9,
-    performanceScores: {
-      performance: 36,
-      mobile: 45,
-      seo: 40,
-      accessibility: 68,
-      security: 60,
-    },
-    metrics: {
-      lcp: "5.2s",
-      fcp: "3.1s",
-      ttfb: "1.4s",
-      cls: "0.32",
-    },
-    findings: [
-      {
-        title: "SSL Certificate Expired / Insecure Mixed Content",
-        severity: "High",
-        description: "Browsers show 'Not Secure' warning upon visiting, destroying customer conversion trust.",
-        impact: "-4.0 Opportunity Points",
-      },
-      {
-        title: "Mobile Navigation Hamburger Broken",
-        severity: "High",
-        description: "Mobile menu drawer fails to toggle on touch tap on modern Android webviews.",
-        impact: "-2.8 Opportunity Points",
-      },
-    ],
-    createdAt: "Yesterday at 04:15 PM",
-  },
-];
-
 export default function AuditsPage() {
-  const [audits, setAudits] = useState<AuditResult[]>(INITIAL_AUDITS);
-  const [selectedAudit, setSelectedAudit] = useState<AuditResult>(INITIAL_AUDITS[0]);
+  const [audits, setAudits] = useState<AuditResult[]>([]);
+  const [selectedAudit, setSelectedAudit] = useState<AuditResult | null>(null);
   const [targetUrl, setTargetUrl] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [category, setCategory] = useState("Restaurant");
-  const [location, setLocation] = useState("Indore, MP");
+  const [location] = useState("Indore, MP");
   const [isAuditing, setIsAuditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -168,66 +76,57 @@ export default function AuditsPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/audits")
+      .then((res) => (res.ok ? res.json() : { audits: [] }))
+      .then((data) => {
+        if (!active) return;
+        const list = Array.isArray(data?.audits) ? data.audits : [];
+        setAudits(list);
+        if (list.length > 0) setSelectedAudit(list[0]);
+      })
+      .catch(() => {
+        if (active) setAudits([]);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleRunAudit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetUrl.trim()) return;
 
     setIsAuditing(true);
     try {
-      // Simulate real audit execution with deterministic metrics
-      await new Promise((r) => setTimeout(r, 1200));
+      const res = await fetch("/api/audits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: targetUrl.trim(),
+          businessName: businessName.trim() || undefined,
+          category,
+          location,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.audit) {
+        showToast(data?.error || "Audit blocked or failed. Verify URL and retry.");
+        return;
+      }
 
-      const newAudit: AuditResult = {
-        id: `aud_${Date.now()}`,
-        url: targetUrl.startsWith("http") ? targetUrl : `https://${targetUrl}`,
-        businessName: businessName.trim() || targetUrl.replace(/^https?:\/\//, "").split(".")[0],
-        category,
-        location,
-        overallScore: Math.floor(Math.random() * 25) + 48, // 48 - 72
-        opportunityScore: Number((Math.random() * 1.5 + 8.0).toFixed(1)), // 8.0 - 9.5
-        performanceScores: {
-          performance: Math.floor(Math.random() * 20) + 38,
-          mobile: Math.floor(Math.random() * 20) + 40,
-          seo: Math.floor(Math.random() * 25) + 45,
-          accessibility: Math.floor(Math.random() * 20) + 65,
-          security: Math.floor(Math.random() * 20) + 70,
-        },
-        metrics: {
-          lcp: `${(Math.random() * 2 + 3.8).toFixed(1)}s`,
-          fcp: `${(Math.random() * 1 + 2.1).toFixed(1)}s`,
-          ttfb: "1.1s",
-          cls: "0.22",
-        },
-        findings: [
-          {
-            title: "Mobile Touch Target Sizing Gaps",
-            severity: "High",
-            description: "Buttons and links are too small for comfortable thumb taps on mobile displays.",
-            impact: "-2.4 Opportunity Points",
-          },
-          {
-            title: "Lighthouse Performance Throttling Detected",
-            severity: "High",
-            description: "JavaScript execution bundle blocks main thread for more than 850ms.",
-            impact: "-2.0 Opportunity Points",
-          },
-          {
-            title: "Missing Social Graph & Meta Tags",
-            severity: "Medium",
-            description: "Sharing the website link on WhatsApp or Facebook renders a blank thumbnail.",
-            impact: "-1.5 Opportunity Points",
-          },
-        ],
-        createdAt: "Just now",
-      };
-
+      const newAudit: AuditResult = data.audit;
       setAudits((prev) => [newAudit, ...prev]);
       setSelectedAudit(newAudit);
-      showToast(`✓ Diagnostic audit completed for ${newAudit.businessName}`);
+      showToast(`Live audit completed (${newAudit.dataMode || "live_html"}) for ${newAudit.businessName}`);
       setTargetUrl("");
       setBusinessName("");
     } catch {
-      showToast("Error running audit. Please check domain connectivity.");
+      showToast("Error running live audit. Please check URL connectivity.");
     } finally {
       setIsAuditing(false);
     }
@@ -500,8 +399,12 @@ ${audit.findings.map((f, i) => `${i + 1}. [${f.severity}] **${f.title}**\n   ${f
           ) : (
             <div className="py-24 text-center bg-white dark:bg-[#151D1A] rounded-xl border border-[#E7E7E2] dark:border-[#22302B]">
               <Globe className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-gray-800 dark:text-white">No Audit Selected</p>
-              <p className="text-xs text-gray-500 mt-1">Select an audit from the right or scan a new URL above.</p>
+              <p className="text-sm font-bold text-gray-800 dark:text-white">
+                {isLoading ? "Loading saved website audits..." : "No Website Audits Recorded Yet"}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Enter any public business URL above to run a live technical, SEO, and PageSpeed check.
+              </p>
             </div>
           )}
         </div>
