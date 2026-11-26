@@ -66,4 +66,19 @@ export class LeadsController {
       audit: result.audit,
     });
   };
+
+  static convertLeadToClient = async (req: Request, res: Response) => {
+    const leadId = extractId(req.params.leadId);
+    const orgId = await resolveOrgId(req);
+
+    const result = await LeadsService.convertLeadToClient(leadId, orgId, req.body || {});
+    if (!result) {
+      return res.status(404).json({ error: "Lead not found" });
+    }
+
+    return res.status(201).json({
+      success: true,
+      ...result,
+    });
+  };
 }

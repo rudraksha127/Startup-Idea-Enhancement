@@ -1,15 +1,43 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
 import mongoose from "mongoose";
 
+function verifyHmacOrSecret(req: NextRequest, rawBody: string, secret: string): boolean {
+  const providedSecret = req.headers.get("x-n8n-secret") || req.headers.get("x-webhook-secret");
+  if (providedSecret && providedSecret.length === secret.length) {
+    try {
+      if (crypto.timingSafeEqual(Buffer.from(providedSecret), Buffer.from(secret))) {
+        return true;
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  const providedSig = req.headers.get("x-n8n-signature");
+  if (providedSig) {
+    const expected = crypto.createHmac("sha256", secret).update(rawBody, "utf8").digest("hex");
+    const cleanSig = providedSig.replace(/^sha256=/i, "");
+    if (cleanSig.length === expected.length) {
+      try {
+        return crypto.timingSafeEqual(Buffer.from(cleanSig), Buffer.from(expected));
+      } catch {
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const rawBody = await req.text();
     const webhookSecret = process.env.N8N_WEBHOOK_SECRET;
-    const providedSecret = req.headers.get("x-n8n-secret") || req.headers.get("x-webhook-secret");
 
-    if (webhookSecret && providedSecret !== webhookSecret) {
-      return NextResponse.json({ error: "Unauthorized: invalid webhook secret" }, { status: 401 });
+    if (webhookSecret && !verifyHmacOrSecret(req, rawBody, webhookSecret)) {
+      return NextResponse.json({ error: "Unauthorized: invalid webhook secret or HMAC signature" }, { status: 401 });
     }
     if (!webhookSecret && process.env.NODE_ENV === "production") {
       return NextResponse.json(
@@ -18,7 +46,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
+    const body = rawBody ? JSON.parse(rawBody) : {};
     const { type, leadId, website, businessName, opportunityScore, websiteScore, auditSummary } = body;
 
     let updatedLead = null;
@@ -56,9 +84,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       processed: true,
+      persisted: Boolean(updatedLead),
       type: type || "audit-sync",
-      leadId: leadId || updatedLead?._id?.toString() || "mock-lead-id",
-      opportunityScore: opportunityScore ?? 85,
+      leadId: updatedLead?._id?.toString() || leadId || null,
+      opportunityScore: opportunityScore ?? updatedLead?.opportunityScore ?? null,
       syncedAt: new Date().toISOString(),
       source: "n8n-inbound-webhook",
     });

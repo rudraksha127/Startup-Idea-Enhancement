@@ -78,6 +78,10 @@ export default function AuditsPage() {
 
   useEffect(() => {
     let active = true;
+    if (typeof window !== "undefined") {
+      const prefillUrl = new URLSearchParams(window.location.search).get("url");
+      if (prefillUrl) setTargetUrl(prefillUrl);
+    }
     fetch("/api/audits")
       .then((res) => (res.ok ? res.json() : { audits: [] }))
       .then((data) => {

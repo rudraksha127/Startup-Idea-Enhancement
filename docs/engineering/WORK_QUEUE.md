@@ -16,7 +16,8 @@
 | **TASK-AUDIT-01** | Route Protection, RBAC & Role Escalation Hardening | **P0** | Antigravity | ChatGPT / Rudraksh | `IN_REVIEW` | `agent/antigravity/security-hardening-ci-repair` | [#3](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/3) |
 | **TASK-AUDIT-04** | CI Baseline Repair (Vitest + ESLint Flat Config) | **P1** | Antigravity | ChatGPT / Rudraksh | `IN_REVIEW` | `agent/antigravity/security-hardening-ci-repair` | [#3](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/3) |
 | **PHASE-1-AUTH-TRUTH** | Edge Middleware Auth, Multi-Tenant API Isolation & M0 Honesty Pass | **P0** | Antigravity | ChatGPT / Rudraksh | `VERIFIED` | `agent/antigravity/phase-1-auth-and-truth` | [#4](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/4) |
-| **PHASE-2-REAL-ENGINES** | SSRF-Safe Audit Engine, Multi-Provider LLM Gateway, Atomic Credits & Suppression | **P0** | Antigravity | ChatGPT / Rudraksh | `VERIFIED` | `agent/antigravity/phase-2-real-engines` | - |
+| **PHASE-2-REAL-ENGINES** | SSRF-Safe Audit Engine, Multi-Provider LLM Gateway, Atomic Credits & Suppression | **P0** | Antigravity | ChatGPT / Rudraksh | `VERIFIED` | `agent/antigravity/phase-2-real-engines` | [#5](https://github.com/rudraksha127/Startup-Idea-Enhancement/pull/5) |
+| **PHASE-3-WORKFLOWS** | Live Map Discovery, Outreach/Agent UI Cleanup, n8n HMAC & Lead Conversion | **P0** | Antigravity | ChatGPT / Rudraksh | `VERIFIED` | `agent/antigravity/phase-3-workflows-and-conversion` | - |
 | **AGENCYOS-002** | 77-Screen Blueprint Alignment & Route Inventory | **P1** | Antigravity | ChatGPT | `READY` | `feature/blueprint-alignment` | - |
 | **AGENCYOS-003** | Cloudflare Pages Static Export Optimization & Route Audit | **P1** | Antigravity | ChatGPT | `feature/cloudflare-pages-export` | - |
 | **AGENCYOS-004** | Zoho Catalyst AppSail Express API Contract Harmonization | **P1** | Antigravity | ChatGPT | `feature/catalyst-api-harmonization` | - |

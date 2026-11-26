@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { Request, Response } from "express";
 import { N8nService } from "./n8n.service.js";
 import { resolveOrgId } from "../../common/resolve-org.js";
@@ -5,13 +6,38 @@ import { resolveOrgId } from "../../common/resolve-org.js";
 function verifyN8nWebhook(req: Request, res: Response): boolean {
   const configuredSecret = process.env.N8N_WEBHOOK_SECRET;
   const incomingSecret = req.headers["x-n8n-secret"] || req.headers["x-webhook-secret"];
+  const incomingSig = req.headers["x-n8n-signature"];
+
   if (process.env.NODE_ENV === "production" && !configuredSecret) {
     res.status(503).json({ error: "N8N_WEBHOOK_SECRET is not configured in production" });
     return false;
   }
-  if (configuredSecret && incomingSecret !== configuredSecret) {
-    res.status(401).json({ error: "Invalid webhook secret" });
-    return false;
+
+  if (configuredSecret) {
+    const secretStr = Array.isArray(incomingSecret) ? incomingSecret[0] : incomingSecret;
+    const secretValid = Boolean(
+      secretStr &&
+        secretStr.length === configuredSecret.length &&
+        crypto.timingSafeEqual(Buffer.from(secretStr), Buffer.from(configuredSecret))
+    );
+
+    let sigValid = false;
+    const sigStr = Array.isArray(incomingSig) ? incomingSig[0] : incomingSig;
+    if (sigStr) {
+      const cleanSig = sigStr.replace(/^sha256=/i, "");
+      const expected = crypto
+        .createHmac("sha256", configuredSecret)
+        .update(JSON.stringify(req.body ?? {}), "utf8")
+        .digest("hex");
+      if (cleanSig.length === expected.length) {
+        sigValid = crypto.timingSafeEqual(Buffer.from(cleanSig), Buffer.from(expected));
+      }
+    }
+
+    if (!secretValid && !sigValid) {
+      res.status(401).json({ error: "Invalid webhook secret or HMAC signature" });
+      return false;
+    }
   }
   return true;
 }
