@@ -1,6 +1,7 @@
 import { LeadsRepository } from "../../repositories/leads.repository.js";
 import { CreateLeadInput } from "../../validators/lead.validator.js";
 import { LeadRecord } from "../../infrastructure/persistence/zoho-catalyst/catalyst.types.js";
+import { runBackendWebsiteAudit } from "./website-audit-engine.js";
 
 export interface GetLeadsQuery {
   orgId: string;
@@ -95,13 +96,13 @@ export class LeadsService {
       organizationId: orgId,
       businessName: input.businessName,
       category: input.category || "General Business",
-      address: input.address || input.location || "Indore, MP, India",
-      city: input.location?.split(",")[0]?.trim() || "Indore",
-      phone: input.phone || "+91 98110 00000",
+      address: input.address || input.location || "",
+      city: input.location?.split(",")[0]?.trim() || "",
+      phone: input.phone || "",
       website: input.website,
-      rating: input.rating || 4.5,
-      reviewCount: input.reviewCount || 10,
-      opportunityScore: input.opportunityScore || 75,
+      rating: input.rating || 0,
+      reviewCount: input.reviewCount || 0,
+      opportunityScore: input.opportunityScore || 0,
       qualificationStatus: (input.status as any) || "New",
       source: input.source || "Manual Entry",
     });
@@ -119,31 +120,34 @@ export class LeadsService {
     const lead = await this.getLeadById(idOrSlug, orgId);
     if (!lead) return null;
 
+    const result = await runBackendWebsiteAudit({
+      website: lead.website,
+      rating: lead.rating,
+      reviewCount: lead.reviewCount,
+    });
+
     const auditData = {
       auditId: `audit_${Date.now()}`,
       leadId: lead.leadId,
       organizationId: orgId,
-      performanceScore: 52,
-      seoScore: 68,
-      accessibilityScore: 75,
-      mobileScore: 45,
-      detectedTech: "WordPress, Apache, jQuery",
-      issuesJson: JSON.stringify([
-        { type: "critical", title: "Slow Mobile First Contentful Paint", detail: "Exceeds Core Web Vitals recommended standard." },
-        { type: "warning", title: "Missing Local Business Schema Markup", detail: "Schema.org/LocalBusiness missing from header." },
-        { type: "passed", title: "Valid SSL/TLS Certificate", detail: "TLS 1.3 protocol active." },
-      ]),
+      performanceScore: result.performanceScore,
+      seoScore: result.seoScore,
+      accessibilityScore: result.accessibilityScore,
+      mobileScore: result.mobileScore,
+      detectedTech: result.detectedTech,
+      issuesJson: JSON.stringify(result.issues),
     };
 
     await LeadsRepository.saveAudit(auditData);
     const updated = await LeadsRepository.update(lead.leadId, orgId, {
-      opportunityScore: 88,
-      qualificationStatus: "Qualified",
+      opportunityScore: result.opportunityScore,
+      qualificationStatus: result.dataMode === "unreachable" ? lead.qualificationStatus : "Qualified",
     });
 
     return {
       lead: updated,
       audit: auditData,
+      dataMode: result.dataMode,
     };
   }
 }

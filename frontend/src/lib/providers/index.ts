@@ -104,8 +104,60 @@ export class MockAIResearchProvider implements AIResearchProvider {
 // Provider Registry
 // -------------------------------------------------------------
 
-export function getEmailProvider(): EmailDeliveryProvider {
-  // If RESEND_API_KEY is configured in production, real provider can be returned here
+export class ResendEmailDeliveryProvider implements EmailDeliveryProvider {
+  private apiKey: string;
+  private fromEmail: string;
+
+  constructor(apiKey: string, fromEmail?: string) {
+    this.apiKey = apiKey;
+    this.fromEmail = fromEmail || process.env.RESEND_FROM_EMAIL || "AgencyOS <onboarding@resend.dev>";
+  }
+
+  async sendEmail(params: { to: string; subject: string; body: string; from?: string }): Promise<EmailDeliveryResult> {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          from: params.from || this.fromEmail,
+          to: [params.to],
+          subject: params.subject,
+          text: params.body,
+        }),
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return {
+          success: false,
+          error: data?.message || `Resend returned HTTP ${res.status}`,
+          mode: "live",
+        };
+      }
+      return {
+        success: true,
+        messageId: data?.id || `resend_${Date.now()}`,
+        mode: "live",
+      };
+    } catch (err: unknown) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Resend transport error",
+        mode: "live",
+      };
+    }
+  }
+}
+
+export function getEmailProvider(options?: { dryRun?: boolean }): EmailDeliveryProvider {
+  const dryRun = options?.dryRun !== false && process.env.ALLOW_LIVE_EMAIL !== "true";
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!dryRun && resendKey && resendKey.length > 10 && !resendKey.includes("placeholder")) {
+    return new ResendEmailDeliveryProvider(resendKey);
+  }
   return new MockEmailDeliveryProvider();
 }
 

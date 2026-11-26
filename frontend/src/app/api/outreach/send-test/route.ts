@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { OutreachMessage } from "@/models/OutreachMessage";
 import { Lead } from "@/models/Lead";
+import { Suppression } from "@/models/Suppression";
 import { requireApiAuth } from "@/lib/auth/jwt";
+import { getEmailProvider } from "@/lib/providers";
 import mongoose from "mongoose";
 
 export async function POST(req: NextRequest) {
@@ -12,7 +14,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
     const body = await req.json();
-    const { toEmail, subject, content, leadId } = body;
+    const { toEmail, subject, content, leadId, dryRun = true } = body;
 
     if (!toEmail || !subject) {
       return NextResponse.json(
@@ -22,6 +24,26 @@ export async function POST(req: NextRequest) {
     }
 
     const orgId = auth.session.organizationId;
+    if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(orgId)) {
+      const suppressed = await Suppression.findOne({
+        organizationId: orgId,
+        contactValue: String(toEmail).toLowerCase().trim(),
+      }).lean();
+      if (suppressed) {
+        return NextResponse.json(
+          { success: false, error: "Recipient is on the organization suppression list" },
+          { status: 403 }
+        );
+      }
+    }
+
+    const provider = getEmailProvider({ dryRun: Boolean(dryRun) });
+    const delivery = await provider.sendEmail({
+      to: toEmail,
+      subject,
+      body: content || "AgencyOS Outreach Preview",
+    });
+
     if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(orgId)) {
       let targetLeadId = leadId;
       if (!targetLeadId) {
@@ -37,17 +59,21 @@ export async function POST(req: NextRequest) {
           recipientName: "Test Recipient",
           subject,
           body: content || "AgencyOS Outreach Preview",
-          status: "Sent",
-          templateUsed: "Dry-Run Simulator",
-          sentAt: new Date(),
+          status: delivery.mode === "live" ? "Sent" : "Draft",
+          templateUsed: delivery.mode === "live" ? "Resend Live Test" : "Dry-Run Simulator",
+          sentAt: delivery.mode === "live" ? new Date() : undefined,
         });
       }
     }
 
     return NextResponse.json({
-      success: true,
-      dryRun: true,
-      message: `[DRY-RUN SIMULATED] Outbound email to ${toEmail} processed safely with zero external spam risk.`,
+      success: delivery.success,
+      dryRun: delivery.mode === "mock",
+      delivery,
+      message:
+        delivery.mode === "live"
+          ? `Live email delivered to ${toEmail} (${delivery.messageId})`
+          : `[DRY-RUN SIMULATED] Outbound email draft to ${toEmail} recorded safely without external dispatch.`,
       dispatchedAt: new Date().toISOString(),
     });
   } catch (error) {

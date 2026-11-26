@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { Lead } from "@/models/Lead";
 import { OutreachMessage } from "@/models/OutreachMessage";
+import { Suppression } from "@/models/Suppression";
 import { requireApiAuth } from "@/lib/auth/jwt";
 import { getEmailProvider } from "@/lib/providers";
 import mongoose from "mongoose";
@@ -37,18 +38,35 @@ export async function POST(req: NextRequest, context: RouteContext) {
     }
 
     const body = await req.json();
-    const { toEmail, subject, body: messageBody, templateUsed } = body;
+    const { toEmail, subject, body: messageBody, templateUsed, dryRun = true } = body;
 
     if (!toEmail || !subject || !messageBody) {
       return NextResponse.json({ error: "Recipient email, subject, and body are required" }, { status: 400 });
     }
 
-    const emailProvider = getEmailProvider();
+    const suppressed = await Suppression.findOne({
+      organizationId: orgId,
+      contactValue: String(toEmail).toLowerCase().trim(),
+    }).lean();
+    if (suppressed) {
+      return NextResponse.json(
+        { error: "Recipient is on the organization suppression list (opted out)" },
+        { status: 403 }
+      );
+    }
+
+    const emailProvider = getEmailProvider({ dryRun: Boolean(dryRun) });
     const deliveryResult = await emailProvider.sendEmail({
       to: toEmail,
       subject,
       body: messageBody,
     });
+    if (!deliveryResult.success) {
+      return NextResponse.json(
+        { error: deliveryResult.error || "Email delivery failed" },
+        { status: 502 }
+      );
+    }
 
     const outreach = await OutreachMessage.create({
       organizationId: orgId,
@@ -58,11 +76,11 @@ export async function POST(req: NextRequest, context: RouteContext) {
       subject,
       body: messageBody,
       templateUsed: templateUsed || "Website Redesign Pitch",
-      status: "Sent",
-      sentAt: new Date(),
+      status: deliveryResult.mode === "live" ? "Sent" : "Draft",
+      sentAt: deliveryResult.mode === "live" ? new Date() : undefined,
     });
 
-    if (lead.status === "New") {
+    if (deliveryResult.mode === "live" && lead.status === "New") {
       lead.status = "Contacted";
       lead.lastContactedAt = new Date().toLocaleDateString("en-GB", {
         day: "numeric",

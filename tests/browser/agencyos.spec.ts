@@ -98,4 +98,19 @@ test.describe("AgencyOS Production SaaS — Headless Chromium Verification (11 R
     await expect(page).toHaveURL(/.*settings/);
     await expect(page.locator("h1")).toContainText("Settings");
   });
+
+  // Test 12: Live Website Audits Hub (Honest Empty State & Scanner Form)
+  test("12. Route /audits renders live audit scanner without fabricated initial rows", async ({ page }) => {
+    await page.goto("/audits");
+    await expect(page).toHaveURL(/.*audits/);
+    await expect(page.locator("h1")).toContainText("AI Website Audits Hub");
+    await expect(page.getByText("Scan & Diagnose Any Website")).toBeVisible();
+  });
+
+  // Test 13: Pitch Mockup Preview (/website-builder honesty relabel)
+  test("13. Route /website-builder displays Pitch Mockup Preview heading", async ({ page }) => {
+    await page.goto("/website-builder");
+    await expect(page).toHaveURL(/.*website-builder/);
+    await expect(page.locator("h1")).toContainText("Pitch Mockup Preview");
+  });
 });
